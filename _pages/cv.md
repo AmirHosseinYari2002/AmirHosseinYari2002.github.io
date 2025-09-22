@@ -9,7 +9,7 @@ redirect_from:
 
 # 🎓 Education
 - **B.Sc. in Electrical Engineering**  
-  Sharif University of Technology (*2020 – 2024*)
+  Sharif University of Technology <span style="font-size:0.9em;">(*2020 – 2024*)</span>
 
 ---
 
