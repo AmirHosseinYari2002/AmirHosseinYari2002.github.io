@@ -29,8 +29,8 @@ author:
   bio              : "NLP researcher"
   location         : "IRAN"
   employer         : "Sharif University of Technology"
-  uri              : "https://en.sharif.ir/"
-  email            : # "none@example.org" 
+  uri              : # ""
+  email            : "ahyari2002@gmail.com"
 
   # Academic websites
   academia         : # URL
