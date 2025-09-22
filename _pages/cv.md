@@ -1,6 +1,6 @@
 ---
 layout: archive
-title: "CV"
+title: ""
 permalink: /cv/
 author_profile: true
 redirect_from:
@@ -9,29 +9,35 @@ redirect_from:
 
 # 🎓 Education
 - **B.Sc. in Electrical Engineering**  
-  Sharif University of Technology | *2020 – 2024*
+  Sharif University of Technology (*2020 – 2024*)
 
 ---
 
-# 💼 Work Experience
+# 💼 Working Experience
 
-- **Research Assistant** | *October 2024 – Present*  
-  <span style="float:right; font-weight:bold;">Mohamed bin Zayed AI University (MBZUAI)</span>  
+- **Research Assistant** (*October 2024 – Present*)  <span style="float:right; font-weight:bold;">
+    <a href="https://mbzuai.ac.ae/" target="_blank" style="color: inherit; text-decoration: none;">Mohamed bin Zayed AI University (MBZUAI)</a>
+  </span>  
   _Supervisor: Prof. Fajri Koto_  
-  - Investigated the **reliability, robustness, and human alignment** of automatic evaluation metrics for translation and summarization in Indian languages through **ITEM**, a benchmark developed in this research.  
-  - Explored **multilingual LLM performance on cultural procedural texts**, uncovering cultural gaps and biases.
+  🔹 Assessed the reliability, robustness, and human-alignment of automated evaluation metrics for translation and summarization in Indian languages.<br>
+  🔹 Investigated multilingual LLMs on cultural procedural texts, highlighting gaps, biases, and limitations.
 
-- **Research Intern** | *December 2024 – July 2025*  
-  <span style="float:right; font-weight:bold;">EPFL, INL</span>  
+- **E3 Intern** (*December 2024 – July 2025*) <span style="float:right; font-weight:bold;">
+    <a href="https://www.epfl.ch/en/" target="_blank" style="color: inherit; text-decoration: none;">École Polytechnique Fédérale de Lausanne (EPFL)</a>
+  </span>  
   _Supervisor: Prof. Mahsa Shoaran_  
-  - Developed a **speech brain-computer interface (BCI)** for neural activity decoding to restore communication in individuals with speech paralysis.  
-  - Implemented **high-accuracy signal processing and classification algorithms**.
+  🔹Developed a speech-based brain-computer interface (BCI) to decode neural signals and support communication for individuals with speech impairments. 
 
-- **Research Assistant** | *July 2023 – July 2024*  
-  <span style="float:right; font-weight:bold;">Sharif University of Technology</span>  
-  _Supervisors: Prof. Mahdi Shabany & Prof. Zahra Kavehvash_  
-  - Developed **millimeter-wave body scanners** and a **real-time scanning product**, ensuring smooth client integration via **API gateway**.  
-  - Established a **quality control testing framework**.  
-  - Conducted AI research using **Mask R-CNN** with active and semi-supervised learning techniques.
+- **Research Assistant** (*July 2023 – July 2024*) <span style="float:right; font-weight:bold;">
+    <a href="https://en.sharif.ir/" target="_blank" style="color: inherit; text-decoration: none;">Sharif University of Technology</a>
+  </span>  
+  _Supervisors: Prof. Mahdi Shabany & Prof. Zahra Kavehvash_ <br>
+  🔹 Designed and implemented software for millimeter wave body scanners.
+  
 
+- **Intern** (*July 2022 – September 2022*)  <span style="float:right; font-weight:bold;">
+    <a href="https://behyaar.com/en" target="_blank" style="color: inherit; text-decoration: none;">Behyaar Medical Equipment Company</a>
+  </span>  
+  🔹 Implemented basic FPGA programming projects.
+  
 ---
