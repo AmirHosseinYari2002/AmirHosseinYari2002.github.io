@@ -7,13 +7,13 @@ redirect_from:
   - /resume
 ---
 
-# 🎓 Education
+# Education
 - **B.Sc. in Electrical Engineering**  
   Sharif University of Technology <span style="font-size:0.9em;">(*2020 – 2024*)</span>
 
 ---
 
-# 💼 Experience
+# Experience
 
 - **Research Assistant** <span style="font-size:0.9em;">(*October 2024 – Present*)</span>  <span style="float:right; font-weight:bold;">
     <a href="https://mbzuai.ac.ae/" target="_blank" style="color: inherit; text-decoration: none;">Mohamed bin Zayed AI University (MBZUAI)</a>
