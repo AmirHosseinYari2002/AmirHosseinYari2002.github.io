@@ -18,7 +18,7 @@ redirect_from:
 - **Research Assistant** <span style="font-size:0.9em;">(*October 2024 – Present*)</span>  <span style="float:right; font-weight:bold;">
     <a href="https://mbzuai.ac.ae/" target="_blank" style="color: inherit; text-decoration: none;">Mohamed bin Zayed AI University (MBZUAI)</a>
   </span>
-  <span style="font-size:0.8em;">Supervisor: Prof. Fajri Koto</span>
+  <span style="font-size:0.85em;"><em>Supervisor: Prof. Fajri Koto</em></span>  
   🔹 Assessed the reliability, robustness, and human-alignment of automated evaluation metrics for translation and summarization in Indian languages.<br>
   🔹 Investigated multilingual LLMs on cultural procedural texts, highlighting gaps, biases, and limitations.
 
