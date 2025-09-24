@@ -7,27 +7,20 @@ redirect_from:
   - /resume
 ---
 
-## <span style="font-size:1.4em; font-weight:bold;">Education</span>
+## Education
 - **B.Sc. in Electrical Engineering**  
-  <span style="font-size:1.1em; font-weight:bold;">Sharif University of Technology</span>  
-  <span style="font-size:0.9em;">(2020 – 2024)</span>
-
+  Sharif University of Technology <span style="font-size:0.9em;">(*2020 – 2024*)</span>
 
 <hr style="border:0.5px solid #ddd; margin:25px 0;">
-  
-## <span style="font-size:1.4em; font-weight:bold; color:#333;">Experience</span>
 
-- **Research Assistant**  
-  <span style="font-size:1.1em; font-weight:bold;">
-    <a href="https://mbzuai.ac.ae/" target="_blank" style="text-decoration: none;">Mohamed bin Zayed AI University (MBZUAI)</a>
-  </span>  
-  <span style="font-size:0.9em;">Oct 2024 – Present</span>  
-  _Supervisor: <a href="https://www.fajrikoto.com/home" target="_blank">Prof. Fajri Koto</a>_  
+## Experience
 
-  <span style="font-size:1em;">
-  🔹 Evaluated reliability, robustness, and human-alignment of automated metrics for translation & summarization in Indian languages.<br>
-  🔹 Investigated multilingual LLMs on cultural procedural texts, highlighting gaps, biases, and limitations.
+- **Research Assistant** <span style="font-size:0.9em;">(*October 2024 – Present*)</span>  <span style="float:right; font-weight:bold;">
+    <a href="https://mbzuai.ac.ae/" target="_blank" style="color: inherit; text-decoration: none;">Mohamed bin Zayed AI University (MBZUAI)</a>
   </span>
+  <span style="font-size:0.8em;">Supervisor: Prof. Fajri Koto</span>
+  🔹 Assessed the reliability, robustness, and human-alignment of automated evaluation metrics for translation and summarization in Indian languages.<br>
+  🔹 Investigated multilingual LLMs on cultural procedural texts, highlighting gaps, biases, and limitations.
 
 - **E3 Intern** <span style="font-size:0.9em;">(*December 2024 – July 2025*)</span> <span style="float:right; font-weight:bold;">
     <a href="https://www.epfl.ch/en/" target="_blank" style="color: inherit; text-decoration: none;">École Polytechnique Fédérale de Lausanne (EPFL)</a>
