@@ -7,20 +7,27 @@ redirect_from:
   - /resume
 ---
 
-# Education
+## <span style="font-size:1.4em; font-weight:bold;">Education</span>
 - **B.Sc. in Electrical Engineering**  
-  Sharif University of Technology <span style="font-size:0.9em;">(*2020 – 2024*)</span>
+  <span style="font-size:1.1em; font-weight:bold;">Sharif University of Technology</span>  
+  <span style="font-size:0.9em;">(2020 – 2024)</span>
 
----
 
-# Experience
+<hr style="border:0.5px solid #ddd; margin:25px 0;">
+  
+## <span style="font-size:1.4em; font-weight:bold; color:#333;">Experience</span>
 
-- **Research Assistant** <span style="font-size:0.9em;">(*October 2024 – Present*)</span>  <span style="float:right; font-weight:bold;">
-    <a href="https://mbzuai.ac.ae/" target="_blank" style="color: inherit; text-decoration: none;">Mohamed bin Zayed AI University (MBZUAI)</a>
+- **Research Assistant**  
+  <span style="font-size:1.1em; font-weight:bold;">
+    <a href="https://mbzuai.ac.ae/" target="_blank" style="text-decoration: none;">Mohamed bin Zayed AI University (MBZUAI)</a>
   </span>  
-  _Supervisor: Prof. Fajri Koto_  
-  🔹 Assessed the reliability, robustness, and human-alignment of automated evaluation metrics for translation and summarization in Indian languages.<br>
+  <span style="font-size:0.9em;">Oct 2024 – Present</span>  
+  _Supervisor: <a href="https://www.fajrikoto.com/home" target="_blank">Prof. Fajri Koto</a>_  
+
+  <span style="font-size:1em;">
+  🔹 Evaluated reliability, robustness, and human-alignment of automated metrics for translation & summarization in Indian languages.<br>
   🔹 Investigated multilingual LLMs on cultural procedural texts, highlighting gaps, biases, and limitations.
+  </span>
 
 - **E3 Intern** <span style="font-size:0.9em;">(*December 2024 – July 2025*)</span> <span style="float:right; font-weight:bold;">
     <a href="https://www.epfl.ch/en/" target="_blank" style="color: inherit; text-decoration: none;">École Polytechnique Fédérale de Lausanne (EPFL)</a>
