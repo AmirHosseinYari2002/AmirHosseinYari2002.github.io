@@ -33,6 +33,7 @@ redirect_from:
     <a href="https://en.sharif.ir/" target="_blank" style="color: inherit; text-decoration: none;">Sharif University of Technology</a>
   </span>  
   <span style="font-size:0.85em;"><em>Supervisors: Prof. Mahdi Shabany & Prof. Zahra Kavehvash</em></span> 
+  <br>
   🔹 Designed and implemented software for millimeter wave body scanners.
 
 - **Intern** <span style="font-size:0.9em;">(*July 2022 – September 2022*)</span>  <span style="float:right; font-weight:bold;">
