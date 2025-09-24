@@ -7,9 +7,20 @@ redirect_from:
   - /about.html
 ---
 
+<!-- About Me Section -->
+<section id="about" style="margin-top: 50px; font-family: Arial, sans-serif; line-height: 1.6;">
+  <p>
+    I am currently a research assistant at MBZUAI, working under the guidance of Prof. Fajri Koto. I earned my B.Sc. in Electrical Engineering from Sharif University of Technology. My research primarily focuses on machine learning and natural language processing.
+  </p>
+  <p>
+    I am deeply interested in creating intelligent systems capable of understanding and generating human language, with the goal of solving real-world problems. I find great satisfaction in exploring both the theoretical underpinnings and practical implementations of AI.
+  </p>
+</section>
+
+
 <!-- Latest News Section -->
 <section id="news" style="margin-top: 50px;">
-  <h2 style="font-family: Arial, sans-serif; color: #333; margin-bottom: 15px;">News</h2>
+  <h2 style="font-family: Arial, sans-serif; margin-bottom: 15px;">News</h2>
   <ul style="max-height: 300px; overflow-y: auto; padding-left: 0; list-style: none; font-size: 0.9em;">
     {% assign sorted_news = site.data.news | sort: "date" | reverse %}
     {% for item in sorted_news limit:5 %}
