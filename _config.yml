@@ -12,7 +12,7 @@ site_theme               : "air" # Currently available options are "default", "a
 title                    : "Amir Hossein Yari"
 title_separator          : "-"
 name                     : &name "Amir Hossein Yari"
-description              : &description "Your Name's academic portfolio"   # Update this with a general description of your site, this is the default if not overridden by a page
+description              : &description "Amir Hossein Yari's academic portfolio"   # Update this with a general description of your site, this is the default if not overridden by a page
 url                      : https://AmirHosseinYari2002.github.io # The base hostname & protocol for your site e.g. "https://[your GitHub username].github.io",
                                                            # or if you already have some other page hosted on Github then use "https://[your GitHub username].github.io/[Your Repo Name]"
 baseurl                  : "" # the subpath of your site, e.g. "/blog"
@@ -26,7 +26,7 @@ author:
   avatar           : "bio-photo.jpg"
   name             : "Amir Hossein Yari"
   pronouns         : # example: "she/her"  
-  bio              : "NLP researcher"
+  bio              : ""
   location         : "IRAN"
   employer         : "Sharif University of Technology"
   uri              : # ""
@@ -127,8 +127,8 @@ atom_feed:
 
 
 # SEO Related
-google_site_verification :
-bing_site_verification   :
+google_site_verification : "-uy44-jJaDKd9cbjlvsbiklFgTM8uneox4ibU8078Dc"
+bing_site_verification   : "90793E5569B2F1A89BD1D9A530B3F013"
 alexa_site_verification  :
 yandex_site_verification :
 

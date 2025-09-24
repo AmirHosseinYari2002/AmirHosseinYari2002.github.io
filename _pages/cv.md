@@ -13,7 +13,7 @@ redirect_from:
 
 ---
 
-# 💼 Working Experience
+# 💼 Experience
 
 - **Research Assistant** <span style="font-size:0.9em;">(*October 2024 – Present*)</span>  <span style="float:right; font-weight:bold;">
     <a href="https://mbzuai.ac.ae/" target="_blank" style="color: inherit; text-decoration: none;">Mohamed bin Zayed AI University (MBZUAI)</a>
