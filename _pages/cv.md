@@ -41,4 +41,4 @@ redirect_from:
   </span>  
   🔹 Implemented basic FPGA programming projects.
   
----
+<hr style="border:0.5px solid #ddd; margin:25px 0;">
