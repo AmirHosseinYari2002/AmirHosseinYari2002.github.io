@@ -20,7 +20,7 @@ redirect_from:
   </span>
   <br>
   <span style="font-size:0.85em;"><em>Supervisor: Prof. Fajri Koto</em></span>  
-  🔹 Assessed the reliability, robustness, and human-alignment of automated evaluation metrics for translation and summarization in Indian languages.<br>
+  🔹 Assessed the reliability, robustness, and human-alignment of automated evaluation metrics for machine translation and text summarization.<br>
   🔹 Investigated multilingual LLMs on cultural procedural texts, highlighting gaps, biases, and limitations.
 
 - **E3 Intern** <span style="font-size:0.9em;">(*December 2024 – July 2025*)</span> <span style="float:right; font-weight:bold;">
