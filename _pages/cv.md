@@ -29,11 +29,9 @@ redirect_from:
   <span style="font-size:0.85em;"><em>Supervisor: Prof. Mahsa Shoaran</em></span>  
   🔹Developed a speech-based brain-computer interface (BCI) to decode neural signals and support communication for individuals with speech impairments. 
 
-- **Research Assistant** <span style="font-size:0.9em;">(*July 2023 – July 2024*)</span> <span style="float:right; font-weight:bold;">
-    <a href="https://en.sharif.ir/" target="_blank" style="color: inherit; text-decoration: none;">Sharif University of Technology</a>
+- **Software Engineer** <span style="font-size:0.9em;">(*July 2023 – July 2024*)</span> <span style="float:right; font-weight:bold;">
+    <a href="https://basirtechnologies.com/en/" target="_blank" style="color: inherit; text-decoration: none;">Basir Technologies</a>
   </span>  
-  <span style="font-size:0.85em;"><em>Supervisors: Prof. Mahdi Shabany & Prof. Zahra Kavehvash</em></span> 
-  <br>
   🔹 Designed and implemented software for millimeter wave body scanners.
 
 - **Intern** <span style="font-size:0.9em;">(*July 2022 – September 2022*)</span>  <span style="float:right; font-weight:bold;">
