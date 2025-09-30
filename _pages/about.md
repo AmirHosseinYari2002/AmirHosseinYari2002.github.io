@@ -10,7 +10,7 @@ redirect_from:
 <!-- About Me Section -->
 <section id="about" style="margin-top: 50px; font-family: Arial, sans-serif; line-height: 1.6;">
   <p>
-    I am currently a research assistant at MBZUAI, working under the guidance of <a href="https://www.fajrikoto.com/home" target="_blank" rel="noopener">Prof. Fajri Koto</a>. I earned my B.Sc. in Electrical Engineering from Sharif University of Technology. My research primarily focuses on machine learning and natural language processing.
+    I am currently a research assistant at MBZUAI, working under the supervision of <a href="https://www.fajrikoto.com/home" target="_blank" rel="noopener">Prof. Fajri Koto</a>. I earned my B.Sc. in Electrical Engineering from Sharif University of Technology. My research primarily focuses on machine learning and natural language processing.
   </p>
   <p>
     I am deeply interested in creating intelligent systems capable of understanding and generating human language, with the goal of solving real-world problems. I find great satisfaction in exploring both the theoretical underpinnings and practical implementations of AI.
