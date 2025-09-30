@@ -34,7 +34,7 @@ redirect_from:
   </span>  
   🔹 Designed and implemented software for millimeter wave body scanners.
 
-- **Intern** <span style="font-size:0.9em;">(*July 2022 – September 2022*)</span>  <span style="float:right; font-weight:bold;">
+- **Summer Intern** <span style="font-size:0.9em;">(*July 2022 – September 2022*)</span>  <span style="float:right; font-weight:bold;">
     <a href="https://behyaar.com/en" target="_blank" style="color: inherit; text-decoration: none;">Behyaar Medical Equipment Company</a>
   </span>  
   🔹 Implemented basic FPGA programming projects.
