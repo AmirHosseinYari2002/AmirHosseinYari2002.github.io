@@ -7,7 +7,7 @@ author_profile: true
 
 ### 2025
 
-- <u>Amir Hossein Yari</u>,  Kalmit Kulkarni, Ahmad Raza Khan, Fajri Koto.  **Revisiting Metric Reliability for Fine-grained Evaluation of Machine Translation and Summarization in Indian Languages.**
+- <u>Amir Hossein Yari</u>,  Kalmit Kulkarni, Ahmad Raza Khan, Fajri Koto.  **Revisiting Metric Reliability for Fine-grained Evaluation of Machine Translation and Summarization in Indian Languages.** <br>
   <a href="https://arxiv.org/abs/2510.07061" style="font-size: 0.9rem; text-decoration: none;">📄 Paper</a> | 
   <a href="https://huggingface.co/datasets/AmirHossein2002/ITEM" style="font-size: 0.9rem; text-decoration: none;">
     <img src="https://huggingface.co/front/assets/huggingface_logo.svg" alt="Hugging Face" width="14" style="vertical-align: middle;"/> Dataset
