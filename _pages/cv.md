@@ -15,11 +15,12 @@ redirect_from:
 
 ## Experience
 
-- **Research Assistant** <span style="font-size:0.9em;">(*October 2024 – Present*)</span>  <span style="float:right; font-weight:bold;">
+- **Researcher** <span style="font-size:0.9em;">(*October 2024 – December 2025*)</span>  <span style="float:right; font-weight:bold;">
     <a href="https://mbzuai.ac.ae/" target="_blank" style="color: inherit; text-decoration: none;">Mohamed bin Zayed AI University (MBZUAI)</a>
   </span>
   <br>
   <span style="font-size:0.85em;"><em>Supervisor: Prof. Fajri Koto</em></span>  
+  🔹 Developed AMIR-GRPO, a GRPO extension that injects implicit preference regularization to improve reasoning performance without additional annotation cost.<br>
   🔹 Assessed the reliability, robustness, and human-alignment of automated evaluation metrics for machine translation and text summarization.<br>
   🔹 Investigated multilingual LLMs on cultural procedural texts, highlighting gaps, biases, and limitations.
 
