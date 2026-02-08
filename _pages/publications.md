@@ -13,7 +13,7 @@ author_profile: true
 - <u>Amir Hossein Yari</u>, Fajri Koto.  **AMIR-GRPO: Inducing Implicit Preference Signals into GRPO.** <br>
   <a href="https://arxiv.org/abs/2601.03661" style="font-size: 0.9rem; text-decoration: none;">📄 Paper</a> | 
   <a href="https://github.com/AmirHosseinYari2002/AMIR-GRPO" style="font-size: 0.9rem; text-decoration: none;">
-    <img src="../assets/github.png" alt="GitHub" width="14" style="vertical-align: middle;"/> Code
+    <img src="../assets/github.png" alt="GitHub" width="16" style="vertical-align: middle;"/> Code
   </a>
 
 ### 2025
