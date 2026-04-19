@@ -7,7 +7,7 @@ author_profile: true
 
 ### 2026
 
-- Mohammad Ali Shaeri, <u>Amir Hossein Yari</u>, Jinhan Liu, Mahsa Shoaran.  **Neural Prostheses for Communication Restoration: Algorithmic, Systemic, and Clinical Perspectives.** <span style="font-size:0.9rem;">*Institute of Electrical and Electronics Engineers (IEEE)*</span> <br>
+- Mohammad Ali Shaeri*, <u>Amir Hossein Yari*</u>, Jinhan Liu, Mahsa Shoaran.  **Neural Prostheses for Communication Restoration: Algorithmic, Systemic, and Clinical Perspectives.** <span style="font-size:0.9rem;">*Institute of Electrical and Electronics Engineers (IEEE)*</span> <br>
   <a href="https://infoscience.epfl.ch/server/api/core/bitstreams/6398b02f-1265-421a-b050-b199c556671a/content" style="font-size: 0.9rem; text-decoration: none;">📄 Paper</a> 
 
 - <u>Amir Hossein Yari</u>, Fajri Koto.  **AMIR-GRPO: Inducing Implicit Preference Signals into GRPO.** <br>
@@ -16,14 +16,15 @@ author_profile: true
     <img src="../assets/github.png" alt="GitHub" width="16" style="vertical-align: middle;"/> Code
   </a>
 
--  SaeedAlmheiri, ..., <u>Amir Hossein Yari</u>, ..., Fajri Koto.  **Multilingual Idioms in Sentences and Conversations Across High-, Medium-, and Low
-Resource Languages.** <span style="font-size:0.9rem;">*In Proceedings of the 64rd Annual Meeting of the Association for Computational Linguistics **(ACL 2026)***</span> <br> **update the links and authors list!**
+-  Saeed Almheiri, Bilal Elbouardi, Salsabila Zahirah Pranida, Irina Nikishina, Ashwath Rao B, Parameswari Krishnamurthy, Muhammad Cendekia Airlangga, Rifo Ahmad Genadi, Nguyễn Phan Gia Bảo, <u>Amir Hossein Yari</u>, Hawau Olamide Toyin, Nurdaulet Mukhituly, Mena Attia, Besher Hassan, Ahmad Fathan Hidayatullah, Tatsuki Kuribayashi, Haonan Li, Suma Bhat, Fajri Koto. **Multilingual Idioms in Sentences and Conversations Across High-, Medium-, and Low
+Resource Languages.** <span style="font-size:0.9rem;">*In Proceedings of the 64th Annual Meeting of the Association for Computational Linguistics **(ACL 2026)***
+<!-- </span> <br> 
   <a href="https://arxiv.org/abs/2510.07061" style="font-size: 0.9rem; text-decoration: none;">📄 Paper</a> | 
   <a href="https://huggingface.co/datasets/AmirHossein2002/ITEM" style="font-size: 0.9rem; text-decoration: none;">
     <img src="https://huggingface.co/front/assets/huggingface_logo.svg" alt="Hugging Face" width="14" style="vertical-align: middle;"/> Dataset
-  </a>
+  </a> -->
 
-- <u>Amir Hossein Yari</u>,  Kalmit Kulkarni, Ahmad Raza Khan, Fajri Koto.  **Revisiting Metric Reliability for Fine-grained Evaluation of Machine Translation and Summarization in Indian Languages.**<span style="font-size:0.9rem;">** In Proceedings of the 64rd Annual Meeting of the Association for Computational Linguistics **(ACL 2026)**</span> <br>
+- <u>Amir Hossein Yari</u>,  Kalmit Kulkarni, Ahmad Raza Khan, Fajri Koto.  **Revisiting Metric Reliability for Fine-grained Evaluation of Machine Translation and Summarization in Indian Languages.** <span style="font-size:0.9rem;"> *In Proceedings of the 64th Annual Meeting of the Association for Computational Linguistics **(ACL 2026)***</span> <br>
   <a href="https://arxiv.org/abs/2510.07061" style="font-size: 0.9rem; text-decoration: none;">📄 Paper</a> | 
   <a href="https://huggingface.co/datasets/AmirHossein2002/ITEM" style="font-size: 0.9rem; text-decoration: none;">
     <img src="https://huggingface.co/front/assets/huggingface_logo.svg" alt="Hugging Face" width="14" style="vertical-align: middle;"/> Dataset
