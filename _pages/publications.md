@@ -7,7 +7,7 @@ author_profile: true
 
 ### 2026
 
-- Mohammad Ali Shaeri*, <u>Amir Hossein Yari*</u>, Jinhan Liu, Mahsa Shoaran.  **Neural Prostheses for Communication Restoration: Algorithmic, Systemic, and Clinical Perspectives.** <span style="font-size:0.9rem;">*Institute of Electrical and Electronics Engineers (IEEE)*</span> <br>
+- Mohammad Ali Shaeri*, <u>Amir Hossein Yari*</u>, Jinhan Liu, Mahsa Shoaran.  **Neural Prostheses for Communication Restoration: Algorithmic, Systemic, and Clinical Perspectives.** <span style="font-size:0.9rem;"></span> <br>
   <a href="https://infoscience.epfl.ch/server/api/core/bitstreams/6398b02f-1265-421a-b050-b199c556671a/content" style="font-size: 0.9rem; text-decoration: none;">📄 Paper</a> 
 
 - <u>Amir Hossein Yari</u>, Fajri Koto.  **AMIR-GRPO: Inducing Implicit Preference Signals into GRPO.** <br>
