@@ -10,10 +10,10 @@ redirect_from:
 <!-- About Me Section -->
 <section id="about" style="margin-top: 50px; font-family: Arial, sans-serif; line-height: 1.6;">
   <p>
-    I am currently a research assistant at MBZUAI, working under the supervision of <a href="https://www.fajrikoto.com/home" target="_blank" rel="noopener">Prof. Fajri Koto</a>. I earned my B.Sc. in Electrical Engineering from Sharif University of Technology. My research primarily focuses on machine learning and natural language processing.
+    I am a natural language processing researcher interested in building intelligent systems that can understand language, reason over complex information, and generate meaningful responses across diverse contexts. My work focuses on multilingual NLP and learning methods that improve reasoning, reliability, and alignment with human intent.
   </p>
   <p>
-    I am deeply interested in creating intelligent systems capable of understanding and generating human language, with the goal of solving real-world problems. I find great satisfaction in exploring both the theoretical underpinnings and practical implementations of AI.
+    I am especially interested in the intersection of principled machine learning and practical AI systems: developing methods that are theoretically grounded, empirically rigorous, and useful beyond standard benchmarks. More broadly, I aim to contribute to AI systems that are not only capable, but also robust, interpretable, and beneficial in real-world settings.
   </p>
 </section>
 
