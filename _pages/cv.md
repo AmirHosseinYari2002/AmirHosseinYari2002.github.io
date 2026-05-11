@@ -516,7 +516,7 @@ body.theme-dark {
                     <path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"></path>
                     <circle cx="12" cy="9" r="2.5"></circle>
                   </svg>
-                  Masdar City, Abu Dhabi, UAE
+                  Abu Dhabi, UAE
                 </span>
               </div>
 
@@ -526,7 +526,7 @@ body.theme-dark {
 
               <ul class="cv-bullets">
                 <li>
-                  Developed <strong>AMIR-GRPO</strong>, a GRPO extension that injects implicit preference
+                  Developed <strong><code>AMIR-GRPO</code></strong>, a GRPO extension that injects implicit preference
                   regularization to improve reasoning performance without additional annotation cost.
                 </li>
                 <li>
@@ -569,7 +569,7 @@ body.theme-dark {
                     <path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"></path>
                     <circle cx="12" cy="9" r="2.5"></circle>
                   </svg>
-                  Lausanne, Switzerland
+                  Geneva, Switzerland
                 </span>
               </div>
 
@@ -725,7 +725,7 @@ body.theme-dark {
           <div class="cv-card-content">
             <a class="cv-logo-link" href="https://behyaar.com/en" target="_blank" rel="noopener noreferrer" aria-label="Behyaar Medical Equipment Company">
               <span class="cv-logo-fallback">Behyaar</span>
-              <img class="cv-logo" src="{{ '/assets/images/logos/behyaar.png' | relative_url }}" alt="Behyaar Medical Equipment Company logo" loading="lazy" onerror="this.style.display='none'; this.previousElementSibling.style.display='inline-flex';">
+              <img class="cv-logo" src="{{ '/assets/images/logos/behyaar.jpg' | relative_url }}" alt="Behyaar Medical Equipment Company logo" loading="lazy" onerror="this.style.display='none'; this.previousElementSibling.style.display='inline-flex';">
             </a>
 
             <div class="cv-card-body">
@@ -746,7 +746,7 @@ body.theme-dark {
                     <path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"></path>
                     <circle cx="12" cy="9" r="2.5"></circle>
                   </svg>
-                  Isfahan Science & Technology Town, Isfahan, Iran
+                  Isfahan, Iran
                 </span>
               </div>
 
