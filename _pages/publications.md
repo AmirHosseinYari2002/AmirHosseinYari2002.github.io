@@ -174,19 +174,21 @@ body.theme-dark {
 }
 
 .pub-abstract-toggle {
-  margin-top: 0.75rem;
-  font-size: 0.9rem;
-  color: var(--pub-text);
+  margin-top: 0.6rem;
+  font-size: 0.88rem;
+  color: var(--pub-muted);
   cursor: pointer;
   user-select: none;
-  font-weight: 600;
-  width: fit-content;
+}
+
+.pub-abstract-toggle:hover {
+  color: var(--pub-text);
 }
 
 .pub-abstract-toggle span {
   display: inline-block;
   transition: transform 0.15s ease;
-  margin-right: 0.3rem;
+  margin-right: 0.25rem;
 }
 
 .pub-abstract-toggle.open span {
@@ -195,18 +197,31 @@ body.theme-dark {
 
 .pub-panel {
   display: none;
-  margin-top: 0.75rem;
-  padding: 0.85rem 0.95rem;
-  border-left: 3px solid var(--pub-badge-border);
-  background: var(--pub-soft);
+  margin-top: 0.4rem;
+  padding: 0.5rem 0.2rem 0.2rem 0.2rem;
+  background: transparent;
   color: var(--pub-muted);
-  border-radius: 10px;
-  font-size: 0.9rem;
-  line-height: 1.55;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  border-left: none;
+  border-radius: 0;
+  max-width: 95%;
 }
 
 .pub-panel.open {
   display: block;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .pub-bibtex pre {
@@ -294,8 +309,8 @@ function copyBibtex(id, btn) {
     </button>
   </div>
 
-  <div class="pub-abstract-toggle" onclick="toggleAbstract('abs-neural-prostheses', this)">
-    <span>&gt;</span> Abstract
+  <div class="pub-abstract-toggle" onclick="toggleAbstract('abs-item', this)">
+    <span>▸</span> Abstract
   </div>
 
   <div id="abs-neural-prostheses" class="pub-panel">
@@ -335,8 +350,8 @@ function copyBibtex(id, btn) {
     </button>
   </div>
 
-  <div class="pub-abstract-toggle" onclick="toggleAbstract('abs-amir-grpo', this)">
-    <span>&gt;</span> Abstract
+  <div class="pub-abstract-toggle" onclick="toggleAbstract('abs-item', this)">
+    <span>▸</span> Abstract
   </div>
 
   <div id="abs-amir-grpo" class="pub-panel">
@@ -391,8 +406,8 @@ function copyBibtex(id, btn) {
     </button>
   </div>
 
-  <div class="pub-abstract-toggle" onclick="toggleAbstract('abs-idioms', this)">
-    <span>&gt;</span> Abstract
+  <div class="pub-abstract-toggle" onclick="toggleAbstract('abs-item', this)">
+    <span>▸</span> Abstract
   </div>
 
   <div id="abs-idioms" class="pub-panel">
@@ -441,7 +456,7 @@ function copyBibtex(id, btn) {
   </div>
 
   <div class="pub-abstract-toggle" onclick="toggleAbstract('abs-item', this)">
-    <span>&gt;</span> Abstract
+    <span>▸</span> Abstract
   </div>
 
   <div id="abs-item" class="pub-panel">
@@ -494,12 +509,12 @@ function copyBibtex(id, btn) {
     </button>
   </div>
 
-  <div class="pub-abstract-toggle" onclick="toggleAbstract('abs-captex', this)">
-    <span>&gt;</span> Abstract
+  <div class="pub-abstract-toggle" onclick="toggleAbstract('abs-item', this)">
+    <span>▸</span> Abstract
   </div>
 
   <div id="abs-captex" class="pub-panel">
-    Despite the impressive performance of multilingual large language models (mLLMs) in various natural language processing tasks, their ability to understand procedural texts, particularly those with culture-specific content, remains largely unexplored. Texts describing cultural procedures, including rituals, traditional craftsmanship, and social etiquette, require an inherent understanding of cultural context, presenting a significant challenge for mLLMs. In this work, we introduce CAPTex, a benchmark designed to evaluate mLLMs’ ability to process and reason over culturally diverse procedural texts in multiple languages. Using a range of evaluation methods, we find that (1) mLLMs struggle with culturally contextualized procedural content, particularly in low-resource languages; (2) performance varies across cultural domains, with some proving more difficult than others; and (3) models perform better on multiple-choice tasks presented in conversational formats than on direct questions. These results highlight the current limitations of mLLMs and emphasize the need for culturally informed benchmarks like CAPTex to support more accurate and inclusive language understanding.
+    Despite the impressive performance of multilingual large language models (mLLMs) in various natural language processing tasks, their ability to understand procedural texts, particularly those with culture-specific content, remains largely unexplored. Texts describing cultural procedures, including rituals, traditional craftsmanship, and social etiquette, require an inherent understanding of cultural context, presenting a significant challenge for mLLMs. In this work, we introduce <strong><code>CAPTex</code></strong> a benchmark designed to evaluate mLLMs’ ability to process and reason over culturally diverse procedural texts in multiple languages. Using a range of evaluation methods, we find that (1) mLLMs struggle with culturally contextualized procedural content, particularly in low-resource languages; (2) performance varies across cultural domains, with some proving more difficult than others; and (3) models perform better on multiple-choice tasks presented in conversational formats than on direct questions. These results highlight the current limitations of mLLMs and emphasize the need for culturally informed benchmarks like <strong><code>CAPTex</code></strong> to support more accurate and inclusive language understanding.
   </div>
 
   <div id="bib-captex" class="pub-panel pub-bibtex">
