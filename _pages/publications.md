@@ -309,7 +309,7 @@ function copyBibtex(id, btn) {
     </button>
   </div>
 
-  <div class="pub-abstract-toggle" onclick="toggleAbstract('abs-item', this)">
+  <div class="pub-abstract-toggle" onclick="toggleAbstract('abs-neural-prostheses', this)">
     <span>▸</span> Abstract
   </div>
 
@@ -350,7 +350,7 @@ function copyBibtex(id, btn) {
     </button>
   </div>
 
-  <div class="pub-abstract-toggle" onclick="toggleAbstract('abs-item', this)">
+  <div class="pub-abstract-toggle" onclick="toggleAbstract('abs-amir-grpo', this)">
     <span>▸</span> Abstract
   </div>
 
@@ -406,7 +406,7 @@ function copyBibtex(id, btn) {
     </button>
   </div>
 
-  <div class="pub-abstract-toggle" onclick="toggleAbstract('abs-item', this)">
+  <div class="pub-abstract-toggle" onclick="toggleAbstract('abs-idioms', this)">
     <span>▸</span> Abstract
   </div>
 
@@ -509,7 +509,7 @@ function copyBibtex(id, btn) {
     </button>
   </div>
 
-  <div class="pub-abstract-toggle" onclick="toggleAbstract('abs-item', this)">
+  <div class="pub-abstract-toggle" onclick="toggleAbstract('abs-captex', this)">
     <span>▸</span> Abstract
   </div>
 
