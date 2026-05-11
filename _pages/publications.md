@@ -20,44 +20,14 @@ author_profile: true
   --pub-code-bg: #f7f7f7;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --pub-bg: #1f1f1f;
-    --pub-text: #f2f2f2;
-    --pub-muted: #c7c7c7;
-    --pub-border: #3a3a3a;
-    --pub-soft: #2a2a2a;
-    --pub-hover: #343434;
-    --pub-shadow: rgba(0,0,0,0.35);
-    --pub-badge-bg: #3a2a16;
-    --pub-badge-text: #ffd18a;
-    --pub-badge-border: #6a4a20;
-    --pub-code-bg: #252525;
-  }
-}
-
-html[data-theme="light"],
-body[data-theme="light"],
-body.light,
-body.light-mode,
-body.theme-light {
-  --pub-bg: #ffffff;
-  --pub-text: #222222;
-  --pub-muted: #555555;
-  --pub-border: #e8e8e8;
-  --pub-soft: #fafafa;
-  --pub-hover: #f0f0f0;
-  --pub-shadow: rgba(0,0,0,0.055);
-  --pub-badge-bg: #fff3df;
-  --pub-badge-text: #7a3e00;
-  --pub-badge-border: #ffdca8;
-  --pub-code-bg: #f7f7f7;
-}
-
+/* Dark mode only when your site explicitly enables it */
 html[data-theme="dark"],
 body[data-theme="dark"],
+html.dark,
 body.dark,
+html.dark-mode,
 body.dark-mode,
+html.theme-dark,
 body.theme-dark {
   --pub-bg: #1f1f1f;
   --pub-text: #f2f2f2;
@@ -137,6 +107,9 @@ body.theme-dark {
 }
 
 .pub-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
   font-size: 0.78rem;
   font-weight: 600;
   color: var(--pub-badge-text);
@@ -144,6 +117,14 @@ body.theme-dark {
   border: 1px solid var(--pub-badge-border);
   border-radius: 999px;
   padding: 0.22rem 0.55rem;
+}
+
+.location-icon {
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
 }
 
 .pub-actions {
@@ -190,6 +171,26 @@ body.theme-dark {
   width: 15px;
   height: 15px;
   vertical-align: middle;
+}
+
+.pub-abstract-toggle {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--pub-text);
+  cursor: pointer;
+  user-select: none;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.pub-abstract-toggle span {
+  display: inline-block;
+  transition: transform 0.15s ease;
+  margin-right: 0.3rem;
+}
+
+.pub-abstract-toggle.open span {
+  transform: rotate(90deg);
 }
 
 .pub-panel {
@@ -241,6 +242,14 @@ function togglePanel(id, btn, showText, hideText) {
   btn.textContent = isOpen ? hideText : showText;
 }
 
+function toggleAbstract(id, el) {
+  var panel = document.getElementById(id);
+  if (!panel) return;
+
+  panel.classList.toggle("open");
+  el.classList.toggle("open");
+}
+
 function toggleAuthors(id, btn) {
   var el = document.getElementById(id);
   if (!el) return;
@@ -280,13 +289,13 @@ function copyBibtex(id, btn) {
   <div class="pub-actions">
     <a href="https://infoscience.epfl.ch/server/api/core/bitstreams/6398b02f-1265-421a-b050-b199c556671a/content">📄 Paper</a>
 
-    <button type="button" onclick="togglePanel('abs-neural-prostheses', this, 'Show abstract', 'Hide abstract')" aria-expanded="false">
-      Show abstract
-    </button>
-
     <button type="button" onclick="togglePanel('bib-neural-prostheses', this, 'Show BibTeX', 'Hide BibTeX')" aria-expanded="false">
       Show BibTeX
     </button>
+  </div>
+
+  <div class="pub-abstract-toggle" onclick="toggleAbstract('abs-neural-prostheses', this)">
+    <span>&gt;</span> Abstract
   </div>
 
   <div id="abs-neural-prostheses" class="pub-panel">
@@ -318,13 +327,13 @@ function copyBibtex(id, btn) {
       <img src="../assets/github.png" alt="GitHub"> Code
     </a>
 
-    <button type="button" onclick="togglePanel('abs-amir-grpo', this, 'Show abstract', 'Hide abstract')" aria-expanded="false">
-      Show abstract
-    </button>
-
     <button type="button" onclick="togglePanel('bib-amir-grpo', this, 'Show BibTeX', 'Hide BibTeX')" aria-expanded="false">
       Show BibTeX
     </button>
+  </div>
+
+  <div class="pub-abstract-toggle" onclick="toggleAbstract('abs-amir-grpo', this)">
+    <span>&gt;</span> Abstract
   </div>
 
   <div id="abs-amir-grpo" class="pub-panel">
@@ -362,17 +371,23 @@ function copyBibtex(id, btn) {
 
   <div class="pub-meta">
     <span class="pub-badge">ACL 2026</span>
-    <span class="pub-badge">San Diego, CA, USA</span>
+    <span class="pub-badge">
+      <svg class="location-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"></path>
+        <circle cx="12" cy="9" r="2.5"></circle>
+      </svg>
+      San Diego, CA, USA
+    </span>
   </div>
 
   <div class="pub-actions">
-    <button type="button" onclick="togglePanel('abs-idioms', this, 'Show abstract', 'Hide abstract')" aria-expanded="false">
-      Show abstract
-    </button>
-
     <button type="button" onclick="togglePanel('bib-idioms', this, 'Show BibTeX', 'Hide BibTeX')" aria-expanded="false">
       Show BibTeX
     </button>
+  </div>
+
+  <div class="pub-abstract-toggle" onclick="toggleAbstract('abs-idioms', this)">
+    <span>&gt;</span> Abstract
   </div>
 
   <div id="abs-idioms" class="pub-panel">
@@ -400,7 +415,13 @@ function copyBibtex(id, btn) {
 
   <div class="pub-meta">
     <span class="pub-badge">ACL 2026</span>
-    <span class="pub-badge">San Diego, CA, USA</span>
+    <span class="pub-badge">
+      <svg class="location-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"></path>
+        <circle cx="12" cy="9" r="2.5"></circle>
+      </svg>
+      San Diego, CA, USA
+    </span>
   </div>
 
   <div class="pub-actions">
@@ -410,13 +431,13 @@ function copyBibtex(id, btn) {
       <img src="https://huggingface.co/front/assets/huggingface_logo.svg" alt="Hugging Face"> Dataset
     </a>
 
-    <button type="button" onclick="togglePanel('abs-item', this, 'Show abstract', 'Hide abstract')" aria-expanded="false">
-      Show abstract
-    </button>
-
     <button type="button" onclick="togglePanel('bib-item', this, 'Show BibTeX', 'Hide BibTeX')" aria-expanded="false">
       Show BibTeX
     </button>
+  </div>
+
+  <div class="pub-abstract-toggle" onclick="toggleAbstract('abs-item', this)">
+    <span>&gt;</span> Abstract
   </div>
 
   <div id="abs-item" class="pub-panel">
@@ -446,7 +467,13 @@ function copyBibtex(id, btn) {
 
   <div class="pub-meta">
     <span class="pub-badge">ACL 2025</span>
-    <span class="pub-badge">Vienna, Austria</span>
+    <span class="pub-badge">
+      <svg class="location-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"></path>
+        <circle cx="12" cy="9" r="2.5"></circle>
+      </svg>
+      Vienna, Austria
+    </span>
   </div>
 
   <div class="pub-actions">
@@ -456,13 +483,13 @@ function copyBibtex(id, btn) {
       <img src="https://huggingface.co/front/assets/huggingface_logo.svg" alt="Hugging Face"> Dataset
     </a>
 
-    <button type="button" onclick="togglePanel('abs-captex', this, 'Show abstract', 'Hide abstract')" aria-expanded="false">
-      Show abstract
-    </button>
-
     <button type="button" onclick="togglePanel('bib-captex', this, 'Show BibTeX', 'Hide BibTeX')" aria-expanded="false">
       Show BibTeX
     </button>
+  </div>
+
+  <div class="pub-abstract-toggle" onclick="toggleAbstract('abs-captex', this)">
+    <span>&gt;</span> Abstract
   </div>
 
   <div id="abs-captex" class="pub-panel">
