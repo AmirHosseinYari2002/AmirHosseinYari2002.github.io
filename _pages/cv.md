@@ -474,27 +474,6 @@ function printCV() {
 
 <div class="cv-page">
 
-  <section class="cv-hero">
-    <h1>Curriculum Vitae</h1>
-    <p class="cv-hero-subtitle">
-      Electrical Engineering graduate from Sharif University of Technology with research experience in
-      multilingual NLP, LLM evaluation, cultural language understanding, reasoning models, and
-      neural interfaces for communication restoration.
-    </p>
-
-    <div class="cv-hero-meta">
-      <span class="cv-pill">Machine Learning</span>
-      <span class="cv-pill">Multilingual NLP</span>
-      <span class="cv-pill">LLM Evaluation</span>
-      <span class="cv-pill">Brain-Computer Interfaces</span>
-    </div>
-  </section>
-
-  <div class="cv-actions">
-    <button type="button" class="cv-action-btn" onclick="printCV()">Print / Save as PDF</button>
-    <a class="cv-action-btn" href="/publications/">Publications</a>
-  </div>
-
   <section class="cv-section">
     <h2 class="cv-section-title">Education</h2>
 
