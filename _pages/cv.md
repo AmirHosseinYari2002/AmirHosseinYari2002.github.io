@@ -660,8 +660,7 @@ body.theme-dark {
 
               <ul class="cv-bullets">
                 <li>
-                  Assisted undergraduate courses in mathematics, machine learning, optimization, electrical
-                  circuits, and digital logic.
+                  Served as a teaching assistant for multiple undergraduate courses.
                 </li>
               </ul>
 
