@@ -666,7 +666,7 @@ body.theme-dark {
               </ul>
 
               <details class="cv-details" open>
-                <summary>Teaching assistantships</summary>
+                <summary>Courses</summary>
 
                 <div class="cv-course-list">
                   <div class="cv-course">
