@@ -579,7 +579,7 @@ body.theme-dark {
 
               <ul class="cv-bullets">
                 <li>
-                  Developed a speech-based brain-computer interface system to decode neural signals and
+                  Developed a speech brain-computer interface system to decode neural signals and
                   support communication restoration for individuals with speech impairments.
                 </li>
               </ul>
