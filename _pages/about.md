@@ -10,7 +10,7 @@ redirect_from:
 <!-- About Me Section -->
 <section id="about" style="margin-top: 50px; font-family: Arial, sans-serif; line-height: 1.6;">
   <p>
-    I am a natural language processing researcher interested in building intelligent systems that can understand language, reason over complex information, and generate meaningful responses across diverse contexts. My work focuses on multilingual NLP and learning methods that improve reasoning, reliability, and alignment with human intent.
+    I am a Natural Language Processing researcher interested in building intelligent systems that can understand language, reason over complex information, and generate meaningful responses across diverse contexts. My work focuses on multilingual NLP and learning methods that improve reasoning, reliability, and alignment with human intent.
   </p>
   <p>
     I am especially interested in the intersection of principled machine learning and practical AI systems: developing methods that are theoretically grounded, empirically rigorous, and useful beyond standard benchmarks. More broadly, I aim to contribute to AI systems that are not only capable, but also robust, interpretable, and beneficial in real-world settings.
