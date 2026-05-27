@@ -1,7 +1,7 @@
 ---
 title: "Unveiling Cultural Blind Spots: Analyzing the Limitations of mLLMs in Procedural Text Comprehension"
 year: 2025
-date: 2025-07-01
+date: 2025-02-20
 authors: "<u>Amir Hossein Yari</u>, Fajri Koto"
 venue: "ACL 2025"
 location: "Vienna, Austria"
@@ -11,7 +11,8 @@ abstract: "Despite the impressive performance of multilingual large language mod
 bibtex: |
   @inproceedings{yari-koto-2025-unveiling,
     title = "Unveiling Cultural Blind Spots: Analyzing the Limitations of m{LLM}s in Procedural Text Comprehension",
-    author = "Yari, Amir Hossein and Koto, Fajri",
+    author = "Yari, Amir Hossein  and
+      Koto, Fajri",
     booktitle = "Proceedings of the 63rd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)",
     month = jul,
     year = "2025",
@@ -20,6 +21,6 @@ bibtex: |
     url = "https://aclanthology.org/2025.acl-long.987/",
     doi = "10.18653/v1/2025.acl-long.987",
     pages = "20151--20170",
-    ISBN = "979-8-89176-251-0"
-  }
+    ISBN = "979-8-89176-251-0",
+    }
 ---
