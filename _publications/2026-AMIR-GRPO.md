@@ -1,7 +1,7 @@
 ---
 title: "AMIR-GRPO: Inducing Implicit Preference Signals into GRPO"
 year: 2026
-date: 2026-01-01
+date: 2026-03-01
 authors: "<u>Amir Hossein Yari</u>, Fajri Koto"
 paper_url: "https://arxiv.org/abs/2601.03661"
 code_url: "https://github.com/AmirHosseinYari2002/AMIR-GRPO"
