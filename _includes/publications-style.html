@@ -1,0 +1,237 @@
+<style>
+:root {
+  --pub-bg: #ffffff;
+  --pub-text: #222222;
+  --pub-muted: #555555;
+  --pub-border: #e8e8e8;
+  --pub-soft: #fafafa;
+  --pub-hover: #f0f0f0;
+  --pub-shadow: rgba(0,0,0,0.055);
+  --pub-badge-bg: #fff3df;
+  --pub-badge-text: #7a3e00;
+  --pub-badge-border: #ffdca8;
+  --pub-code-bg: #f7f7f7;
+}
+
+html[data-theme="dark"],
+body[data-theme="dark"],
+html.dark,
+body.dark,
+html.dark-mode,
+body.dark-mode,
+html.theme-dark,
+body.theme-dark {
+  --pub-bg: #1f1f1f;
+  --pub-text: #f2f2f2;
+  --pub-muted: #c7c7c7;
+  --pub-border: #3a3a3a;
+  --pub-soft: #2a2a2a;
+  --pub-hover: #343434;
+  --pub-shadow: rgba(0,0,0,0.35);
+  --pub-badge-bg: #3a2a16;
+  --pub-badge-text: #ffd18a;
+  --pub-badge-border: #6a4a20;
+  --pub-code-bg: #252525;
+}
+
+.pub-year {
+  margin-top: 1.8rem;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--pub-text);
+  border-bottom: 2px solid var(--pub-border);
+  padding-bottom: 0.35rem;
+}
+
+.pub-card {
+  margin: 1.1rem 0;
+  padding: 1rem 1.15rem;
+  border-radius: 14px;
+  border: 1px solid var(--pub-border);
+  background: var(--pub-bg);
+  color: var(--pub-text);
+  box-shadow: 0 4px 14px var(--pub-shadow);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.pub-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px var(--pub-shadow);
+}
+
+.pub-title {
+  font-size: 1.02rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+  color: var(--pub-text);
+}
+
+.pub-authors {
+  font-size: 0.92rem;
+  color: var(--pub-muted);
+  line-height: 1.45;
+  margin-bottom: 0.35rem;
+}
+
+.pub-authors u {
+  font-weight: 600;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.authors-full {
+  display: none;
+}
+
+.pub-authors.open .authors-short {
+  display: none;
+}
+
+.pub-authors.open .authors-full {
+  display: inline;
+}
+
+.pub-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.45rem 0 0.65rem;
+}
+
+.pub-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--pub-badge-text);
+  background: var(--pub-badge-bg);
+  border: 1px solid var(--pub-badge-border);
+  border-radius: 999px;
+  padding: 0.22rem 0.55rem;
+}
+
+.location-icon {
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+
+.pub-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.45rem;
+}
+
+.pub-actions a,
+.pub-actions button,
+.author-toggle,
+.copy-bibtex {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.86rem;
+  line-height: 1.2;
+  text-decoration: none;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--pub-border);
+  color: var(--pub-text);
+  background: var(--pub-soft);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.pub-actions a:hover,
+.pub-actions button:hover,
+.author-toggle:hover,
+.copy-bibtex:hover {
+  background: var(--pub-hover);
+  text-decoration: none;
+}
+
+.author-toggle {
+  margin-left: 0.35rem;
+  font-size: 0.78rem;
+  padding: 0.18rem 0.48rem;
+}
+
+.pub-actions img {
+  width: 15px;
+  height: 15px;
+  vertical-align: middle;
+}
+
+.pub-abstract-toggle {
+  margin-top: 0.6rem;
+  font-size: 0.88rem;
+  color: var(--pub-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.pub-abstract-toggle:hover {
+  color: var(--pub-text);
+}
+
+.pub-abstract-toggle span {
+  display: inline-block;
+  transition: transform 0.15s ease;
+  margin-right: 0.25rem;
+}
+
+.pub-abstract-toggle.open span {
+  transform: rotate(90deg);
+}
+
+.pub-panel {
+  display: none;
+  margin-top: 0.4rem;
+  padding: 0.5rem 0.2rem 0.2rem 0.2rem;
+  color: var(--pub-muted);
+  font-size: 0.88rem;
+  line-height: 1.6;
+  max-width: 95%;
+}
+
+.pub-panel.open {
+  display: block;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pub-bibtex pre {
+  margin: 0.4rem 0 0;
+  padding: 0.85rem;
+  overflow-x: auto;
+  border-radius: 10px;
+  background: var(--pub-code-bg);
+  color: var(--pub-text);
+  border: 1px solid var(--pub-border);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.pub-bibtex code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+.copy-bibtex {
+  margin-top: 0.55rem;
+}
+</style>

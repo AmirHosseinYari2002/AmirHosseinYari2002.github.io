@@ -1,0 +1,42 @@
+<script>
+function togglePanel(id, btn, showText, hideText) {
+  var el = document.getElementById(id);
+  if (!el) return;
+
+  var isOpen = el.classList.toggle("open");
+  btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  btn.textContent = isOpen ? hideText : showText;
+}
+
+function toggleAbstract(id, el) {
+  var panel = document.getElementById(id);
+  if (!panel) return;
+
+  panel.classList.toggle("open");
+  el.classList.toggle("open");
+}
+
+function toggleAuthors(id, btn) {
+  var el = document.getElementById(id);
+  if (!el) return;
+
+  var isOpen = el.classList.toggle("open");
+  btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  btn.textContent = isOpen ? "Hide authors" : "Show all authors";
+}
+
+function copyBibtex(id, btn) {
+  var el = document.getElementById(id);
+  if (!el) return;
+
+  var text = el.innerText.trim();
+
+  navigator.clipboard.writeText(text).then(function() {
+    var oldText = btn.textContent;
+    btn.textContent = "Copied!";
+    setTimeout(function() {
+      btn.textContent = oldText;
+    }, 1400);
+  });
+}
+</script>
