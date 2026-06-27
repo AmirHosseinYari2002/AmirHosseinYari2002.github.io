@@ -11,10 +11,7 @@ abstract: "While automatic metrics drive progress in Machine Translation (MT) an
 bibtex: |
     @inproceedings{yari-etal-2026-revisiting,
     title = "Revisiting Metric Reliability for Fine-grained Evaluation of Machine Translation and Summarization in {I}ndian Languages",
-    author = "Yari, Amir Hossein  and
-      Kulkarni, Kalmit  and
-      Khan, Ahmad Raza  and
-      Koto, Fajri",
+    author = "Yari, Amir Hossein  and Kulkarni, Kalmit  and Khan, Ahmad Raza  and Koto, Fajri",
     booktitle = "Proceedings of the 64th Annual Meeting of the {A}ssociation for {C}omputational {L}inguistics (Volume 1: Long Papers)",
     month = jul,
     year = "2026",

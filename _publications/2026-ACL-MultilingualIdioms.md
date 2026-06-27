@@ -12,25 +12,7 @@ abstract: "Idiomatic expressions pose a major challenge for multilingual NLP bec
 bibtex: |
   @inproceedings{almheiri-etal-2026-multilingual,
     title = "Multilingual Idioms in Sentences and Conversations Across High-, Medium-, and Low-Resource Languages",
-    author = "Almheiri, Saeed  and
-      Elbouardi, Bilal  and
-      Pranida, Salsabila Zahirah  and
-      Nikishina, Irina  and
-      B, Ashwath Rao  and
-      Krishnamurthy, Parameswari  and
-      Airlangga, Muhammad Cendekia  and
-      Genadi, Rifo Ahmad  and
-      Bao, Nguyen Phan Gia  and
-      Yari, Amir Hossein  and
-      Toyin, Hawau Olamide  and
-      Mukhituly, Nurdaulet  and
-      Attia, Mena  and
-      Hassan, Besher  and
-      Hidayatullah, Ahmad Fathan  and
-      Kuribayashi, Tatsuki  and
-      Li, Haonan  and
-      Bhat, Suma  and
-      Koto, Fajri",
+    author = "Almheiri, Saeed  and Elbouardi, Bilal  and Pranida, Salsabila Zahirah  and Nikishina, Irina  and B, Ashwath Rao  and Krishnamurthy, Parameswari  and Airlangga, Muhammad Cendekia  and Genadi, Rifo Ahmad  and Bao, Nguyen Phan Gia  and Yari, Amir Hossein  and Toyin, Hawau Olamide  and Mukhituly, Nurdaulet  and Attia, Mena  and Hassan, Besher  and Hidayatullah, Ahmad Fathan  and Kuribayashi, Tatsuki  and Li, Haonan  and Bhat, Suma  and Koto, Fajri",
     booktitle = "Proceedings of the 64th Annual Meeting of the {A}ssociation for {C}omputational {L}inguistics (Volume 1: Long Papers)",
     month = jul,
     year = "2026",
