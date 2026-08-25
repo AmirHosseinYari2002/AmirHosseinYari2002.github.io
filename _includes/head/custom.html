@@ -1,12 +1,11 @@
 {% include base_path %}
 
-<!-- Support for Academicons -->
 <link rel="stylesheet" href="{{ base_path }}/assets/css/academicons.css">
+<link rel="stylesheet" href="{{ base_path }}/assets/css/neural-observatory.css">
+<meta name="theme-color" content="#030815">
 
 <!-- start custom head snippets -->
-
 <!-- Custom SEO / Structured Data -->
-
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -18,10 +17,15 @@
   "url": "https://amirhosseinyari2002.github.io/",
   "image": "https://amirhosseinyari2002.github.io/images/myPhoto.png",
   "jobTitle": "Researcher",
+  "email": "mailto:{{ site.author.email }}",
   "description": "Researcher in Natural Language Processing, Large Language Models, multilingual NLP, reasoning, and AI evaluation.",
   "affiliation": {
     "@type": "Organization",
-    "name": "Mohamed bin Zayed University of Artificial Intelligence"
+    "name": "{{ site.author.employer | escape }}"
+  },
+  "homeLocation": {
+    "@type": "Place",
+    "name": "{{ site.author.location | escape }}"
   },
   "alumniOf": {
     "@type": "CollegeOrUniversity",
@@ -45,5 +49,4 @@
   ]
 }
 </script>
-
 <!-- end custom head snippets -->
