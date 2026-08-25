@@ -3,28 +3,29 @@
 <div class="masthead">
   <div class="masthead__inner-wrap">
     <div class="masthead__menu">
-      <nav id="site-nav" class="greedy-nav" aria-label="Primary navigation">
-        <button aria-label="Open navigation menu"><div class="navicon"></div></button>
-        <ul class="visible-links">
-          <li class="masthead__menu-item masthead__menu-item--lg persist">
-            <a href="{{ base_path }}/" aria-label="{{ site.title }} — home">
-              <span class="site-mark" aria-hidden="true">AY</span>
-              <span class="site-title-text">{{ site.title }}</span>
-            </a>
-          </li>
+      <nav class="neural-site-nav" aria-label="Primary navigation" data-neural-nav>
+        <a class="neural-site-nav__brand" href="{{ base_path }}/" aria-label="{{ site.title }} — home">
+          <svg class="site-mark" viewBox="0 0 64 48" aria-hidden="true">
+            <path d="M7 38 22 8l14 30M12 28h19M36 19l7 15 8-15M43 34c2 8 7 10 13 3"/>
+            <circle cx="58" cy="36" r="2.2"/>
+          </svg>
+          <span class="site-title-text">{{ site.title }}</span>
+        </a>
+
+        <button class="neural-site-nav__toggle" type="button" aria-label="Open navigation menu" aria-controls="neural-nav-links" aria-expanded="false" data-nav-toggle>
+          <span></span><span></span><span></span>
+        </button>
+
+        <ul class="neural-site-nav__links" id="neural-nav-links" data-nav-links>
           {% for link in site.data.navigation.main %}
             {% if link.url contains 'http' %}
               {% assign domain = '' %}
             {% else %}
               {% assign domain = base_path %}
             {% endif %}
-            <li class="masthead__menu-item"><a href="{{ domain }}{{ link.url }}">{{ link.title }}</a></li>
+            <li><a href="{{ domain }}{{ link.url }}">{{ link.title }}</a></li>
           {% endfor %}
-          <li id="theme-toggle" class="masthead__menu-item persist tail">
-            <a role="button" aria-labelledby="theme-icon"><i id="theme-icon" class="fa-solid fa-moon" aria-hidden="true" title="toggle theme"></i></a>
-          </li>
         </ul>
-        <ul class="hidden-links hidden"></ul>
       </nav>
     </div>
   </div>
