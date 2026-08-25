@@ -5,24 +5,19 @@
     <div class="masthead__menu">
       <nav class="neural-site-nav" aria-label="Primary navigation" data-neural-nav>
         <a class="neural-site-nav__brand" href="{{ base_path }}/" aria-label="{{ site.title }} — home">
-          <svg class="site-mark" viewBox="0 0 64 48" aria-hidden="true">
-            <path d="M7 38 22 8l14 30M12 28h19M36 19l7 15 8-15M43 34c2 8 7 10 13 3"/>
-            <circle cx="58" cy="36" r="2.2"/>
+          <svg class="site-mark" viewBox="0 0 96 48" aria-hidden="true">
+            <defs><linearGradient id="ahy-mark-gradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f8fbff"/><stop offset=".48" stop-color="#37e3ff"/><stop offset="1" stop-color="#bd70ff"/></linearGradient></defs>
+            <g fill="none" stroke="url(#ahy-mark-gradient)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 39 18 8l14 31M9 28h18"/><path d="M38 8v31M58 8v31M38 24h20"/><path d="m65 8 12 16L89 8M77 24v15"/>
+            </g>
+            <circle cx="77" cy="24" r="2.2" fill="#37e3ff"/>
           </svg>
-          <span class="site-title-text">{{ site.title }}</span>
+          <span class="site-title-text" aria-hidden="true">AMIR HOSSEIN YARI</span>
         </a>
-
-        <button class="neural-site-nav__toggle" type="button" aria-label="Open navigation menu" aria-controls="neural-nav-links" aria-expanded="false" data-nav-toggle>
-          <span></span><span></span><span></span>
-        </button>
-
+        <button class="neural-site-nav__toggle" type="button" aria-label="Open navigation menu" aria-controls="neural-nav-links" aria-expanded="false" data-nav-toggle><span></span><span></span><span></span></button>
         <ul class="neural-site-nav__links" id="neural-nav-links" data-nav-links>
           {% for link in site.data.navigation.main %}
-            {% if link.url contains 'http' %}
-              {% assign domain = '' %}
-            {% else %}
-              {% assign domain = base_path %}
-            {% endif %}
+            {% if link.url contains 'http' %}{% assign domain = '' %}{% else %}{% assign domain = base_path %}{% endif %}
             <li><a href="{{ domain }}{{ link.url }}">{{ link.title }}</a></li>
           {% endfor %}
         </ul>
