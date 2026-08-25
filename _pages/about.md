@@ -11,7 +11,7 @@ redirect_from:
 <div class="neural-observatory" data-neural-home>
   <aside class="neural-profile-rail" aria-label="Profile and contact details">
     <figure class="neural-profile-rail__portrait">
-      <img src="{{ '/images/portrait-eiffel-hq.webp' | relative_url }}" width="720" height="1080" alt="Amir Hossein Yari in Paris" decoding="async" fetchpriority="high">
+      <img src="{{ '/images/portrait-eiffel-hq.webp' | relative_url }}" width="720" height="1224" alt="Amir Hossein Yari in Paris" decoding="async" fetchpriority="high">
     </figure>
 
     <nav aria-label="Profile links">
@@ -126,6 +126,15 @@ redirect_from:
                   <circle cx="237" cy="157" r="3.5"/><circle cx="278" cy="145" r="4"/>
                   <circle cx="301" cy="170" r="3.5"/><circle cx="276" cy="216" r="3"/>
                 </g>
+              </g>
+              <g class="multilingual-mark__speech-links">
+                <path d="M326 80c12-3 21-1 30 1"/>
+                <path d="M350 116c31-4 55 7 79 19"/>
+                <path d="M330 198c35 12 61 27 89 45"/>
+                <path d="M207 118c-39 1-70 18-101 44"/>
+                <path d="M225 193c-27 18-47 39-66 62"/>
+                <circle cx="326" cy="80" r="3"/><circle cx="350" cy="116" r="3"/>
+                <circle cx="330" cy="198" r="3"/><circle cx="207" cy="118" r="3"/><circle cx="225" cy="193" r="3"/>
               </g>
               <g class="language-token" transform="translate(336 32)"><path d="M8 1h64a7 7 0 0 1 7 7v25a7 7 0 0 1-7 7H30l-10 9 2-9H8a7 7 0 0 1-7-7V8a7 7 0 0 1 7-7Z"/><text x="40" y="26">Hello</text></g>
               <g class="language-token" transform="translate(411 86)"><path d="M8 1h58a7 7 0 0 1 7 7v25a7 7 0 0 1-7 7H28l-10 9 2-9H8a7 7 0 0 1-7-7V8a7 7 0 0 1 7-7Z"/><text x="37" y="26" direction="rtl">سلام</text></g>
