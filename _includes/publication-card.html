@@ -1,80 +1,120 @@
 {% assign paper = include.publication %}
 {% assign paper_id = paper.title | slugify %}
+{% assign venue_logo = paper.venue_logo %}
 
-<div class="pub-card">
-  <div class="pub-title">{{ paper.title }}</div>
+{% if venue_logo == nil and paper.venue contains "ACL" %}
+  {% assign venue_logo = "/assets/images/venues/acl.png" %}
+{% elsif venue_logo == nil and paper.paper_url contains "arxiv.org" %}
+  {% assign venue_logo = "/assets/images/venues/arxiv.png" %}
+{% elsif venue_logo == nil and paper.paper_url contains "techrxiv.org" %}
+  {% assign venue_logo = "/assets/images/venues/techrxiv.png" %}
+{% endif %}
 
-  {% if paper.authors_short %}
-  <div id="authors-{{ paper_id }}" class="pub-authors">
-    <span class="authors-short">{{ paper.authors_short }}</span>
-    <span class="authors-full">{{ paper.authors }}</span>
-
-    <button type="button" class="author-toggle" onclick="toggleAuthors('authors-{{ paper_id }}', this)" aria-expanded="false">
-      Show all authors
-    </button>
-  </div>
-  {% else %}
-  <div class="pub-authors">
-    {{ paper.authors }}
-  </div>
-  {% endif %}
+<article class="pub-card" aria-labelledby="title-{{ paper_id }}" data-publication-card>
+  <span class="pub-card__accent" aria-hidden="true"></span>
 
   {% if paper.venue or paper.location %}
-  <div class="pub-meta">
-    {% if paper.venue %}
-      <span class="pub-badge">{{ paper.venue }}</span>
-    {% endif %}
+    <div class="pub-meta">
+      {% if paper.venue %}
+        <span class="pub-badge pub-badge--venue">
+          {% if venue_logo %}
+            <span class="pub-badge__logo-wrap{% if venue_logo contains 'techrxiv' %} pub-badge__logo-wrap--wordmark{% endif %}" aria-hidden="true">
+              <img class="pub-badge__logo" src="{{ venue_logo | relative_url }}" alt="" loading="lazy" decoding="async">
+            </span>
+          {% endif %}
+          {% if venue_logo contains "techrxiv" %}
+            <span>{{ paper.year }}</span>
+          {% else %}
+            <span>{{ paper.venue }}</span>
+          {% endif %}
+        </span>
+      {% endif %}
 
-    {% if paper.location %}
-      <span class="pub-badge">
-        <svg class="location-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"></path>
-          <circle cx="12" cy="9" r="2.5"></circle>
-        </svg>
-        {{ paper.location }}
-      </span>
-    {% endif %}
-  </div>
+      {% if paper.location %}
+        <span class="pub-badge pub-badge--location">
+          <svg class="pub-badge__location" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 21s6-5.4 6-11a6 6 0 1 0-12 0c0 5.6 6 11 6 11Z"/><circle cx="12" cy="10" r="2"/>
+          </svg>
+          <span>{{ paper.location }}</span>
+        </span>
+      {% endif %}
+    </div>
   {% endif %}
 
-  <div class="pub-actions">
-    {% if paper.paper_url %}
-      <a href="{{ paper.paper_url }}">📄 Paper</a>
-    {% endif %}
+  <div class="pub-card__divider" aria-hidden="true"></div>
 
-    {% if paper.code_url %}
-      <a href="{{ paper.code_url }}">
-        <img src="/assets/github.png" alt="GitHub"> Code
-      </a>
-    {% endif %}
+  <div class="pub-card__content">
+    <div class="pub-card__copy">
+      <h3 id="title-{{ paper_id }}" class="pub-title">{{ paper.title }}</h3>
 
-    {% if paper.dataset_url %}
-      <a href="{{ paper.dataset_url }}">
-        <img src="https://huggingface.co/front/assets/huggingface_logo.svg" alt="Hugging Face"> Dataset
-      </a>
-    {% endif %}
+      {% if paper.authors_short %}
+        <div id="authors-{{ paper_id }}" class="pub-authors" data-author-list>
+          <span class="authors-short">{{ paper.authors_short }}</span>
+          <span class="authors-full" hidden>{{ paper.authors }}</span>
+          <button type="button" class="author-toggle" data-author-toggle aria-controls="authors-{{ paper_id }}" aria-expanded="false">
+            <span data-author-toggle-label>Show all authors</span>
+          </button>
+        </div>
+      {% else %}
+        <div class="pub-authors">{{ paper.authors }}</div>
+      {% endif %}
+    </div>
 
-    {% if paper.bibtex %}
-      <button type="button" onclick="togglePanel('bib-{{ paper_id }}', this, 'Show BibTeX', 'Hide BibTeX')" aria-expanded="false">
-        Show BibTeX
-      </button>
-    {% endif %}
+    <div class="pub-actions" aria-label="Resources for {{ paper.title | escape }}">
+      {% if paper.abstract %}
+        <button type="button" class="pub-action pub-action--primary" data-panel-toggle="abstract-{{ paper_id }}" aria-controls="abstract-{{ paper_id }}" aria-expanded="false">
+          <svg class="pub-action__icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M3 10h11M3 15h8"/></svg>
+          <span>Abstract</span>
+          <svg class="pub-action__chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>
+        </button>
+      {% endif %}
+
+      {% if paper.paper_url %}
+        <a class="pub-action" href="{{ paper.paper_url }}" target="_blank" rel="noopener noreferrer">
+          <svg class="pub-action__icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 2.5h7l3 3V17.5H5Z"/><path d="M12 2.5v4h3M7.5 10h5M7.5 13h4"/></svg>
+          <span>Paper</span>
+        </a>
+      {% endif %}
+
+      {% if paper.code_url %}
+        <a class="pub-action" href="{{ paper.code_url }}" target="_blank" rel="noopener noreferrer">
+          <svg class="pub-action__icon pub-action__icon--github" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M8 1.3a6.665 6.665 0 0 1 5.413 10.56 6.677 6.677 0 0 1-3.288 2.432c-.333.067-.458-.142-.458-.316 0-.226.008-.942.008-1.834 0-.625-.208-1.025-.45-1.233 1.483-.167 3.042-.734 3.042-3.292a2.58 2.58 0 0 0-.684-1.792c.067-.166.3-.85-.066-1.766 0 0-.559-.184-1.834.683a6.186 6.186 0 0 0-1.666-.225c-.567 0-1.134.075-1.667.225-1.275-.858-1.833-.683-1.833-.683-.367.916-.134 1.6-.067 1.766a2.594 2.594 0 0 0-.683 1.792c0 2.55 1.55 3.125 3.033 3.292-.192.166-.367.458-.425.891-.383.175-1.342.459-1.942-.55-.125-.2-.5-.691-1.025-.683-.558.008-.225.317.009.442.283.158.608.75.683.941.133.376.567 1.092 2.242.784 0 .558.008 1.083.008 1.242 0 .174-.125.374-.458.316a6.662 6.662 0 0 1-4.559-6.325A6.665 6.665 0 0 1 8 1.3Z"/>
+          </svg>
+          <span>Code</span>
+        </a>
+      {% endif %}
+
+      {% if paper.dataset_url %}
+        <a class="pub-action" href="{{ paper.dataset_url }}" target="_blank" rel="noopener noreferrer">
+          <img class="pub-action__icon pub-action__icon--huggingface" src="{{ '/assets/images/icons/huggingface.png' | relative_url }}" alt="" loading="lazy" decoding="async">
+          <span>Dataset</span>
+        </a>
+      {% endif %}
+
+      {% if paper.bibtex %}
+        <button type="button" class="pub-action" data-panel-toggle="bibtex-{{ paper_id }}" aria-controls="bibtex-{{ paper_id }}" aria-expanded="false">
+          <span class="pub-action__braces" aria-hidden="true">{ }</span>
+          <span>BibTeX</span>
+        </button>
+      {% endif %}
+    </div>
   </div>
 
   {% if paper.abstract %}
-  <div class="pub-abstract-toggle" onclick="toggleAbstract('abs-{{ paper_id }}', this)">
-    <span>▸</span> Abstract
-  </div>
-
-  <div id="abs-{{ paper_id }}" class="pub-panel">
-    {{ paper.abstract }}
-  </div>
+    <section id="abstract-{{ paper_id }}" class="pub-panel" aria-label="Abstract" tabindex="-1" hidden>
+      <h4>Abstract</h4>
+      <p>{{ paper.abstract }}</p>
+    </section>
   {% endif %}
 
   {% if paper.bibtex %}
-  <div id="bib-{{ paper_id }}" class="pub-panel pub-bibtex">
-<pre><code id="bibtex-{{ paper_id }}">{{ paper.bibtex | escape }}</code></pre>
-    <button type="button" class="copy-bibtex" onclick="copyBibtex('bibtex-{{ paper_id }}', this)">Copy BibTeX</button>
-  </div>
+    <section id="bibtex-{{ paper_id }}" class="pub-panel pub-bibtex" aria-label="BibTeX" tabindex="-1" hidden>
+      <div class="pub-panel__heading">
+        <h4>BibTeX</h4>
+        <button type="button" class="copy-bibtex" data-copy-target="bibtex-code-{{ paper_id }}">Copy</button>
+      </div>
+      <pre><code id="bibtex-code-{{ paper_id }}">{{ paper.bibtex | escape }}</code></pre>
+    </section>
   {% endif %}
-</div>
+</article>
