@@ -4,6 +4,8 @@
 <link rel="stylesheet" href="{{ base_path }}/assets/css/neural-observatory.css">
 {% if page.layout == 'neural-publications' %}
   <link rel="stylesheet" href="{{ base_path }}/assets/css/publications.css">
+{% elsif page.layout == 'neural-cv' %}
+  <link rel="stylesheet" href="{{ base_path }}/assets/css/cv.css">
 {% endif %}
 <link rel="icon" href="{{ base_path }}/images/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="{{ base_path }}/images/favicon-32x32.png" type="image/png" sizes="32x32">
@@ -12,7 +14,7 @@
 <link rel="manifest" href="{{ base_path }}/images/manifest.json">
 <meta name="application-name" content="AHY">
 <meta name="apple-mobile-web-app-title" content="AHY">
-{% if page.layout == 'neural-home' or page.layout == 'neural-publications' %}
+{% if page.layout == 'neural-home' or page.layout == 'neural-publications' or page.layout == 'neural-cv' %}
   <link rel="preload" href="{{ base_path }}/images/portrait-eiffel-hq.webp" as="image" type="image/webp" fetchpriority="high">
 {% endif %}
 <meta name="theme-color" content="#030815">
