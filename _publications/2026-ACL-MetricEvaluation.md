@@ -4,6 +4,7 @@ year: 2026
 date: 2025-10-08
 authors: "<u>Amir Hossein Yari</u>, Kalmit Kulkarni, Ahmad Raza Khan, Fajri Koto"
 venue: "ACL 2026"
+venue_id: "acl"
 location: "San Diego, CA, USA"
 paper_url: "https://aclanthology.org/2026.acl-long.1171/"
 dataset_url: "https://huggingface.co/datasets/AmirHossein2002/ITEM"

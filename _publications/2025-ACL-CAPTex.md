@@ -4,6 +4,7 @@ year: 2025
 date: 2025-02-20
 authors: "<u>Amir Hossein Yari</u>, Fajri Koto"
 venue: "ACL 2025"
+venue_id: "acl"
 location: "Vienna, Austria"
 paper_url: "https://aclanthology.org/2025.acl-long.987/"
 dataset_url: "https://huggingface.co/datasets/AmirHossein2002/CAPTex"
