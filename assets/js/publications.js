@@ -55,14 +55,14 @@
     var list = button.closest("[data-author-list]");
     if (!list) return;
 
-    var shortAuthors = list.querySelector(".authors-short");
-    var fullAuthors = list.querySelector(".authors-full");
+    var authorText = list.querySelector("[data-author-text]");
+    var shortAuthors = list.querySelector("template[data-author-short]");
+    var fullAuthors = list.querySelector("template[data-author-full]");
     var label = button.querySelector("[data-author-toggle-label]");
-    if (!shortAuthors || !fullAuthors || !label) return;
+    if (!authorText || !shortAuthors || !fullAuthors || !label) return;
 
-    var willOpen = fullAuthors.hidden;
-    shortAuthors.hidden = willOpen;
-    fullAuthors.hidden = !willOpen;
+    var willOpen = button.getAttribute("aria-expanded") !== "true";
+    authorText.innerHTML = willOpen ? fullAuthors.innerHTML : shortAuthors.innerHTML;
     button.setAttribute("aria-expanded", willOpen ? "true" : "false");
     label.textContent = willOpen ? "Hide authors" : "Show all authors";
   }
@@ -75,7 +75,9 @@
       var yearHasMatch = false;
 
       yearGroup.querySelectorAll("[data-publication-card]").forEach(function (card) {
-        var searchText = card.textContent.toLocaleLowerCase();
+        var fullAuthorTemplate = card.querySelector("template[data-author-full]");
+        var fullAuthors = fullAuthorTemplate ? fullAuthorTemplate.content.textContent || "" : "";
+        var searchText = (card.textContent + " " + fullAuthors).toLocaleLowerCase();
         var matches = !query || searchText.indexOf(query) !== -1;
         card.hidden = !matches;
         yearHasMatch = yearHasMatch || matches;

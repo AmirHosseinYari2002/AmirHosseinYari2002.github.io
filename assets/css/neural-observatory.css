@@ -186,6 +186,14 @@ a {
   transform: scaleX(1);
 }
 
+.neural-site-nav__links a.is-active {
+  color: #fff;
+}
+
+.neural-site-nav__links a.is-active::after {
+  transform: scaleX(1);
+}
+
 .neural-site-nav__toggle {
   display: none;
   width: 2.8rem;
@@ -911,6 +919,11 @@ body:not(.neural-observatory-page) #main { margin-top: 7.4rem; }
   .neural-site-nav__links a { padding: 0.82rem 0.9rem; border-bottom: 1px solid rgba(120, 160, 219, 0.12); font-size: 0.64rem; }
   .neural-site-nav__links li:last-child a { border-bottom: 0; }
   .neural-site-nav__links a::after { display: none; }
+  .neural-site-nav__links a.is-active {
+    color: var(--neural-cyan);
+    background: rgba(55, 227, 255, 0.07);
+    box-shadow: inset 2px 0 0 var(--neural-cyan);
+  }
   .neural-profile-rail { margin-right: 0.75rem; margin-left: 0.75rem; }
   .neural-profile-rail__links { grid-template-columns: 1fr; }
   .neural-profile-rail__links li,
