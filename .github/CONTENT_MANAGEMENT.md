@@ -1,5 +1,34 @@
 # Website content management
 
+## Update the CV
+
+The CV page is generated from `_data/cv.json`. Edit that single file to add or
+update education and experience entries; the layout, timeline, logo sizing,
+responsive behavior, and accessibility markup are applied automatically.
+
+Add a new object to the `experience` array in reverse chronological order:
+
+```json
+{
+  "role": "Researcher",
+  "organization": "Institution name",
+  "url": "https://institution.example/",
+  "date": "Jan 2027–Present",
+  "location": "City, Country",
+  "supervisor": "Prof. Name",
+  "logo": "/assets/images/logos/institution.png",
+  "logo_id": "institution",
+  "logo_alt": "Institution logo",
+  "highlights": [
+    "A concise description of the work."
+  ]
+}
+```
+
+`supervisor` and `courses` are optional. Store each original logo once under
+`assets/images/logos/`; every logo is fitted proportionally inside the same
+fixed-size tile, so a new entry never requires redesigning a card.
+
 ## Add a publication
 
 Create one Markdown file in `_publications/`, using a descriptive filename such as

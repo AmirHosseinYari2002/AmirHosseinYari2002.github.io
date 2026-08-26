@@ -1,60 +1,97 @@
 {
-  "basics": {
-    "name": "Amir Hossein Yari",
-    "email": "ahyari2002@gmail.com",
-    "phone": "",
-    "website": "https://AmirHosseinYari2002.github.io",
-    "summary": "",
-    "location": {
-      "address": "",
-      "postalCode": "",
-      "city": "",
-      "countryCode": "",
-      "region": ""
-    },
-    "profiles": [
-      {
-        "network": "Google Scholar",
-        "username": "",
-        "url": "https://scholar.google.com/citations?hl=en\\&user=cYc6hYkAAAAJ"
-      },
-      {
-        "network": "ORCID",
-        "username": "",
-        "url": "https://orcid.org/0009-0007-3683-6917"
-      },
-      {
-        "network": "GitHub",
-        "username": "AmirHosseinYari2002",
-        "url": "https://github.com/AmirHosseinYari2002"
-      }
-    ]
-  },
-  "work": [
-    {
-      "position": "Research Assistant",
-      "employer": "Sharif University of Technology",
-      "location": "Iran",
-      "start": "July 2023",
-      "end": "July 2024"
-    }
-  ],
+  "title": "Curriculum Vitae",
   "education": [
     {
+      "degree": "B.Sc. in Electrical Engineering",
       "institution": "Sharif University of Technology",
-      "area": "B.Sc. in Electrical Engineering",
-      "studyType": "",
-      "startDate": "2020",
-      "endDate": "2024",
-      "gpa": null,
-      "courses": []
+      "url": "https://en.sharif.ir/",
+      "date": "2020–2024",
+      "location": "Tehran, Iran",
+      "logo": "/assets/images/logos/sharif.png",
+      "logo_id": "sharif",
+      "logo_alt": "Sharif University of Technology logo"
     }
   ],
-  "skills": [],
-  "languages": [],
-  "interests": [],
-  "references": [],
-  "publications": [],
-  "presentations": [],
-  "teaching": []
+  "experience": [
+    {
+      "role": "Researcher",
+      "organization": "Mohamed bin Zayed University of Artificial Intelligence — MBZUAI",
+      "url": "https://mbzuai.ac.ae/",
+      "date": "Oct 2024–Dec 2025",
+      "location": "Abu Dhabi, UAE",
+      "supervisor": "Prof. Fajri Koto",
+      "logo": "/assets/images/logos/mbzuai.png",
+      "logo_id": "mbzuai",
+      "logo_alt": "MBZUAI logo",
+      "highlights": [
+        "Developed AMIR-GRPO, a GRPO extension that injects implicit preference regularization to improve reasoning performance without additional annotation cost.",
+        "Assessed the reliability, robustness, and human alignment of automated evaluation metrics for machine translation and text summarization.",
+        "Investigated multilingual LLMs on culturally grounded procedural texts, highlighting gaps, biases, and limitations in cross-cultural language understanding."
+      ]
+    },
+    {
+      "role": "E3 Intern",
+      "organization": "École Polytechnique Fédérale de Lausanne — EPFL",
+      "url": "https://www.epfl.ch/en/",
+      "date": "Dec 2024–Jul 2025",
+      "location": "Geneva, Switzerland",
+      "supervisor": "Prof. Mahsa Shoaran",
+      "logo": "/assets/images/logos/epfl.png",
+      "logo_id": "epfl",
+      "logo_alt": "EPFL logo",
+      "highlights": [
+        "Developed a speech brain-computer interface system to decode neural signals and support communication restoration for individuals with speech impairments."
+      ]
+    },
+    {
+      "role": "Software Engineer",
+      "organization": "Basir Technologies",
+      "url": "https://basirtechnologies.com/en/",
+      "date": "Jul 2023–Jul 2024",
+      "location": "Tehran, Iran",
+      "logo": "/assets/images/logos/basir.png",
+      "logo_id": "basir",
+      "logo_alt": "Basir Technologies logo",
+      "highlights": [
+        "Designed and implemented software components for millimeter-wave body scanner systems."
+      ]
+    },
+    {
+      "role": "Teaching Assistant",
+      "organization": "Sharif University of Technology",
+      "url": "https://en.sharif.ir/",
+      "date": "Feb 2022–Jul 2024",
+      "location": "Tehran, Iran",
+      "logo": "/assets/images/logos/sharif.png",
+      "logo_id": "sharif",
+      "logo_alt": "Sharif University of Technology logo",
+      "highlights": [
+        "Served as a teaching assistant for multiple undergraduate courses."
+      ],
+      "courses": [
+        { "name": "Linear Algebra", "term": "Spring 2024", "instructor": "Prof. Amiri" },
+        { "name": "Linear Algebra", "term": "Fall 2023", "instructor": "Prof. Amiri" },
+        { "name": "Machine Learning", "term": "Spring 2024", "instructor": "Prof. Amiri" },
+        { "name": "Convex Optimization", "term": "Fall 2023", "instructor": "Prof. Amiri" },
+        { "name": "Linear Algebra", "term": "Spring 2023", "instructor": "Prof. Kazemi" },
+        { "name": "Linear Algebra", "term": "Spring 2023", "instructor": "Prof. Amiri" },
+        { "name": "Electrical Circuit Theory", "term": "Fall 2022", "instructor": "Prof. Shamsollahi" },
+        { "name": "Logic Circuit & Lab", "term": "Fall 2022", "instructor": "Prof. Shabany" },
+        { "name": "Electrical Circuits & Lab", "term": "Spring 2022", "instructor": "Prof. Shamsollahi" }
+      ]
+    },
+    {
+      "role": "Summer Intern",
+      "organization": "Behyaar Medical Equipment Company",
+      "url": "https://behyaar.com/en",
+      "date": "Jul–Sep 2022",
+      "location": "Isfahan, Iran",
+      "logo": "/assets/images/logos/behyaar.jpg",
+      "logo_id": "behyaar",
+      "logo_alt": "Behyaar Medical Equipment Company logo",
+      "highlights": [
+        "Implemented basic FPGA programming projects and gained hands-on experience with hardware-oriented development."
+      ]
+    }
+  ]
 }

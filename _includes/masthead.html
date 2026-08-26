@@ -17,7 +17,15 @@
         <ul class="neural-site-nav__links" id="neural-nav-links" data-nav-links>
           {% for link in site.data.navigation.main %}
             {% if link.url contains 'http' %}{% assign domain = '' %}{% else %}{% assign domain = base_path %}{% endif %}
-            <li><a href="{{ domain }}{{ link.url }}">{{ link.title }}</a></li>
+            {% assign is_current = false %}
+            {% if link.url == '/#about' and page.url == '/' %}
+              {% assign is_current = true %}
+            {% elsif link.url == '/publications/' and page.url contains '/publications/' %}
+              {% assign is_current = true %}
+            {% elsif link.url == page.url %}
+              {% assign is_current = true %}
+            {% endif %}
+            <li><a href="{{ domain }}{{ link.url }}"{% if is_current %} class="is-active" aria-current="page"{% endif %}>{{ link.title }}</a></li>
           {% endfor %}
         </ul>
       </nav>
