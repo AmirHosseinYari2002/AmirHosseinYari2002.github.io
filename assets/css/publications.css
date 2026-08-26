@@ -268,8 +268,6 @@ body:has([data-publications-page])::before {
   text-decoration: none;
 }
 
-.authors-full[hidden] { display: none; }
-
 .author-toggle {
   margin: 0 0 0 0.45rem;
   padding: 0.12rem 0.42rem;
@@ -388,7 +386,10 @@ body:has([data-publications-page])::before {
 }
 
 .pub-panel[hidden] { display: none; }
-.pub-panel:focus { outline: none; }
+.pub-panel:focus {
+  outline: 2px solid rgba(55, 227, 255, 0.58);
+  outline-offset: 2px;
+}
 
 .pub-panel h4 {
   margin: 0 0 0.45rem;

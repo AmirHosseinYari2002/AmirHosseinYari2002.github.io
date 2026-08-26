@@ -1,13 +1,5 @@
 /* Neural Night CV — data-driven credential and experience timeline */
 
-.neural-site-nav__links a.is-active {
-  color: #fff;
-}
-
-.neural-site-nav__links a.is-active::after {
-  transform: scaleX(1);
-}
-
 .cv-stage {
   padding-top: 6.65rem;
   padding-bottom: 2.4rem;

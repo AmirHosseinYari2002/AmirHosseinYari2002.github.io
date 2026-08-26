@@ -61,9 +61,10 @@
       <h3 id="title-{{ paper_id }}" class="pub-title">{{ paper.title }}</h3>
 
       {% if paper.authors_short %}
-        <div id="authors-{{ paper_id }}" class="pub-authors" data-author-list>
-          <span class="authors-short">{{ paper.authors_short }}</span>
-          <span class="authors-full" hidden>{{ paper.authors }}</span>
+        <div class="pub-authors" data-author-list>
+          <span id="authors-{{ paper_id }}" data-author-text>{{ paper.authors_short }}</span>
+          <template data-author-short>{{ paper.authors_short }}</template>
+          <template data-author-full>{{ paper.authors }}</template>
           <button type="button" class="author-toggle" data-author-toggle aria-controls="authors-{{ paper_id }}" aria-expanded="false">
             <span data-author-toggle-label>Show all authors</span>
           </button>
