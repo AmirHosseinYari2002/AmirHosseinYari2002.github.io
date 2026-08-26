@@ -1,0 +1,20 @@
+# Central venue registry used by publication cards.
+# Add a venue here once, then reference it with `venue_id` in any publication.
+
+acl:
+  label: "ACL"
+  logo: "/assets/images/venues/acl.png"
+  preprint: false
+  wordmark: false
+
+arxiv:
+  label: "arXiv"
+  logo: "/assets/images/venues/arxiv.png"
+  preprint: true
+  wordmark: false
+
+techrxiv:
+  label: "TechRxiv"
+  logo: "/assets/images/venues/techrxiv.png"
+  preprint: true
+  wordmark: true

@@ -5,6 +5,7 @@ date: 2026-01-08
 authors_short: "Saeed Almheiri, Bilal Elbouardi, ..., <u>Amir Hossein Yari</u>, ..., Fajri Koto"
 authors: "Saeed Almheiri, Bilal Elbouardi, Salsabila Zahirah Pranida, Irina Nikishina, Ashwath Rao B, Parameswari Krishnamurthy, Muhammad Cendekia Airlangga, Rifo Ahmad Genadi, Nguyễn Phan Gia Bảo, <u>Amir Hossein Yari</u>, Hawau Olamide Toyin, Nurdaulet Mukhituly, Mena Attia, Besher Hassan, Ahmad Fathan Hidayatullah, Tatsuki Kuribayashi, Haonan Li, Suma Bhat, Fajri Koto"
 venue: "ACL 2026"
+venue_id: "acl"
 location: "San Diego, CA, USA"
 paper_url: "https://aclanthology.org/2026.acl-long.564/"
 dataset_url: "https://huggingface.co/datasets/Almheiri/MultIdiom"

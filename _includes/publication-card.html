@@ -1,13 +1,30 @@
 {% assign paper = include.publication %}
 {% assign paper_id = paper.title | slugify %}
-{% assign venue_logo = paper.venue_logo %}
+{% assign venue_id = paper.venue_id %}
 
-{% if venue_logo == nil and paper.venue contains "ACL" %}
-  {% assign venue_logo = "/assets/images/venues/acl.png" %}
-{% elsif venue_logo == nil and paper.paper_url contains "arxiv.org" %}
-  {% assign venue_logo = "/assets/images/venues/arxiv.png" %}
-{% elsif venue_logo == nil and paper.paper_url contains "techrxiv.org" %}
-  {% assign venue_logo = "/assets/images/venues/techrxiv.png" %}
+{% if venue_id == nil and paper.venue contains "ACL" %}
+  {% assign venue_id = "acl" %}
+{% elsif venue_id == nil and paper.paper_url contains "arxiv.org" %}
+  {% assign venue_id = "arxiv" %}
+{% elsif venue_id == nil and paper.paper_url contains "techrxiv.org" %}
+  {% assign venue_id = "techrxiv" %}
+{% endif %}
+
+{% assign venue_config = site.data.publication_venues[venue_id] %}
+{% assign venue_logo = paper.venue_logo %}
+{% assign venue_label = paper.venue %}
+{% assign venue_wordmark = false %}
+
+{% if venue_config %}
+  {% if venue_logo == nil %}
+    {% assign venue_logo = venue_config.logo %}
+  {% endif %}
+  {% if venue_config.preprint %}
+    {% assign venue_label = venue_config.label %}
+  {% endif %}
+  {% if venue_config.wordmark %}
+    {% assign venue_wordmark = true %}
+  {% endif %}
 {% endif %}
 
 <article class="pub-card" aria-labelledby="title-{{ paper_id }}" data-publication-card>
@@ -16,17 +33,13 @@
   {% if paper.venue or paper.location %}
     <div class="pub-meta">
       {% if paper.venue %}
-        <span class="pub-badge pub-badge--venue">
+        <span class="pub-badge pub-badge--venue" aria-label="{{ venue_label | escape }}">
           {% if venue_logo %}
-            <span class="pub-badge__logo-wrap{% if venue_logo contains 'techrxiv' %} pub-badge__logo-wrap--wordmark{% endif %}" aria-hidden="true">
+            <span class="pub-badge__logo-wrap{% if venue_wordmark %} pub-badge__logo-wrap--wordmark{% endif %}" aria-hidden="true">
               <img class="pub-badge__logo" src="{{ venue_logo | relative_url }}" alt="" loading="lazy" decoding="async">
             </span>
           {% endif %}
-          {% if venue_logo contains "techrxiv" %}
-            <span>{{ paper.year }}</span>
-          {% else %}
-            <span>{{ paper.venue }}</span>
-          {% endif %}
+          {% unless venue_wordmark %}<span>{{ venue_label }}</span>{% endunless %}
         </span>
       {% endif %}
 
