@@ -63,13 +63,19 @@
       {% if paper.authors_short %}
         <div class="pub-authors" data-author-list>
           <span id="authors-{{ paper_id }}" data-author-text>{{ paper.authors_short }}</span>
-          <template data-author-short>{{ paper.authors_short }}</template>
-          <template data-author-full>{{ paper.authors }}</template>
-          <button type="button" class="author-toggle" data-author-toggle aria-controls="authors-{{ paper_id }}" aria-expanded="false">
-            <span data-author-toggle-label>Show all authors</span>
-          </button>
+          {% if paper.authors_url %}
+            <a class="author-toggle" href="{{ paper.authors_url }}" target="_blank" rel="noopener noreferrer">
+              {% if paper.authors_count %}View all {{ paper.authors_count }} authors{% else %}View complete author list{% endif %}
+            </a>
+          {% elsif paper.authors %}
+            <template data-author-short>{{ paper.authors_short }}</template>
+            <template data-author-full>{{ paper.authors }}</template>
+            <button type="button" class="author-toggle" data-author-toggle aria-controls="authors-{{ paper_id }}" aria-expanded="false">
+              <span data-author-toggle-label>Show all authors</span>
+            </button>
+          {% endif %}
         </div>
-      {% else %}
+      {% elsif paper.authors %}
         <div class="pub-authors">{{ paper.authors }}</div>
       {% endif %}
     </div>

@@ -54,8 +54,11 @@ bibtex: |
 ```
 
 Optional URLs create their corresponding buttons automatically. Use
-`authors_short` only for unusually long author lists; `authors` should always
-contain the complete list.
+`authors_short` only for unusually long author lists. For lists that remain
+reasonable to expand within a card, keep the complete list in `authors`. For a
+consortium-scale paper, use `authors_url` and optional `authors_count` instead;
+the card links to the canonical external author list without expanding hundreds
+of names inside the page.
 
 Venue presentation is centralized in `_data/publication_venues.yml`. For a paper
 at an existing venue, reuse its `venue_id`; no template or logo change is needed.
