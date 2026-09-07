@@ -65,7 +65,7 @@
           <span id="authors-{{ paper_id }}" data-author-text>{{ paper.authors_short }}</span>
           {% if paper.authors_url %}
             <a class="author-toggle" href="{{ paper.authors_url }}" target="_blank" rel="noopener noreferrer">
-              {% if paper.authors_count %}View all {{ paper.authors_count }} authors{% else %}View complete author list{% endif %}
+              Show all authors
             </a>
           {% elsif paper.authors %}
             <template data-author-short>{{ paper.authors_short }}</template>
