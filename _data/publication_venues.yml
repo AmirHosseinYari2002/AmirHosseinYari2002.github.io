@@ -9,6 +9,8 @@ acl:
 
 mathnlp:
   label: "MathNLP @ EMNLP 2026"
+  logo: "/assets/images/venues/mathnlp.png"
+  logo_style: "wide"
   preprint: false
   wordmark: false
 

@@ -209,6 +209,14 @@ body:has([data-publications-page])::before {
   background: #f8fafc;
 }
 
+.pub-badge__logo-wrap--wide {
+  width: 4.2rem;
+  height: 1.05rem;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border-radius: 0.14rem;
+}
+
 .pub-badge__logo {
   display: block;
   width: 100%;
