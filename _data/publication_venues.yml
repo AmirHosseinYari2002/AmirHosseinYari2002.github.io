@@ -7,6 +7,11 @@ acl:
   preprint: false
   wordmark: false
 
+mathnlp:
+  label: "MathNLP"
+  preprint: false
+  wordmark: false
+
 arxiv:
   label: "arXiv"
   logo: "/assets/images/venues/arxiv.png"
