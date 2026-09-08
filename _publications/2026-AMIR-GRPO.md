@@ -1,9 +1,9 @@
 ---
 title: "AMIR-GRPO: Inducing Implicit Preference Signals into GRPO"
 year: 2026
-date: 2026-09-06
+date: 2026-02-01
 authors: "<u>Amir Hossein Yari</u>, Fajri Koto"
-venue: "MathNLP 2026"
+venue: "MathNLP @ EMNLP 2026"
 venue_id: "mathnlp"
 location: "Budapest, Hungary"
 paper_url: "https://arxiv.org/abs/2601.03661"

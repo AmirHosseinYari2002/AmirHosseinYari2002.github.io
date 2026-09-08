@@ -8,7 +8,7 @@ acl:
   wordmark: false
 
 mathnlp:
-  label: "MathNLP"
+  label: "MathNLP @ EMNLP 2026"
   preprint: false
   wordmark: false
 
