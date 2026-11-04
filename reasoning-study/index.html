@@ -34,7 +34,7 @@ window.MathJax = {
   <div class="hero">
     <p class="eyebrow">A study of human reasoning</p>
     <h1>Your process. <em>As it happens.</em></h1>
-    <p class="lede">A quiet workspace for sharing your problem-solving process. Pick a domain, receive one question, and write your thinking down as it comes, including doubts, false starts and changes of mind. Correctness is not required.</p>
+    <p class="lede">A quiet workspace for sharing your problem-solving process. Pick a domain, receive one question, and write your thinking down as it comes, including doubts, false starts and changes of mind. The correctness of your answer is not important to us. We just want to see how humans reason: the doubts, the thinking, the repairs, the changes of approach, and everything else.</p>
     <div class="row">
       <a class="btn primary" href="#domains">Choose your domain
         <svg class="arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg></a>
@@ -57,7 +57,7 @@ window.MathJax = {
 
   <div class="callout">
     <p class="eyebrow">No AI — ChatGPT, Gemini, Claude</p>
-    <p>AI use is prohibited. Do not use ChatGPT, Gemini, Claude, or any other AI assistant, AI search, or automated solver. Work independently without internet searches or help from another person. A basic calculator is allowed. Please don't use scratch paper: write everything in the editor.</p>
+    <p>AI use is prohibited. Do not use ChatGPT, Gemini, Claude, or any other AI assistant, AI search, or automated solver. Please don't use scratch paper: write everything in the editor.</p>
   </div>
 
   <div class="stack-lg" id="domains">
@@ -72,13 +72,12 @@ window.MathJax = {
     </div>
   </div>
 
-  <div class="card stack-lg">
+  <div class="stack-lg">
     <div class="stack">
-      <p class="eyebrow">From first thought to final answer</p>
       <h2>What a good response looks like</h2>
-      <p class="muted">An invented example, not a study question: <em>A $24 book is 25% off, then 8% sales tax is added. What do you pay?</em></p>
+      <p class="lede"><strong>Write your thoughts as they come — how you understand the problem, what you try, what you doubt, and when you change your mind.</strong> The correctness of your answer is not important to us. We just want to see how humans reason: the doubts, the thinking, the repairs, the changes of approach, and everything else.</p>
     </div>
-    <div class="sample" id="sampleTop"></div>
+    <div class="ex" id="sampleTop"></div>
   </div>
 </section>
 
@@ -127,19 +126,19 @@ window.MathJax = {
       </div>
       <div class="callout">
         <p class="eyebrow">No AI — ChatGPT, Gemini, Claude</p>
-        <p>AI use is prohibited. Do not use ChatGPT, Gemini, Claude, or any other AI assistant, AI search, or automated solver. Work independently without internet searches or help from another person.</p>
+        <p>AI use is prohibited. Do not use ChatGPT, Gemini, Claude, or any other AI assistant, AI search, or automated solver.</p>
       </div>
       <div class="prose">
         <p>This study compares how people and language models reason through problems.</p>
         <p>Your responses may be analyzed by external AI services for research annotation and evaluation. Names and email addresses will be removed before that analysis. Results and de-identified excerpts may appear in academic publications. Please avoid including personal or sensitive information in your working.</p>
         <p>Your name and email address will remain confidential and will not be published. We will report educational background and subject expertise only in aggregate to describe the participant group in our publications.</p>
         <p><strong>Write your thoughts as they come — how you understand the problem, what you try, what you doubt, and when you change your mind.</strong> Write in the first person, in English, as you solve. Keep false starts and revisions; do not reconstruct a polished solution afterward. Include “umm” or “wait” only if they naturally occur.</p>
-        <p>Submit your working and a final answer; correctness is not required. If you cannot attempt the question, choose <strong>Skip this question</strong>; you can skip up to 2 questions in total. Repeat participation is welcome, with a different question each time.</p>
+        <p>Submit your working and a final answer. The correctness of your answer is not important to us. We just want to see how humans reason: the doubts, the thinking, the repairs, the changes of approach, and everything else. If you cannot attempt the question, choose <strong>Skip this question</strong>; you can skip up to 2 questions in total. Repeat participation is welcome, with a different question each time.</p>
         <p>Taking part is voluntary. You may stop at any time without giving a reason.</p>
       </div>
       <details class="example">
         <summary>See a complete example of the requested response</summary>
-        <div class="sample" id="sampleDetails"></div>
+        <div class="ex" id="sampleDetails"></div>
       </details>
       <div class="prose">
         <p><strong>Draft retention:</strong> Unsubmitted work is deleted after 24 hours without a save. Submitted responses are retained for research.</p>
@@ -149,7 +148,7 @@ window.MathJax = {
       <div class="checks">
         <label class="check" for="cAdult"><input type="checkbox" id="cAdult"><span>I am at least 18 years old.</span></label>
         <label class="check" for="cConsent"><input type="checkbox" id="cConsent"><span>I have read the information and agree to the collection of my name, email address, background, working notes, edits, and timestamps.</span></label>
-        <label class="check" for="cNoAI"><input type="checkbox" id="cNoAI"><span>I will not use ChatGPT, Gemini, Claude, or any other AI, internet searches, automated solvers, or outside help.</span></label>
+        <label class="check" for="cNoAI"><input type="checkbox" id="cNoAI"><span>I will not use ChatGPT, Gemini, Claude, or any other AI or automated solver.</span></label>
       </div>
     </div>
     <p class="note err" id="detailsError" hidden></p>
