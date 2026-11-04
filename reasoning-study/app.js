@@ -30,13 +30,22 @@
     document.querySelectorAll('.contact-line').forEach(el => { el.innerHTML = ' Questions? Email <a></a>.'; const a = el.querySelector('a'); a.href = 'mailto:' + CFG.contactEmail; a.textContent = CFG.contactEmail; });
     document.querySelectorAll('.contact-foot').forEach(el => { el.innerHTML = '<a></a>'; const a = el.querySelector('a'); a.href = 'mailto:' + CFG.contactEmail; a.textContent = 'Questions? ' + CFG.contactEmail; });
   }
-  const SAMPLE = '<span class="tag">Working</span>OK, so 25% off first. A quarter of 24 is 6, so the book is $18 now.\n' +
-    'Then 8% tax... wait, is the tax on the original $24 or on the $18? It\'s charged on what I actually pay, so on 18.\n' +
-    '10% of 18 would be 1.80, so 8% is a bit less. 0.08 × 18 = 1.44.\n' +
-    '18 + 1.44 = 19.44.\n' +
-    'Hmm, does the order matter? Discount then tax is 24 × 0.75 × 1.08, and tax then discount is 24 × 1.08 × 0.75. Same product, so no.\n' +
-    '<span class="tag">Final answer</span>$19.44';
-  $('sampleTop').innerHTML = SAMPLE; $('sampleDetails').innerHTML = SAMPLE;
+  // The worked example (same on the landing page and in the study information). Only the equations are typeset, so "$24" stays text.
+  const M = (tex) => '<div class="ex-math">\\(' + tex + '\\)</div>';
+  const SAMPLE =
+    '<div class="ex-head">From first thought to final answer</div>' +
+    '<div class="ex-q"><div class="ex-label">The question</div><p>A book costs $24. It is discounted by 25%, then 8% sales tax is added to the discounted price. What is the final price?</p></div>' +
+    '<div class="ex-r"><div class="ex-label">An illustrative first-person response</div>' +
+    '<p>Umm, I need the price after both changes. I’ll start with the discount. Twenty-five percent is one quarter, so 24 divided by 4 gives 6.</p>' +
+    '<p>Is $6 the new price? Wait, no—that’s the amount taken off. I need to subtract it from $24.</p>' +
+    M('24 - 6 = 18') +
+    '<p>So I have $18 before tax. The question says the tax is added to the discounted price, so I should use 18, not 24.</p>' +
+    M('18 \\times 0.08 = 1.44') +
+    '<p>I’ll add that tax to $18.</p>' +
+    M('18 + 1.44 = 19.44') +
+    '<p>I think that completes both changes. My final answer is <strong>$19.44</strong>.</p></div>' +
+    '<div class="ex-foot">This invented example shows the level of detail and first-person style. Record your own thoughts; do not copy its wording, add hesitations, or invent mistakes or checks.</div>';
+  ['sampleTop', 'sampleDetails'].forEach(id => { const el = $(id); el.innerHTML = SAMPLE; el.querySelectorAll('.ex-math').forEach(typeset); });
 
   // ---------------- api ----------------
   async function api(action, payload) {
