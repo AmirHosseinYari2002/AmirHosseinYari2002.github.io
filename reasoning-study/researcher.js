@@ -89,6 +89,7 @@
       [auto ? Math.round(100 * matched / auto) + '%' : '—', 'Auto-checked answers correct'],
     ].map(([v, k]) => '<div class="stat"><b>' + esc(v) + '</b><span>' + esc(k) + '</span></div>').join('');
     document.querySelectorAll('.legend-target').forEach(el => { el.textContent = D.target; });
+    document.querySelectorAll('.legend .cell[data-n="2"]').forEach(c => { c.parentElement.hidden = D.target <= 2; });
     renderProgress(); renderResponses(); renderActivity(); renderParticipants();
     if ($('shareLink') && window.STUDY_SITE_URL) $('shareLink').textContent = window.STUDY_SITE_URL;
   }
