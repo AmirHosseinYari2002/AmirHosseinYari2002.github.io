@@ -34,12 +34,18 @@ window.MathJax = {
   <div class="hero">
     <p class="eyebrow">A study of human reasoning</p>
     <h1>Your process. <em>As it happens.</em></h1>
-    <p class="lede">A quiet workspace for sharing your problem-solving process. Pick a domain, receive one question, and write your thinking down as it comes, including doubts, false starts and changes of mind. The correctness of your answer is not important to us. We just want to see how humans reason: the doubts, the thinking, the repairs, the changes of approach, and everything else.</p>
+    <p class="lede">A quiet workspace for sharing your problem-solving process. Pick a domain, receive one question, and write your thinking down as it comes, including doubts, false starts and changes of mind.</p>
     <div class="row">
       <a class="btn primary" href="#domains">Choose your domain
         <svg class="arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg></a>
       <button type="button" id="tryEditorBtn">Try the editor</button>
     </div>
+  </div>
+
+  <div class="key" role="note">
+    <p class="key-eyebrow">The most important thing</p>
+    <p class="key-title">Your answer does not need to be correct.</p>
+    <p class="key-text">The correctness of your answer is not important to us. We just want to see how humans reason: the doubts, the thinking, the repairs, the changes of approach, and everything else.</p>
   </div>
 
   <div id="landingNotice" class="note" hidden></div>
@@ -75,7 +81,7 @@ window.MathJax = {
   <div class="stack-lg">
     <div class="stack">
       <h2>What a good response looks like</h2>
-      <p class="lede"><strong>Write your thoughts as they come — how you understand the problem, what you try, what you doubt, and when you change your mind.</strong> The correctness of your answer is not important to us. We just want to see how humans reason: the doubts, the thinking, the repairs, the changes of approach, and everything else.</p>
+      <p class="lede"><strong>Write your thoughts as they come — how you understand the problem, what you try, what you doubt, and when you change your mind.</strong></p>
     </div>
     <div class="ex" id="sampleTop"></div>
   </div>
@@ -119,30 +125,40 @@ window.MathJax = {
       </div>
     </div>
 
+    <div class="key" role="note">
+      <p class="key-eyebrow">The most important thing</p>
+      <p class="key-title">Your answer does not need to be correct.</p>
+      <p class="key-text">The correctness of your answer is not important to us. We just want to see how humans reason: the doubts, the thinking, the repairs, the changes of approach, and everything else.</p>
+    </div>
+
     <div class="card stack-lg">
       <h2>What participation involves</h2>
       <div class="prose">
-        <p><strong>You must be fluent in English and write all your working and answers in English.</strong> You can combine English text with mathematical notation.</p>
-      </div>
-      <div class="callout">
-        <p class="eyebrow">No AI — ChatGPT, Gemini, Claude</p>
-        <p>AI use is prohibited. Do not use ChatGPT, Gemini, Claude, or any other AI assistant, AI search, or automated solver.</p>
-      </div>
-      <div class="prose">
-        <p>This study compares how people and language models reason through problems.</p>
-        <p>Your responses may be analyzed by external AI services for research annotation and evaluation. Names and email addresses will be removed before that analysis. Results and de-identified excerpts may appear in academic publications. Please avoid including personal or sensitive information in your working.</p>
-        <p>Your name and email address will remain confidential and will not be published. We will report educational background and subject expertise only in aggregate to describe the participant group in our publications.</p>
+        <h3>How to write your response</h3>
         <p><strong>Write your thoughts as they come — how you understand the problem, what you try, what you doubt, and when you change your mind.</strong> Write in the first person, in English, as you solve. Keep false starts and revisions; do not reconstruct a polished solution afterward. Include “umm” or “wait” only if they naturally occur.</p>
-        <p>Submit your working and a final answer. The correctness of your answer is not important to us. We just want to see how humans reason: the doubts, the thinking, the repairs, the changes of approach, and everything else. If you cannot attempt the question, choose <strong>Skip this question</strong>; you can skip up to 2 questions in total. Repeat participation is welcome, with a different question each time.</p>
-        <p>Taking part is voluntary. You may stop at any time without giving a reason.</p>
+        <p><strong>You must be fluent in English and write all your working and answers in English.</strong> You can combine English text with mathematical notation.</p>
+        <p>Use ordinary words or the equation buttons. Work directly in the editor. <strong>Please don't use scratch paper.</strong> Write every step, calculation and change of approach directly in the editor as you work; do not submit only a cleaned-up summary.</p>
       </div>
       <details class="example">
         <summary>See a complete example of the requested response</summary>
         <div class="ex" id="sampleDetails"></div>
       </details>
+      <div class="callout">
+        <p class="eyebrow">No AI — ChatGPT, Gemini, Claude</p>
+        <p>AI use is prohibited. Do not use ChatGPT, Gemini, Claude, or any other AI assistant, AI search, or automated solver.</p>
+      </div>
       <div class="prose">
+        <h3>Answering, skipping and drafts</h3>
+        <p>Submit your working and a final answer. If you cannot attempt the question, choose <strong>Skip this question</strong>; you can skip up to 2 questions in total. Repeat participation is welcome, with a different question each time.</p>
         <p><strong>Draft retention:</strong> Unsubmitted work is deleted after 24 hours without a save. Submitted responses are retained for research.</p>
-        <p>Use ordinary words or the equation buttons. Work directly in the editor. <strong>Please don't use scratch paper.</strong> Write every step, calculation and change of approach directly in the editor as you work; do not submit only a cleaned-up summary. Revision history and approximate timestamps are recorded, including deleted text, and a full copy of your text is saved about every 30 seconds. Your name, email, background, and working notes are saved to the study after you consent and begin. They are accessible to the researcher; participation is not anonymous. No audio or video is collected.</p>
+        <p>Taking part is voluntary. You may stop at any time without giving a reason.</p>
+      </div>
+      <div class="prose">
+        <h3>About the study and your data</h3>
+        <p>This study compares how people and language models reason through problems.</p>
+        <p>Revision history and approximate timestamps are recorded, including deleted text, and a full copy of your text is saved about every 30 seconds. Your name, email, background, and working notes are saved to the study after you consent and begin. They are accessible to the researcher; participation is not anonymous. No audio or video is collected.</p>
+        <p>Your responses may be analyzed by external AI services for research annotation and evaluation. Names and email addresses will be removed before that analysis. Results and de-identified excerpts may appear in academic publications. Please avoid including personal or sensitive information in your working.</p>
+        <p>Your name and email address will remain confidential and will not be published. We will report educational background and subject expertise only in aggregate to describe the participant group in our publications.</p>
         <p>You can withdraw and delete your current participation from this browser using the button on the question and confirmation pages, including after submission. Each participation gets a code. If you participate again, keep the previous participation code and contact the researcher if you later want that earlier response withdrawn.<span class="contact-line"></span></p>
       </div>
       <div class="checks">
@@ -178,7 +194,8 @@ window.MathJax = {
       <div class="qtext" id="qText"></div>
       <p class="small muted" id="qUnit" hidden></p>
       <hr class="rule">
-      <p class="small pnote"><strong>Write your thoughts as they come — how you understand the problem, what you try, what you doubt, and when you change your mind.</strong> Use first-person English and keep your working as it unfolds. Finish with a final answer; correctness is not required. No scratch paper: write everything here. You may skip. Unfinished drafts are deleted after 24 hours of inactivity.</p>
+      <div class="key key-sm" role="note"><p class="key-title">Your answer does not need to be correct.</p><p class="key-text">We just want to see how you reason: the doubts, the thinking, the repairs, the changes of approach, and everything else.</p></div>
+      <p class="small pnote"><strong>Write your thoughts as they come — how you understand the problem, what you try, what you doubt, and when you change your mind.</strong> Use first-person English and keep your working as it unfolds. Finish with a final answer. No scratch paper: write everything here. You may skip. Unfinished drafts are deleted after 24 hours of inactivity.</p>
       <hr class="rule">
       <div class="skiprow">
         <button type="button" id="skipBtn" class="skipbtn">Skip this question<svg class="arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg></button>
@@ -214,7 +231,7 @@ window.MathJax = {
       </div>
       <div class="preview" id="preview" hidden></div>
       <div class="stack" style="gap:10px">
-        <label for="finalAnswer" class="ws-label">Final answer <span class="small muted" style="font-weight:400">Required — your answer may be incorrect</span></label>
+        <label for="finalAnswer" class="ws-label">Final answer <span class="small muted" style="font-weight:400">Required — it’s fine if it’s wrong</span></label>
         <input type="text" id="finalAnswer" autocomplete="off" placeholder="A value, expression, or short answer">
       </div>
       <p class="note err" id="workError" hidden></p>

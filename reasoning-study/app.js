@@ -10,7 +10,7 @@
 
   const $ = (id) => document.getElementById(id);
   const views = ['landing', 'details', 'work', 'done'];
-  function show(v) { views.forEach(n => { $('v-' + n).hidden = n !== v; }); window.scrollTo(0, 0); }
+  function show(v) { views.forEach(n => { $('v-' + n).hidden = n !== v; }); document.body.dataset.view = v; window.scrollTo(0, 0); }
   function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }

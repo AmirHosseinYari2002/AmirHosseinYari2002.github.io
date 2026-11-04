@@ -3,8 +3,11 @@
   --bg: #f3f6f2;
   --card: #fffefa;
   --ink: #1f2d27;
-  --ink-2: #44514b;
-  --muted: #69756f;
+  --ink-2: #34413b;
+  --muted: #55615b;
+  --key-bg: #2f5c49;
+  --key-ink: #ffffff;
+  --key-soft: rgba(255, 255, 255, .86);
   --line: #dde4dd;
   --line-2: #cfdacf;
   --green: #2f5c49;
@@ -28,13 +31,13 @@
   --radius: 14px;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #141a17; --card: #1b2420; --ink: #e6ede8; --ink-2: #c3cec7; --muted: #95a39b; --line: #2a3530; --line-2: #34433b;
+  --bg: #141a17; --card: #1b2420; --ink: #e6ede8; --ink-2: #cdd7d0; --muted: #a7b4ad; --key-bg: #24402f; --key-ink: #e9f2ec; --key-soft: #c9dbcf; --line: #2a3530; --line-2: #34433b;
   --green: #6fae8c; --green-hover: #84c0a0; --green-soft: #1f2d26; --green-ink: #8cc4a5;
   --amber-bg: #2a2418; --amber-line: #8a6a3c; --amber-ink: #e0b77a; --red: #e58a7f; --red-soft: #2c1d1b; --ok: #7cc79c;
   --cell-0: #1b2420; --cell-1: #2e4a3b; --cell-2: #4f7d63; --cell-3: #8cc4a5;
   --shadow: none; color-scheme: dark } }
 :root[data-theme="dark"] {
-  --bg: #141a17; --card: #1b2420; --ink: #e6ede8; --ink-2: #c3cec7; --muted: #95a39b; --line: #2a3530; --line-2: #34433b;
+  --bg: #141a17; --card: #1b2420; --ink: #e6ede8; --ink-2: #cdd7d0; --muted: #a7b4ad; --key-bg: #24402f; --key-ink: #e9f2ec; --key-soft: #c9dbcf; --line: #2a3530; --line-2: #34433b;
   --green: #6fae8c; --green-hover: #84c0a0; --green-soft: #1f2d26; --green-ink: #8cc4a5;
   --amber-bg: #2a2418; --amber-line: #8a6a3c; --amber-ink: #e0b77a; --red: #e58a7f; --red-soft: #2c1d1b; --ok: #7cc79c;
   --cell-0: #1b2420; --cell-1: #2e4a3b; --cell-2: #4f7d63; --cell-3: #8cc4a5;
@@ -70,7 +73,7 @@ h2 { font-size: clamp(1.45rem, 2.6vw, 1.8rem); font-weight: 600; line-height: 1.
 h3 { font-size: 1.15rem; font-weight: 600; line-height: 1.3; }
 p { margin: 0; }
 .eyebrow { font-size: .78rem; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--green-ink); }
-.lede { font-size: 1.15rem; color: var(--muted); max-width: 62ch; }
+.lede { font-size: 1.15rem; line-height: 1.65; color: var(--ink-2); max-width: 62ch; }
 .muted { color: var(--muted); }
 .small { font-size: .9rem; }
 .mono { font-family: var(--f-mono); font-size: .86em; }
@@ -264,3 +267,17 @@ code { font-family: var(--f-mono); font-size: .9em; }
 .ex-math { margin: 18px 0 2px; font-size: 1.3rem; color: var(--ink-2); }
 .ex-foot { background: color-mix(in srgb, var(--green-soft) 45%, var(--card)); border-top: 1px solid var(--line-2); padding: 22px clamp(20px, 5vw, 52px); font-size: .86rem; line-height: 1.75; letter-spacing: .01em; color: var(--muted); }
 details.example .ex { margin-top: 14px; box-shadow: none; }
+
+/* "correctness doesn't matter" panel: the study's most important message */
+.key { background: var(--key-bg); color: var(--key-ink); border-radius: var(--radius); padding: clamp(24px, 4vw, 40px) clamp(22px, 4.5vw, 48px); display: flex; flex-direction: column; gap: 10px; box-shadow: var(--shadow); }
+.key p { margin: 0; }
+.key-eyebrow { font-size: .78rem; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--key-soft); }
+.key-title { font-family: var(--f-display); font-size: clamp(1.6rem, 3.4vw, 2.3rem); font-weight: 600; line-height: 1.2; letter-spacing: -.015em; color: var(--key-ink); text-wrap: balance; }
+.key-text { font-size: 1.12rem; line-height: 1.7; color: var(--key-soft); max-width: 64ch; }
+.key-sm { padding: 18px 20px; gap: 6px; border-radius: 12px; }
+.key-sm .key-title { font-size: 1.2rem; }
+.key-sm .key-text { font-size: .95rem; line-height: 1.6; }
+/* readability */
+.prose { line-height: 1.7; }
+.prose h3 { font-size: 1.2rem; margin-top: 4px; }
+body[data-view="work"] .top .wrap, body[data-view="work"] .foot .wrap { max-width: 1240px; }
