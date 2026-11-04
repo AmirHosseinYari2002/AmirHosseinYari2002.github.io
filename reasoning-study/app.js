@@ -138,7 +138,7 @@
     const mine = (st && st.mine) || [];
     const list = $('mineList'); list.innerHTML = '';
     const local = {}; codes().forEach(c => { local[c.code] = c; });
-    const label = { active: 'In progress', done: 'Submitted', skipped: 'Skipped', expired: 'Expired (no save for 24 h)', released: 'Released' };
+    const label = { active: 'In progress', done: 'Submitted', skipped: 'Skipped', expired: 'Deleted (no save for 24 h)', released: 'Released' };
     mine.forEach(m => {
       const c = local[m.code]; if (!c) return;
       const item = document.createElement('div'); item.className = 'mine-item';
@@ -213,7 +213,7 @@
   async function resume(c) {
     try {
       const r = await api('resume', { email: c.email, code: c.code });
-      if (r.released || r.gone) { notice($('landingNotice'), '', r.state === 'expired' ? 'That draft expired after 24 hours without a save.' : 'That question is no longer held for you. You can take another one.'); refreshStatus(); return; }
+      if (r.released || r.gone) { notice($('landingNotice'), '', r.state === 'expired' ? 'That draft was deleted after 24 hours without a save.' : 'That question is no longer held for you. You can take another one.'); refreshStatus(); return; }
       openQuestion(Object.assign({ email: c.email }, r));
     } catch (e) { notice($('landingNotice'), 'err', errText(e)); }
   }
@@ -310,7 +310,7 @@
     finally { btn.disabled = false; $('submitConfirm').hidden = true; }
   };
   function skipsLeft() { const st = S.status || {}; return Math.max(0, (st.maxSkips || 2) - (st.skipsUsed || 0)); }
-  function renderSkip() { const n = skipsLeft(); $('skipBtn').disabled = n === 0; $('skipNote').textContent = n === 0 ? 'You have used both of your skips, so please give this one your best attempt.' : 'No idea where to start? Skipping is welcome. Notes already entered are kept. ' + n + ' skip' + (n === 1 ? '' : 's') + ' left.'; }
+  function renderSkip() { const n = skipsLeft(); $('skipBtn').disabled = n === 0; $('skipNote').textContent = n === 0 ? 'You have used both of your skips, so please give this one your best attempt.' : 'No idea where to start? Skipping is welcome. ' + n + ' skip' + (n === 1 ? '' : 's') + ' left.'; }
   $('skipBtn').onclick = () => { if (!skipsLeft()) return; hideConfirms(); $('skipConfirm').hidden = false; };
   $('skipNo').onclick = hideConfirms;
   $('skipYes').onclick = async () => {
@@ -340,7 +340,7 @@
       submitted: ['Submitted', 'Thank you.', 'Your working and answer are saved. If you would like, you can take another question.'],
       skipped: ['Skipped', 'Question skipped.', 'No problem. You can try a different question or stop here. You have ' + skipsLeft() + ' skip' + (skipsLeft() === 1 ? '' : 's') + ' left.'],
       released: ['Question released', 'This question was given to someone else.', 'It filled up while you were away for more than 3 hours. You can take another question.'],
-      expired: ['Draft expired', 'Your draft expired.', 'Unsubmitted drafts expire after 24 hours without a save. You can take another question.'],
+      expired: ['Draft deleted', 'Your draft was deleted.', 'Unsubmitted drafts are deleted after 24 hours without a save. You can take another question.'],
       none: [DOMAIN_NAME[d] || 'No question', 'No open questions right now.', 'Every open ' + (DOMAIN_NAME[d] || '').toLowerCase() + ' question is complete, already seen by you, or being answered by someone else. Try another domain, or check back later.'],
     }[kind];
     $('doneEyebrow').textContent = T[0]; $('doneTitle').textContent = T[1]; $('doneText').textContent = T[2];
