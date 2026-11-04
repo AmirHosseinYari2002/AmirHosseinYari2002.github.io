@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Reasoning Study</title>
+<meta name="description" content="A quiet workspace for sharing your problem-solving process.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,500;0,8..60,600;1,8..60,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="styles.css">
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']], processEscapes: true },
+  svg: { fontCache: 'global' },
+  options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'input', 'select'] },
+  startup: { typeset: false }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg-full.js" async></script>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <button class="brand" id="homeBtn" type="button">Reasoning<span>/ study</span></button>
+    <nav class="toplinks"></nav>
+  </div>
+</header>
+
+<main>
+<!-- STEP 1 · LANDING -->
+<section id="v-landing" class="wrap stack-xl">
+  <div class="hero">
+    <p class="eyebrow">A study of human reasoning</p>
+    <h1>Your process. <em>As it happens.</em></h1>
+    <p class="lede">A quiet workspace for sharing your problem-solving process. Pick a domain, receive one question, and write your thinking down as it comes, including doubts, false starts and changes of mind. Correctness is not required.</p>
+    <div class="row">
+      <a class="btn primary" href="#domains">Choose your domain
+        <svg class="arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg></a>
+      <button type="button" id="tryEditorBtn">Try the editor</button>
+    </div>
+  </div>
+
+  <div id="landingNotice" class="note" hidden></div>
+
+  <div id="mineBox" class="stack" hidden>
+    <h3>Your participation in this browser</h3>
+    <div class="mine" id="mineList"></div>
+  </div>
+
+  <div class="steps">
+    <div class="step"><span class="n">01</span><h3>Choose a domain</h3><p class="muted">Mathematics, physics or chemistry: whichever you know best.</p></div>
+    <div class="step"><span class="n">02</span><h3>Your details</h3><p class="muted">Name, email, background, and your consent to the study terms.</p></div>
+    <div class="step"><span class="n">03</span><h3>Solve, out loud</h3><p class="muted">One question, no time limit. Your draft saves as you write.</p></div>
+  </div>
+
+  <div class="callout">
+    <p class="eyebrow">No AI — ChatGPT, Gemini, Claude</p>
+    <p>AI use is prohibited. Do not use ChatGPT, Gemini, Claude, or any other AI assistant, AI search, or automated solver. Work independently without internet searches or help from another person. A basic calculator is allowed.</p>
+  </div>
+
+  <div class="stack-lg" id="domains">
+    <div class="stack">
+      <p class="eyebrow">Step 1 · Choose your domain</p>
+      <h2>Which subject do you know best?</h2>
+    </div>
+    <div class="domains">
+      <button class="domain" type="button" data-domain="math"><span class="glyph">∑</span><strong>Mathematics</strong><span class="meta">Algebra, number theory, combinatorics, geometry</span></button>
+      <button class="domain" type="button" data-domain="physics"><span class="glyph">ħ</span><strong>Physics</strong><span class="meta">Mechanics, thermodynamics, quantum, condensed matter</span></button>
+      <button class="domain" type="button" data-domain="chemistry"><span class="glyph">Δ<i style="font-size:.6em">H</i></span><strong>Chemistry</strong><span class="meta">Physical, quantum and general chemistry</span></button>
+    </div>
+  </div>
+
+  <div class="card stack-lg">
+    <div class="stack">
+      <p class="eyebrow">From first thought to final answer</p>
+      <h2>What a good response looks like</h2>
+      <p class="muted">An invented example, not a study question: <em>A $24 book is 25% off, then 8% sales tax is added. What do you pay?</em></p>
+    </div>
+    <div class="sample" id="sampleTop"></div>
+  </div>
+</section>
+
+<!-- STEP 2 · DETAILS -->
+<section id="v-details" class="wrap stack-lg" hidden>
+  <div class="stack">
+    <p class="eyebrow">Step 2 · Before your problem</p>
+    <h1>Your details &amp; background.</h1>
+    <p class="lede">Enter your details, read the study information, and begin. Use the same email for repeat participation.</p>
+  </div>
+  <div class="band"><span>Expertise domain: <strong id="detailsDomain">Mathematics</strong></span><button type="button" class="link" id="changeDomain">Change domain</button></div>
+
+  <form id="detailsForm" class="stack-lg" novalidate>
+    <div class="card">
+      <div class="grid2">
+        <label class="field" for="pName">Your name<input type="text" id="pName" autocomplete="name" placeholder="Full name" required></label>
+        <label class="field" for="pEmail">Your email address<input type="email" id="pEmail" autocomplete="email" placeholder="you@example.com" required></label>
+        <label class="field" for="pDegree">Highest completed degree or qualification
+          <select id="pDegree" required>
+            <option value="">Select an option</option>
+            <option>Secondary school</option>
+            <option>Bachelor's degree</option>
+            <option>Master's degree</option>
+            <option>Doctorate (PhD)</option>
+            <option>Other qualification</option>
+          </select></label>
+        <label class="field" for="pRole">Current role or study
+          <select id="pRole" required>
+            <option value="">Select an option</option>
+            <option>Undergraduate student</option>
+            <option>Master's student</option>
+            <option>PhD student</option>
+            <option>Postdoc or researcher</option>
+            <option>Teacher or faculty member</option>
+            <option>Industry professional</option>
+            <option>Other</option>
+          </select></label>
+        <label class="field" for="pSubject">Main subject or discipline<input type="text" id="pSubject" placeholder="e.g. Physics, computer science" required></label>
+      </div>
+    </div>
+
+    <div class="card stack-lg">
+      <h2>What participation involves</h2>
+      <div class="prose">
+        <p><strong>You must be fluent in English and write all your working and answers in English.</strong> You can combine English text with mathematical notation.</p>
+      </div>
+      <div class="callout">
+        <p class="eyebrow">No AI — ChatGPT, Gemini, Claude</p>
+        <p>AI use is prohibited. Do not use ChatGPT, Gemini, Claude, or any other AI assistant, AI search, or automated solver. Work independently without internet searches or help from another person.</p>
+      </div>
+      <div class="prose">
+        <p>This study compares how people and language models reason through problems.</p>
+        <p>Your responses may be analyzed by external AI services for research annotation and evaluation. Names and email addresses will be removed before that analysis. Results and de-identified excerpts may appear in academic publications. Please avoid including personal or sensitive information in your working.</p>
+        <p>Your name and email address will remain confidential and will not be published. We will report educational background and subject expertise only in aggregate to describe the participant group in our publications.</p>
+        <p><strong>Write your thoughts as they come — how you understand the problem, what you try, what you doubt, and when you change your mind.</strong> Write in the first person, in English, as you solve. Keep false starts and revisions; do not reconstruct a polished solution afterward. Include “umm” or “wait” only if they naturally occur.</p>
+        <p>Submit your working and a final answer; correctness is not required. If you cannot attempt the question, choose <strong>Skip this question</strong>; you can skip up to 2 questions in total. Repeat participation is welcome, with a different question each time.</p>
+        <p>Taking part is voluntary. You may stop at any time without giving a reason.</p>
+      </div>
+      <details class="example">
+        <summary>See a complete example of the requested response</summary>
+        <div class="sample" id="sampleDetails"></div>
+      </details>
+      <div class="prose">
+        <p><strong>Draft retention:</strong> Unsubmitted drafts expire after 24 hours without a save. Submitted responses are retained for research.</p>
+        <p>Use ordinary words or the equation buttons. Work directly in the editor. If you need scratch paper, also enter each step and change of approach here as you work; do not submit only a cleaned-up summary. Revision history and approximate timestamps are recorded, including deleted text. Your name, email, background, and working notes are saved to the study after you consent and begin. They are accessible to the researcher; participation is not anonymous. No audio or video is collected.</p>
+        <p>You can withdraw and delete your current participation from this browser using the button on the question and confirmation pages, including after submission. Each participation gets a code. If you participate again, keep the previous participation code and contact the researcher if you later want that earlier response withdrawn.<span class="contact-line"></span></p>
+      </div>
+      <div class="checks">
+        <label class="check" for="cAdult"><input type="checkbox" id="cAdult"><span>I am at least 18 years old.</span></label>
+        <label class="check" for="cConsent"><input type="checkbox" id="cConsent"><span>I have read the information and agree to the collection of my name, email address, background, working notes, edits, and timestamps.</span></label>
+        <label class="check" for="cNoAI"><input type="checkbox" id="cNoAI"><span>I will not use ChatGPT, Gemini, Claude, or any other AI, internet searches, automated solvers, or outside help.</span></label>
+      </div>
+    </div>
+    <p class="note err" id="detailsError" hidden></p>
+    <div class="row between">
+      <button type="button" id="detailsBack"><svg class="arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 10H4M9 5l-5 5 5 5"/></svg>Back</button>
+      <button type="submit" class="primary" id="detailsSubmit">Assign my question<svg class="arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg></button>
+    </div>
+  </form>
+</section>
+
+<!-- STEP 3 · WORKSPACE -->
+<section id="v-work" class="wrap wide stack-lg" hidden>
+  <div class="ws-head">
+    <div class="stack" style="gap:10px">
+      <p class="eyebrow">Your workspace</p>
+      <h1 class="ws-title">One thought at a time.</h1>
+    </div>
+    <div class="ws-status">
+      <span>Your assigned problem</span>
+      <span class="savestate" id="saveState"><i class="dot"></i>Not saved yet</span>
+      <span class="small muted">Code <span class="code-chip" id="wCode"></span></span>
+    </div>
+  </div>
+  <div class="ws">
+    <aside class="problem pcard stack-lg">
+      <div class="row between"><div class="chips" id="qChips"></div><span class="small muted">No time limit</span></div>
+      <div class="qtext" id="qText"></div>
+      <p class="small muted" id="qUnit" hidden></p>
+      <hr class="rule">
+      <p class="small pnote"><strong>Write your thoughts as they come — how you understand the problem, what you try, what you doubt, and when you change your mind.</strong> Use first-person English and keep your working as it unfolds. Finish with a final answer; correctness is not required. You may skip. Drafts expire after 24 hours of inactivity.</p>
+      <hr class="rule">
+      <div class="skiprow">
+        <button type="button" id="skipBtn" class="skipbtn">Skip this question<svg class="arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg></button>
+        <p class="small muted" id="skipNote">No idea where to start? Skipping is welcome. Notes already entered are kept.</p>
+      </div>
+      <div class="confirm" id="skipConfirm" hidden><p><strong>Skip this question?</strong> You won't be given it again. You can skip at most 2 questions in total.</p><div class="row"><button type="button" id="skipYes">Skip it</button><button type="button" id="skipNo">Keep working</button></div></div>
+    </aside>
+    <div class="stack-lg">
+      <div class="stack" style="gap:8px">
+        <div class="row between"><label for="working" class="ws-label">Your working thoughts</label><span class="small muted">Words + equations</span></div>
+        <p class="muted small">Plain text is welcome: <code>sqrt(x)</code> for a square root, <code>x_i</code> for an index, <code>x^2</code> for a power, and <code>(a+b)/c</code> for a fraction. You do not need LaTeX.</p>
+      </div>
+      <div class="editor">
+        <div class="insertbar" id="toolbar" aria-label="Insert">
+          <span class="ins-label">Insert</span>
+          <button type="button" data-ins="$|$" title="Equation (shown as math in the preview)">Equation</button>
+          <button type="button" data-ins="(|)/()" title="Fraction">a/b</button>
+          <button type="button" data-ins="^|" title="Power">x²</button>
+          <button type="button" data-ins="sqrt(|)" title="Square root">√</button>
+          <button type="button" data-ins="_|" title="Index"><span>x<sub>i</sub></span></button>
+          <button type="button" data-ins="Σ|" title="Sum">Σ</button>
+          <button type="button" data-ins="∫|" title="Integral">∫</button>
+          <span class="greek-wrap"><button type="button" id="greekBtn" aria-expanded="false" title="Greek letters and symbols">α β</button>
+            <span class="greek" id="greek" hidden></span></span>
+          <button type="button" class="help" id="helpBtn" aria-expanded="false" title="Help">?</button>
+        </div>
+        <div class="helpbox small" id="helpBox" hidden>
+          <p><strong>Writing math without LaTeX.</strong> Type it the way you would say it: <code>x^2 + 3x = 10</code>, <code>sqrt(2)/2</code>, <code>a_n = a_(n-1) + 2</code>, <code>sin(theta)</code>. The buttons insert the same plain forms. <strong>Equation</strong> wraps LaTeX in <code>$…$</code> if you prefer it; the preview below shows it as math.</p>
+          <p>Every change is saved every 30 seconds, including text you delete, so there is no need to tidy up as you go.</p>
+        </div>
+        <textarea id="working" spellcheck="true" placeholder="Write in the first person as you solve: “I think…”, “umm…”, “wait…” when natural. Include your working and changes of mind, then reach a final answer."></textarea>
+        <div class="editor-foot"><span>Ordinary words are welcome. You can edit naturally; earlier versions are saved.</span><span class="row" style="gap:14px"><span id="wordCount">0 words</span><button type="button" class="link" id="previewToggle">Preview equations</button></span></div>
+      </div>
+      <div class="preview" id="preview" hidden></div>
+      <div class="stack" style="gap:10px">
+        <label for="finalAnswer" class="ws-label">Final answer <span class="small muted" style="font-weight:400">Required — your answer may be incorrect</span></label>
+        <input type="text" id="finalAnswer" autocomplete="off" placeholder="A value, expression, or short answer">
+      </div>
+      <p class="note err" id="workError" hidden></p>
+      <div class="row between">
+        <button class="primary" type="button" id="submitBtn">Review &amp; submit<svg class="arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg></button>
+        <button type="button" class="link danger-link" id="withdrawWorkBtn">Withdraw and delete</button>
+      </div>
+      <div class="confirm" id="submitConfirm" hidden>
+        <p><strong>Review before you submit.</strong> Your working (<span id="rvWords"></span>) and final answer can't be edited afterwards.</p>
+        <p class="small">Final answer: <strong id="rvAnswer"></strong></p>
+        <div class="row"><button class="primary" type="button" id="submitYes">Submit</button><button type="button" id="submitNo">Keep working</button></div>
+      </div>
+      <div class="confirm" id="withdrawConfirm" hidden><p><strong>Withdraw and delete this participation?</strong> Your working, edits and answer for this question are permanently deleted from the study.</p><div class="row"><button type="button" class="danger-link" id="withdrawYes" style="color:var(--red)">Delete my participation</button><button type="button" id="withdrawNo">Cancel</button></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- DONE -->
+<section id="v-done" class="wrap stack-lg" hidden>
+  <div class="stack">
+    <p class="eyebrow" id="doneEyebrow">Submitted</p>
+    <h1 id="doneTitle">Thank you.</h1>
+    <p class="lede" id="doneText"></p>
+  </div>
+  <div class="card stack" id="doneCodeBox">
+    <p>Your participation code: <span class="code-chip" id="doneCode"></span></p>
+    <p class="small muted">Keep this code. To withdraw this response later from another device, send the code to the researcher.</p>
+    <div class="row"><button type="button" class="link danger-link" id="withdrawDoneBtn">Withdraw and delete this response</button></div>
+    <div class="confirm" id="withdrawDoneConfirm" hidden><p><strong>Delete this response from the study?</strong> This can't be undone.</p><div class="row"><button type="button" id="withdrawDoneYes" style="color:var(--red)">Delete my response</button><button type="button" id="withdrawDoneNo">Cancel</button></div></div>
+  </div>
+  <div class="row">
+    <button class="primary" type="button" id="anotherSame">Another question in this domain</button>
+    <button type="button" id="anotherHome">Choose a different domain</button>
+  </div>
+</section>
+</main>
+
+<!-- Try the editor -->
+<div class="dialog-back" id="tryDialog" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="tryTitle">
+    <div class="row between"><h2 id="tryTitle">Try the editor</h2><button type="button" id="tryClose">Close</button></div>
+    <p class="muted">Nothing here is saved or sent. Type a few lines and use the buttons to see how notation looks.</p>
+    <div class="editor"><div class="insertbar" id="tryToolbar"></div><textarea id="tryText" style="min-height:180px">I think the area is (1/2) b h... wait, it's a trapezoid, so it's ((a+b)/2) h.</textarea></div>
+    <div class="preview" id="tryPreview"></div>
+  </div>
+</div>
+
+<footer class="foot">
+  <div class="wrap">
+    <span class="shield"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v6c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>No ChatGPT, Gemini, Claude, or other AI assistance.</span>
+    <span class="contact-foot"></span>
+  </div>
+</footer>
+
+<script src="config.js"></script>
+<script src="questions.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
