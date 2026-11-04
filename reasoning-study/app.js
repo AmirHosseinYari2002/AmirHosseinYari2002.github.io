@@ -19,8 +19,25 @@
   function words(s) { return (s.trim().match(/\S+/g) || []).length; }
   function notice(el, kind, html) { el.className = 'note' + (kind ? ' ' + kind : ''); el.innerHTML = html; el.hidden = false; }
   function fmtTime(ms) { return ms ? new Date(ms).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''; }
+
+  // Math display helpers: tidy line breaks around displayed equations, and keep punctuation on the same line as the formula before it.
+    function tidyMath(t) {
+    return String(t || '').replace(/\r/g, '').replace(/\n{3,}/g, '\n\n')
+      .replace(new RegExp('\\s*\\n\\s*(\\$\\$|\\\\\\[|\\\\begin\\{(?:equation|align|gather|multline)\\*?\\})', 'g'), '$1')
+      .replace(new RegExp('(\\$\\$|\\\\\\]|\\\\end\\{(?:equation|align|gather|multline)\\*?\\})(\\s*[.,;:])?[ \\t]*\\n\\s*', 'g'), '$1$2');
+  }
+  function glue(el) {
+    el.querySelectorAll('mjx-container:not([display="true"])').forEach(c => {
+      const n = c.nextSibling;
+      if (!n || n.nodeType !== 3) return;
+      const m = n.nodeValue.match(/^[.,;:!?)\]]+/);
+      if (!m) return;
+      const w = document.createElement('span'); w.style.whiteSpace = 'nowrap';
+      c.before(w); w.append(c, document.createTextNode(m[0])); n.nodeValue = n.nodeValue.slice(m[0].length);
+    });
+  }
   function typeset(el) {
-    const go = () => { try { window.MathJax.typesetClear([el]); window.MathJax.typesetPromise([el]).catch(() => {}); } catch (e) {} };
+    const go = () => { try { window.MathJax.typesetClear([el]); window.MathJax.typesetPromise([el]).then(() => glue(el)).catch(() => {}); } catch (e) {} };
     if (window.MathJax && window.MathJax.typesetPromise) go();
     else { let n = 0; const t = setInterval(() => { if (window.MathJax && window.MathJax.typesetPromise) { clearInterval(t); go(); } else if (++n > 60) clearInterval(t); }, 250); }
   }
@@ -236,7 +253,7 @@
     S.startedAt = dr.startedAt || Date.now(); S.activeMs = (dr.activeSeconds || 0) * 1000; S.pasteCount = dr.pasteCount || 0; S.pastedChars = dr.pastedChars || 0;
     $('wCode').textContent = r.code;
     $('qChips').innerHTML = '<span class="chip">' + esc(DOMAIN_NAME[q.d]) + '</span>' + (q.sub ? '<span class="chip">' + esc(q.sub) + '</span>' : '');
-    $('qText').textContent = q.q;
+    $('qText').textContent = tidyMath(q.q);
     if (q.u) { $('qUnit').textContent = 'Give your final answer in ' + q.u + '.'; $('qUnit').hidden = false; } else $('qUnit').hidden = true;
     typeset($('qText')); if (q.u) typeset($('qUnit'));
     let w = dr.working || '', a = dr.finalAnswer || '';

@@ -627,7 +627,7 @@ window.QUESTIONS = [
 "id": "imo-bench-combinatorics-051",
 "d": "math",
 "sub": "Combinatorics",
-"q": "A conference hall is used for hosting events, and each event is assigned a specific time slot (represented as an interval that is a subset of $[0,1]$) within the full schedule from $0$ to $1$ (representing a day on a normalized scale). The hall manager designs a schedule (which is a set of intervals representing time slots) that follows these strict rules when booking events:\n\n\\begin{itemize}\n    \\item There are exactly $192$ scheduled events.\n    \\item Each event is assigned a specific time interval (represented as an interval) within the full-day schedule $[0,1]$.\n    \\item At any given moment in the day, there are at most $96$ events occurring simultaneously.\n\\end{itemize}\n\nNow, suppose two different event schedules (sets of booked events) are considered, called $\\mathcal{A}$ and $\\mathcal{B}$. For any event $I \\in \\mathcal{A}$ and event $J \\in \\mathcal{B}$, define $n(\\mathcal{A}, \\mathcal{B})$ as the number of overlapping event pairs $(I, J)$ such that $I \\cap J \\neq \\emptyset$.\n\nDetermine the maximum possible value of $n(\\mathcal{A}, \\mathcal{B})$ over all valid schedules.",
+"q": "A conference hall is used for hosting events, and each event is assigned a specific time slot (represented as an interval that is a subset of $[0,1]$) within the full schedule from $0$ to $1$ (representing a day on a normalized scale). The hall manager designs a schedule (which is a set of intervals representing time slots) that follows these strict rules when booking events:\n• There are exactly $192$ scheduled events.\n• Each event is assigned a specific time interval (represented as an interval) within the full-day schedule $[0,1]$.\n• At any given moment in the day, there are at most $96$ events occurring simultaneously.\n\nNow, suppose two different event schedules (sets of booked events) are considered, called $\\mathcal{A}$ and $\\mathcal{B}$. For any event $I \\in \\mathcal{A}$ and event $J \\in \\mathcal{B}$, define $n(\\mathcal{A}, \\mathcal{B})$ as the number of overlapping event pairs $(I, J)$ such that $I \\cap J \\neq \\emptyset$.\n\nDetermine the maximum possible value of $n(\\mathcal{A}, \\mathcal{B})$ over all valid schedules.",
 "u": ""
 },
 {
@@ -816,7 +816,7 @@ window.QUESTIONS = [
 "id": "abench-phyA-13",
 "d": "physics",
 "sub": "",
-"q": "A point source with luminous intensity \\( I_0 = 100 \\) cd is positioned at a distance \\( s = 20.0 \\) cm from a converging lens with focal length \\( f = 25.0 \\) cm. Find the luminous intensity of the transmitted ray if the transmission coefficient of the lens is \\( \\tau = 0.80 \\) . (Results should be expressed in scientific notation, with units of $ {\\prime $,and rounded to 2 significant figures)",
+"q": "A point source with luminous intensity \\( I_0 = 100 \\) cd is positioned at a distance \\( s = 20.0 \\) cm from a converging lens with focal length \\( f = 25.0 \\) cm. Find the luminous intensity of the transmitted ray if the transmission coefficient of the lens is \\( \\tau = 0.80 \\) . (Results should be expressed in scientific notation, with units of cd, and rounded to 2 significant figures)",
 "u": ""
 },
 {
@@ -858,7 +858,7 @@ window.QUESTIONS = [
 "id": "abench-phyA-24",
 "d": "physics",
 "sub": "",
-"q": "A circular opaque disk of diameter \\( D = 40\\mathrm{\\;mm} \\) is positioned between a monochromatic light source of wavelength \\( \\lambda = 0.55\\mu\\mathrm{m} \\) and a detection screen. The source-to-disk distance is \\( a = 12\\mathrm{\\;m} \\), and the disk-to-screen distance is \\( b = 18\\mathrm{\\;m} \\). Determine the image size \\( y^{\\prime} \\) on the screen given the transverse size of the source is \\( y = 6.0\\mathrm{\\;mm} \\). (Results should be expressed with units of $ {\\prime $,and rounded to 1 significant figures)",
+"q": "A circular opaque disk of diameter \\( D = 40\\mathrm{\\;mm} \\) is positioned between a monochromatic light source of wavelength \\( \\lambda = 0.55\\mu\\mathrm{m} \\) and a detection screen. The source-to-disk distance is \\( a = 12\\mathrm{\\;m} \\), and the disk-to-screen distance is \\( b = 18\\mathrm{\\;m} \\). Determine the image size \\( y^{\\prime} \\) on the screen given the transverse size of the source is \\( y = 6.0\\mathrm{\\;mm} \\). (Results should be expressed with units of mm, and rounded to 1 significant figures)",
 "u": ""
 },
 {
@@ -1047,7 +1047,7 @@ window.QUESTIONS = [
 "id": "cmphys-11",
 "d": "physics",
 "sub": "Theoretical Foundations",
-"q": "For a spin $1/2$ particle, $\\langle\\boldsymbol{\\sigma}\\rangle$ is often called the polarization vector, denoted as $\\boldsymbol{P}$, which is the spatial orientation of the spin angular momentum. Given the initial spin wave function at $t=0$ (in the $\\sigma_{z}$ representation) as:\n\n\\chi(0)=[\\begin{array}{c}\n\\cos \\delta \\mathrm{e}^{-\\mathrm{i} \\alpha}  \\\\\n\\sin \\delta \\mathrm{e}^{\\mathrm{i} \\alpha}\n\\end{array}]\n\n\nwhere $\\delta, ~ \\alpha$ are positive real numbers (or 0), $\\delta \\leqslant \\pi / 2, \\alpha \\leqslant \\pi$. Determine the azimuthal angle $\\theta_{0}$ (polar angle) of the initial polarization vector $\\boldsymbol{P}(t=0)$.",
+"q": "For a spin $1/2$ particle, $\\langle\\boldsymbol{\\sigma}\\rangle$ is often called the polarization vector, denoted as $\\boldsymbol{P}$, which is the spatial orientation of the spin angular momentum. Given the initial spin wave function at $t=0$ (in the $\\sigma_{z}$ representation) as:\n\n$$\\chi(0)=\\left[\\begin{array}{c}\n\\cos \\delta \\mathrm{e}^{-\\mathrm{i} \\alpha}  \\\\\n\\sin \\delta \\mathrm{e}^{\\mathrm{i} \\alpha}\n\\end{array}\\right]$$\n\n\nwhere $\\delta, ~ \\alpha$ are positive real numbers (or 0), $\\delta \\leqslant \\pi / 2, \\alpha \\leqslant \\pi$. Determine the azimuthal angle $\\theta_{0}$ (polar angle) of the initial polarization vector $\\boldsymbol{P}(t=0)$.",
 "u": ""
 },
 {
@@ -1145,7 +1145,7 @@ window.QUESTIONS = [
 "id": "abench-phyA-279",
 "d": "physics",
 "sub": "",
-"q": "The radius of the cross-section of a pipe decays exponentially with the distance \\( x \\) from the entrance, with a decay coefficient of \\( \\gamma = 0.50 \\text{m}^{-1} \\), i.e., \\( r(x) = r_0 e^{-\\gamma x} \\). Find the ratio of the Reynolds numbers at two cross-sections separated by a distance \\( d = 3.2 \\text{m} \\). (Results should be expressed with units of $ {\\alpha $,and rounded to 1 significant figures)",
+"q": "The radius of the cross-section of a pipe decays exponentially with the distance \\( x \\) from the entrance, with a decay coefficient of \\( \\gamma = 0.50 \\text{m}^{-1} \\), i.e., \\( r(x) = r_0 e^{-\\gamma x} \\). Find the ratio of the Reynolds numbers at two cross-sections separated by a distance \\( d = 3.2 \\text{m} \\). (Results should be expressed as a dimensionless ratio, rounded to 1 significant figure)",
 "u": ""
 },
 {

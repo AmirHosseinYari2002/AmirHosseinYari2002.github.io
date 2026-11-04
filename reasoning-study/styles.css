@@ -281,3 +281,8 @@ details.example .ex { margin-top: 14px; box-shadow: none; }
 .prose { line-height: 1.7; }
 .prose h3 { font-size: 1.2rem; margin-top: 4px; }
 body[data-view="work"] .top .wrap, body[data-view="work"] .foot .wrap { max-width: 1240px; }
+/* math: long equations scroll sideways inside their box instead of breaking the layout */
+mjx-container[display="true"] { display: block; max-width: 100%; overflow-x: auto; overflow-y: hidden; padding: 4px 0; margin: .6em 0 !important; }
+mjx-container { max-width: 100%; }
+mjx-container[display="true"][width="full"] { min-width: 0 !important; }
+.qtext mjx-container:not([display="true"]) { overflow-wrap: normal; }
