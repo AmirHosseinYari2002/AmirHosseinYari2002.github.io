@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>Researcher · Reasoning Study</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="styles.css">
+<script>window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }, startup: { typeset: false } };</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg-full.js" async></script>
+<style>body{padding:20px 24px} .head{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between} pre.text,.replay pre{white-space:pre-wrap;word-break:break-word;max-height:420px;overflow:auto} .replay input[type=range]{width:100%} .filters{flex-wrap:wrap} .filters select,.filters input{width:auto;flex:0 1 240px}</style>
+</head><body>
+<section id="login" class="wrap stack-lg" style="max-width:440px;margin:8vh auto">
+  <div class="stack"><p class="eyebrow">Reasoning Study</p><h1>Researcher sign-in</h1><p class="muted">Only the researcher can open this page.</p></div>
+  <form id="loginForm" class="card stack-lg" autocomplete="on">
+    <input type="text" name="username" value="researcher" autocomplete="username" hidden>
+    <label class="field" for="pw">Password<input type="password" id="pw" autocomplete="current-password" required></label>
+    <p class="note err" id="loginErr" hidden></p>
+    <div class="row between"><a href="./">Back to the study</a><button type="submit" class="primary" id="loginBtn">Sign in</button></div>
+  </form>
+</section>
+<div class="stack-lg" id="dash" hidden>
+  <div class="head">
+    <div class="row" style="gap:12px;align-items:center"><h1 style="font-size:1.6rem">Reasoning Study</h1><span id="collectPill" class="pill mute">Loading</span></div>
+    <div class="row" style="gap:10px"><button type="button" id="toggleCollect">Pause collection</button><button type="button" class="primary" id="reload">Refresh</button><button type="button" id="logout">Sign out</button></div>
+  </div>
+  <p class="small muted"><span id="syncNote">Loading…</span> · Study link: <span id="shareLink" class="mono"></span></p>
+  <div class="stats" id="stats"></div>
+  <div class="tabs" role="tablist">
+    <button type="button" data-tab="progress" aria-selected="true">Progress</button>
+    <button type="button" data-tab="responses" aria-selected="false">Responses</button>
+    <button type="button" data-tab="activity" aria-selected="false">In progress</button>
+    <button type="button" data-tab="participants" aria-selected="false">Participants</button>
+    <button type="button" data-tab="data" aria-selected="false">Download &amp; delete</button>
+  </div>
+
+  <section data-panel="progress" class="stack-lg">
+    <div class="legend"><span><i class="cell" data-n="0"></i>0 answers</span><span><i class="cell" data-n="1"></i>1</span><span><i class="cell" data-n="2"></i>2</span><span><i class="cell" data-n="3"></i><b class="legend-target">3</b> (complete)</span><span><i class="cell active"></i>someone working</span></div>
+    <div id="ladders" class="stack-lg"></div>
+    <h2>Participant background</h2>
+    <div id="background" class="grid2"></div>
+  </section>
+
+  <section data-panel="responses" class="stack" hidden>
+    <div class="row filters" style="gap:10px">
+      <select id="fDomain"><option value="">All domains</option><option value="math">Mathematics</option><option value="physics">Physics</option><option value="chemistry">Chemistry</option></select>
+      <select id="fCheck"><option value="">Any check</option><option value="match">Matches</option><option value="differs">Differs</option><option value="manual">By hand</option></select>
+      <input type="search" id="fSearch" placeholder="Search name, email, question or code">
+    </div>
+    <div class="tablebox"><table><thead><tr><th>Code</th><th>Question</th><th>Person</th><th>Submitted</th><th>Answer</th><th>Gold</th><th>Check</th><th>Words</th><th>Deleted chars</th><th>Active</th><th>Pastes</th><th></th></tr></thead><tbody id="respBody"></tbody></table></div>
+    <p class="small muted" id="respNote"></p>
+  </section>
+
+  <section data-panel="activity" class="stack" hidden>
+    <p class="small muted">Questions people hold but haven't submitted, plus skipped, released and expired ones. Their text is deleted 24 h after the last save.</p>
+    <div class="tablebox"><table><thead><tr><th>Code</th><th>Question</th><th>Person</th><th>State</th><th>Started</th><th>Last save</th><th>Words</th><th></th></tr></thead><tbody id="actBody"></tbody></table></div>
+  </section>
+
+  <section data-panel="participants" class="stack" hidden>
+    <div class="tablebox"><table><thead><tr><th>Name</th><th>Email</th><th>Degree</th><th>Role</th><th>Subject</th><th>Submitted</th><th>Skipped</th><th>First seen</th><th>Last seen</th></tr></thead><tbody id="partBody"></tbody></table></div>
+  </section>
+
+  <section data-panel="data" class="stack-lg" hidden>
+    <div class="card stack">
+      <h3>Downloads</h3>
+      <div class="row" style="gap:10px"><button type="button" id="dlResponses">Responses (CSV)</button><button type="button" id="dlParticipants">Participants (CSV)</button><button type="button" id="dlLogs">Edit logs (JSON)</button><button type="button" id="dlAll">Everything (JSON)</button></div>
+      <p class="small muted">"Everything" also includes the full-text copies saved about every 30 seconds ("snapshots").</p>
+    </div>
+    <div class="card stack">
+      <h3>Delete a participation</h3>
+      <div class="row" style="gap:10px"><input type="text" id="wdCode" placeholder="RS-AB12-CD34"><button type="button" id="wdBtn">Delete participation</button></div>
+      <p class="small" id="wdNote" hidden></p>
+    </div>
+  </section>
+</div>
+
+<div class="dialog-back" id="qDialog" hidden><div class="dialog stack" role="dialog" aria-modal="true">
+  <div class="row between"><h2 id="qdTitle" class="mono"></h2><button type="button" id="qdClose">Close</button></div>
+  <div class="chips" id="qdChips"></div>
+  <pre class="text" id="qdText"></pre>
+  <p><strong>Gold answer:</strong> <span id="qdGold"></span></p>
+  <div id="qdAnswers" class="stack-lg"></div>
+</div></div>
+
+<script src="config.js"></script>
+<script>
+(function () {
+  var API = (window.STUDY_CONFIG || {}).apiUrl || '', KEY = 'rs_researcher_token';
+  function tok() { try { return sessionStorage.getItem(KEY); } catch (e) { return null; } }
+  function setTok(t) { try { if (t) sessionStorage.setItem(KEY, t); else sessionStorage.removeItem(KEY); } catch (e) {} }
+  async function post(body) {
+    var res = await fetch(API, { method: 'POST', body: JSON.stringify(body) }), j = await res.json();
+    if (!j.ok) { var e = new Error(j.error || 'error'); e.code = j.error; throw e; }
+    return j;
+  }
+  function showLogin(msg) {
+    document.getElementById('dash').hidden = true; document.getElementById('login').hidden = false;
+    var err = document.getElementById('loginErr'); err.hidden = !msg; if (msg) err.textContent = msg;
+    document.getElementById('pw').focus();
+  }
+  window.STUDY_SITE_URL = location.href.replace(/researcher\.html.*$/, '');
+  window.STUDY_API = async function (action, extra) {
+    try { return await post(Object.assign({ action: action, token: tok() }, extra || {})); }
+    catch (e) { if (e.code === 'not_signed_in') { setTok(null); showLogin('Your session ended. Please sign in again.'); } throw e; }
+  };
+  function enter() { document.getElementById('login').hidden = true; document.getElementById('dash').hidden = false; window.STUDY_OPEN_RESEARCHER(); }
+  var MSG = { wrong_password: 'That password is not right.', locked: 'Too many wrong tries. Wait 15 minutes and try again.',
+    no_password: 'No researcher password is set yet. In your Google Sheet, use Reasoning Study \u2192 Set researcher password.' };
+  document.getElementById('loginForm').addEventListener('submit', async function (ev) {
+    ev.preventDefault();
+    var btn = document.getElementById('loginBtn'); btn.disabled = true;
+    try { var r = await post({ action: 'r_login', password: document.getElementById('pw').value }); setTok(r.token); document.getElementById('pw').value = ''; enter(); }
+    catch (e) { showLogin(MSG[e.code] || (e.code ? 'Sign-in failed (' + e.code + ').' : 'The study server couldn\'t be reached. Check your connection and try again.')); }
+    finally { btn.disabled = false; }
+  });
+  document.getElementById('logout').onclick = function () { var t = tok(); setTok(null); if (t) post({ action: 'r_logout', token: t }).catch(function () {}); location.reload(); };
+  window.addEventListener('DOMContentLoaded', function () { if (tok()) enter(); else showLogin(''); });
+})();
+</script>
+<script src="questions.js"></script>
+<script src="researcher.js"></script>
+</body></html>
