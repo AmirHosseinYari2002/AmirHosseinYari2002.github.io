@@ -12,8 +12,7 @@ Inputs
   --bundle       the frozen pilot folder (gives the trace text and the LLM segmentation,
                  deepseek-pilot/results/{trajectories,segments}.jsonl). The LLM boundaries
                  are read here, never from the website, so annotators cannot see them.
-  --annotations  one or more JSON files: the researcher export (admin.html) and/or
-                 annotator backups ("Download a backup of my work"). Duplicates are merged
+  --annotations  one or more JSON exports from the researcher page (admin.html). Duplicates are merged
                  (submitted beats draft, newer beats older).
 
 Unit of analysis

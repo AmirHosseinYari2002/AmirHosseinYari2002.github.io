@@ -27,8 +27,7 @@ suggestions are shown). Each trace is shown up to and including `</think>`, so i
    Send them the site link; they sign in with that email (case does not matter). Only registered emails can sign in.
 
 If you edit `Code.gs` later, use **Deploy → Manage deployments → Edit → New version** so the URL stays the same.
-If `apiUrl` is left empty, the site runs in *local mode*: work is saved only in the browser, and annotators
-send you the JSON file from "Download a backup of my work".
+If `apiUrl` is left empty, the site runs in *local mode* (testing only): work is saved only in the browser.
 
 ## 2. What gets recorded
 
