@@ -24,7 +24,6 @@
   function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2600); }
   function note(el, kind, html) { el.className = 'note' + (kind ? ' ' + kind : ''); el.innerHTML = html; el.hidden = false; }
   function fmtTime(iso) { try { return new Date(iso).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } }
-  function fmtMin(ms) { const m = Math.round((ms || 0) / 60000); return m < 1 ? '<1 min' : m + ' min'; }
 
   function typeset(el) {
     const go = () => { try { window.MathJax.typesetClear([el]); window.MathJax.typesetPromise([el]).catch(() => {}); } catch (e) {} };
@@ -342,7 +341,7 @@
       const label = { new: 'Not started', draft: 'In progress', submitted: 'Submitted', reopened: 'Reopened' }[st];
       card.innerHTML = '<div><h3>' + esc(t.label) + '<span class="pill ' + st + '">' + label + '</span></h3>' +
         '<p class="muted">' + t.words.toLocaleString() + ' words' +
-        (st !== 'new' ? ' · ' + nCuts + ' CUTs' + (l && l.active_ms ? ' · ' + fmtMin(l.active_ms) + ' active' : '') : '') + '</p></div>' +
+        (st !== 'new' ? ' · ' + nCuts + ' CUTs' : '') + '</p></div>' +
         '<button class="btn ' + (st === 'submitted' ? '' : 'primary sm') + '" type="button">' + (st === 'submitted' ? 'View' : st === 'new' ? 'Start' : 'Continue') + '</button>';
       card.querySelector('button').addEventListener('click', () => go('trace/' + t.id));
       list.appendChild(card);

@@ -400,7 +400,10 @@ def main():
             if c in tv:
                 b = sum(tv[c]); cells.append(str(b)); nb += b; nw += units[tid].n_words; nt += 1
                 coder_rows.append({"coder": c, "trace_id": tid, "boundaries": b, "segments": b + 1,
-                                   "words": units[tid].n_words, "mean_words_per_segment": round(units[tid].n_words / (b + 1), 2)})
+                                   "words": units[tid].n_words, "mean_words_per_segment": round(units[tid].n_words / (b + 1), 2),
+                                   "active_minutes": "" if c == AI else round((ann[(c, tid)].get("active_ms") or 0) / 60000, 1),
+                                   "words_per_active_minute": "" if c == AI or not ann[(c, tid)].get("active_ms") else round(units[tid].n_words / (ann[(c, tid)]["active_ms"] / 60000), 1),
+                                   "read_pct": "" if c == AI else ann[(c, tid)].get("read_pct", "")})
             else:
                 cells.append("—")
         P("| %s | %s | %s |" % (c, " | ".join(cells), fmt(nw / (nb + nt) if nt else float("nan"), 1)))

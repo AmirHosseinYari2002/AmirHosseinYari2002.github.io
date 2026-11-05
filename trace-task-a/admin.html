@@ -85,7 +85,7 @@
         const x = by[id + '|' + t.id];
         if (!x) return '<td class="cell muted">—</td>';
         return '<td class="cell"><span class="pill ' + esc(x.status) + '" style="margin:0">' + esc(x.status) + '</span>' +
-          '<small>' + x.n_cuts + ' CUTs · ' + x.n_flags + ' flags</small><small>' + Math.round((x.active_ms || 0) / 60000) + ' min active · read ' + Math.round((x.read_pct || 0) * 100) + '%</small>' +
+          '<small>' + x.n_cuts + ' CUTs · ' + x.n_flags + ' flags</small><small>' + (Math.round((x.active_ms || 0) / 6000) / 10) + ' min active · read ' + Math.round((x.read_pct || 0) * 100) + '%</small>' +
           (x.status === 'submitted' ? '<button class="link small" data-reopen="' + esc(id) + '|' + esc(t.id) + '">Reopen</button>' : '') + '</td>';
       }).join('') + '</tr>';
     });
