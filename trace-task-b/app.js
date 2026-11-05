@@ -257,7 +257,7 @@
       const label = { new: 'Not started', draft: 'In progress', submitted: 'Submitted', reopened: 'Reopened' }[st];
       const pct = Math.round(100 * lab / n);
       card.innerHTML = '<div><h3>' + esc(t.label) + '<span class="pill ' + st + '">' + label + '</span></h3>' +
-        '<p class="muted">' + n.toLocaleString() + ' segments · ' + t.words.toLocaleString() + ' words · about ' + Math.max(5, Math.round(n * 12 / 60 / 5) * 5) + '–' + Math.max(10, Math.round(n * 25 / 60 / 5) * 5) + ' min' +
+        '<p class="muted">' + n.toLocaleString() + ' segments' +
         (st !== 'new' ? ' · ' + lab + ' labeled' + (l && l.active_ms ? ' · ' + fmtMin(l.active_ms) + ' active' : '') : '') + '</p>' +
         (st !== 'new' ? '<div class="mini-bar"><span style="width:' + pct + '%"></span></div>' : '') + '</div>' +
         '<button class="btn ' + (st === 'submitted' ? '' : 'primary sm') + '" type="button">' + (st === 'submitted' ? 'View' : st === 'new' ? 'Start' : 'Continue') + '</button>';
