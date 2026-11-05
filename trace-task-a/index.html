@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TRACE · Task A</title>
+<meta name="description" content="Task A — human annotation of operation boundaries in reasoning traces.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500&display=swap">
+<link rel="stylesheet" href="styles.css">
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']], processEscapes: true , macros: { equal: '=', minus: '-', plus: '+' } },
+  svg: { fontCache: 'global' },
+  startup: { typeset: false }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg-full.js" async></script>
+</head>
+<body data-view="signin">
+
+<header class="top">
+  <div class="wrap top-in">
+    <button class="brand" type="button" data-go="home">TRACE <span>/ Task A</span></button>
+    <nav class="toplinks" id="topnav" hidden>
+      <button type="button" data-go="guide">Guidelines</button>
+      <button type="button" data-go="traces">Traces</button>
+      <span class="who" id="whoChip"></span>
+      <button type="button" id="signOutBtn" class="quiet">Sign out</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ SIGN IN ============ -->
+<section id="v-signin" class="wrap view">
+  <p class="eyebrow">Task A · Human annotation</p>
+  <h1 class="display">One operation.<br><em>One segment.</em></h1>
+  <p class="lede">Read the reasoning. Find where each new operation begins.<br>Insert your own CUT markers, using the rules in the guidelines.</p>
+
+  <form class="signin card" id="signinForm" autocomplete="on">
+    <h2>Sign in</h2>
+    <p class="muted">Use the annotator ID and access code you received from the researcher. Your progress is saved to your account, so you can leave and return later.</p>
+    <label>Annotator ID <input id="inId" name="username" autocomplete="username" required spellcheck="false" autocapitalize="off" placeholder="e.g. ann01"></label>
+    <label>Access code <input id="inCode" name="password" type="password" autocomplete="current-password" required placeholder="6-digit code"></label>
+    <div class="note" id="signinNote" hidden></div>
+    <button class="btn primary" type="submit" id="signinBtn">Sign in <svg class="arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg></button>
+  </form>
+  <p class="contact-line muted small"></p>
+</section>
+
+<!-- ============ GUIDELINES ============ -->
+<section id="v-guide" class="wrap view" hidden>
+  <p class="eyebrow">Task A · Human annotation</p>
+  <h1 class="display">One operation.<br><em>One segment.</em></h1>
+  <p class="lede">Read the reasoning. Find where each new operation begins.<br>Insert your own CUT markers, using the rules below.</p>
+  <ul class="meta">
+    <li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 2.5h6l4 4v11H6z M12 2.5v4h4 M8.5 10.5h5 M8.5 13.5h5"/></svg><span id="metaTraces">4 shared traces</span></li>
+    <li><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><path d="M10 5.5V10l3 2"/></svg>Work at your own pace</li>
+    <li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.5l6 2.5v4.5c0 4-2.6 6.6-6 8-3.4-1.4-6-4-6-8V5z M7.3 10l2 2 3.6-3.8"/></svg>Independent decisions</li>
+  </ul>
+
+  <div class="alert">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5.5c0 4.6-3 7.7-7 9.5-4-1.8-7-4.9-7-9.5V6z M8.8 12l2.2 2.2 4.2-4.4"/></svg>
+    <div>
+      <p class="alert-h">No AI assistance — required</p>
+      <p><b>Do not use ChatGPT, Gemini, Copilot, or any other AI tool</b> to read, explain, review, segment, or label these traces. <b>Make every boundary decision yourself.</b></p>
+    </div>
+  </div>
+
+  <section class="step">
+    <div class="num">01</div>
+    <div class="step-body">
+      <h2>What counts as one segment?</h2>
+      <div class="rule">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6.5C10 5 7 4.5 3.5 5v13c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5z M12 6.5v13"/></svg>
+        <div>
+          <p class="rule-h">One segment = one explicit local operation</p>
+          <p><b>Keep the operation together with its necessary lead-in, operands, and stated result.</b> It can depend on earlier context, span several sentences, or occupy only part of a sentence.</p>
+          <p><b>Insert CUT when a distinct new introduction, inference, calculation, check, correction, or method choice begins.</b> Follow the operation being expressed, even if its content is incorrect.</p>
+        </div>
+      </div>
+
+      <div class="card table-card">
+        <h3>Apply the same rule in every case</h3>
+        <dl class="cases">
+          <div><dt>Several sentences, one operation</dt><dd><b>Keep together.</b> Sentence boundaries do not determine segments.</dd></div>
+          <div><dt>One sentence, distinct operations</dt><dd><b>Split at the new operation.</b> A check followed by a separate calculation needs a boundary.</dd></div>
+          <div><dt>Calculation + its stated result</dt><dd><b>Keep together.</b> The result completes that calculation.</dd></div>
+          <div><dt>Two calculations on the same topic</dt><dd><b>Split if they are distinct operations.</b> A shared topic or action type does not merge them.</dd></div>
+          <div><dt>A lead-in or an explicit replacement</dt><dd><b>Keep the lead-in with its content and the replacement with its value.</b> Avoid unfinished fragments.</dd></div>
+          <div><dt>Punctuation, a newline, or a long passage</dt><dd><b>Do not split for formatting or length alone.</b> Look for a distinct operation inside the passage.</dd></div>
+          <div><dt>Uncertain boundary</dt><dd><b>Flag the character position and describe both interpretations.</b> Do not invent an unstated operation.</dd></div>
+        </dl>
+      </div>
+
+      <div class="two">
+        <div class="card mini">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          <h3>Start a new operation</h3>
+          <p>Insert CUT before a distinct introduction, inference, calculation, check, correction, or method choice.</p>
+        </div>
+        <div class="card mini">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 018 0v3"/></svg>
+          <h3>Keep the operation together</h3>
+          <p>Keep a lead-in with its content, a calculation with its stated result, and a replacement with its replacement value.</p>
+        </div>
+      </div>
+      <p class="info"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><path d="M10 9v5 M10 6.2v.1"/></svg>Punctuation, a newline, or length alone is not a reason to split. A shared topic or action category is not a reason to merge distinct operations.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <div class="num">02</div>
+    <div class="step-body">
+      <h2>Insert boundaries from scratch</h2>
+      <p class="body">Each trace starts without suggested boundaries. Read the entire trace and insert <code>&lt;CUT&gt;</code> wherever a new local operation begins. The first segment begins automatically; no marker is needed at the start or end.</p>
+      <ol class="howto">
+        <li><span class="sq">1</span><h3>Click once to insert</h3><p>Click directly before the new operation. A colored CUT appears immediately.</p></li>
+        <li><span class="sq">2</span><h3>Adjust your own markers</h3><p>Click a colored CUT to remove it. Undo restores your last change.</p></li>
+        <li><span class="sq">3</span><h3>Review &amp; submit</h3><p>Check the whole trace and flag uncertainty.</p></li>
+      </ol>
+      <p class="body">Source text is locked. You may insert, remove, or undo your own markers. Do not correct, omit, reorder, or rewrite the reasoning. Do not invent operations that are not explicitly expressed.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <div class="num">03</div>
+    <div class="step-body">
+      <h2>A small worked example</h2>
+      <div class="card example">
+        <p class="cap">Input · Unsegmented source</p>
+        <p class="src">Compute u = 2 + 3. The result is u = 5. Check: u − 3 = 2, then compute v: v = 2u = 10.</p>
+        <hr>
+        <p class="cap">Task A · Independent segmentation</p>
+        <p class="src">Compute u = 2 + 3. The result is u = 5. <span class="cut static">CUT</span> Check: u − 3 = 2, <span class="cut static">CUT</span> then compute v: v = 2u = 10.</p>
+      </div>
+      <p class="body">The calculation stays with its result. The check and the next calculation begin separate operations. This website collects Task A boundaries only; action labels are not requested.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <div class="num">04</div>
+    <div class="step-body">
+      <h2>Before you submit</h2>
+      <ul class="checks">
+        <li>Read the full trace, including long passages.</li>
+        <li>Check that each segment expresses one operation with its necessary context.</li>
+        <li>Use an uncertainty note to identify ambiguous locations and explain the alternatives.</li>
+      </ul>
+      <div class="consent">
+        <label class="check"><input type="checkbox" id="agree"> <span>I have read the guidelines and will make my own annotation decisions without AI assistance.</span></label>
+        <button class="btn primary" type="button" id="guideNext" disabled><span id="guideNextLabel">Continue to practice</span> <svg class="arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg></button>
+        <p class="muted small">Your progress is saved to your signed-in account. You can leave and return later.</p>
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- ============ PRACTICE ============ -->
+<section id="v-practice" class="wrap view" hidden>
+  <p class="eyebrow">Practice · Not scored</p>
+  <h1 class="h1">Try two short passages first.</h1>
+  <p class="lede">Insert CUT markers, then check them against a reference. Practice answers are not part of the study; they only help you calibrate.</p>
+  <div id="practiceList" class="stack"></div>
+  <div class="row end">
+    <button class="btn primary" type="button" id="practiceDone" disabled>Continue to the traces <svg class="arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg></button>
+  </div>
+</section>
+
+<!-- ============ TRACE LIST ============ -->
+<section id="v-traces" class="wrap view" hidden>
+  <p class="eyebrow">Your traces</p>
+  <h1 class="h1">Four shared traces.</h1>
+  <p class="lede">Every annotator segments the same traces, independently. Work in any order and at your own pace; drafts are saved automatically. Once you submit a trace it is locked.</p>
+  <div class="note" id="syncNote" hidden></div>
+  <div id="traceList" class="trace-list"></div>
+  <div class="row between small muted">
+    <span class="contact-line"></span>
+    <button type="button" class="link" id="downloadAll">Download a backup of my work (JSON)</button>
+  </div>
+</section>
+
+<!-- ============ WORKSPACE ============ -->
+<section id="v-work" class="view" hidden>
+  <div class="toolbar">
+    <div class="wrap tb-in">
+      <button type="button" class="quiet back" data-go="traces" aria-label="Back to traces"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 10H4M9 5l-5 5 5 5"/></svg></button>
+      <div class="tb-title"><b id="wTitle">Trace</b><span id="wSub" class="muted"></span></div>
+      <div class="seg-mode" role="group" aria-label="Tool">
+        <button type="button" id="toolCut" class="on" aria-pressed="true" title="Cut tool (C)">CUT</button>
+        <button type="button" id="toolFlag" aria-pressed="false" title="Uncertainty flag tool (F)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 17.5V3 M5 3.5h9l-2 3.5 2 3.5H5"/></svg>Flag</button>
+      </div>
+      <button type="button" id="undoBtn" class="quiet" title="Undo (Ctrl/⌘+Z)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 5L3.5 9l4 4 M4 9h8a4.5 4.5 0 010 9H9"/></svg>Undo</button>
+      <span class="save" id="saveState"></span>
+      <button type="button" class="btn primary sm" id="submitBtn">Review &amp; submit</button>
+    </div>
+    <div class="readbar"><span id="readFill"></span></div>
+  </div>
+
+  <div class="wrap work-grid">
+    <article class="paper">
+      <div class="locked-note" id="lockedNote" hidden>This trace has been submitted and is locked. Contact the researcher if you need to change it.</div>
+      <div id="trace" class="trace" aria-label="Reasoning trace. Click before a word to insert a CUT."></div>
+      <p class="end-mark">— End of trace —</p>
+    </article>
+    <aside class="side">
+      <div class="card side-card">
+        <div class="stats">
+          <div><b id="stSeg">1</b><span>segments</span></div>
+          <div><b id="stCut">0</b><span>CUTs</span></div>
+          <div><b id="stFlag">0</b><span>flags</span></div>
+          <div><b id="stRead">0%</b><span>read</span></div>
+        </div>
+        <label class="check small"><input type="checkbox" id="shade" checked> <span>Shade alternate segments</span></label>
+      </div>
+      <details class="card side-card" open>
+        <summary>Problem statement</summary>
+        <div id="problem" class="problem"></div>
+      </details>
+      <details class="card side-card">
+        <summary>Rules at a glance</summary>
+        <ul class="glance">
+          <li><b>CUT</b> before a new introduction, inference, calculation, check, correction, or method choice.</li>
+          <li><b>Keep</b> a lead-in with its content, a calculation with its result, a replacement with its value.</li>
+          <li><b>Never</b> split for punctuation, a newline, or length alone.</li>
+          <li><b>Flag</b> genuinely ambiguous spots and describe both readings.</li>
+        </ul>
+        <button type="button" class="link small" data-go="guide">Open full guidelines</button>
+      </details>
+      <div class="card side-card">
+        <h3 class="side-h">Uncertainty flags</h3>
+        <p class="muted small" id="flagEmpty">Switch to <b>Flag</b>, then click before a word to note an ambiguous boundary.</p>
+        <ol id="flagList" class="flag-list"></ol>
+      </div>
+      <p class="small ai-reminder">No AI assistance. Every decision is yours.</p>
+    </aside>
+  </div>
+</section>
+
+<!-- ============ DONE ============ -->
+<section id="v-done" class="wrap view" hidden>
+  <p class="eyebrow">All traces submitted</p>
+  <h1 class="display">Thank you.<br><em>Every boundary counts.</em></h1>
+  <p class="lede">Your segmentation of all four traces has been received. You can close this page.</p>
+  <p class="contact-line muted"></p>
+</section>
+
+</main>
+
+<footer class="foot"><div class="wrap">TRACE <span>/</span> Reasoning Behavior Study</div></footer>
+
+<!-- flag dialog -->
+<dialog id="flagDlg" class="dlg">
+  <form method="dialog">
+    <h3>Uncertainty flag</h3>
+    <p class="muted small">Position: before “<span id="flagWord"></span>”. Describe both interpretations (for example: “CUT here if … ; no CUT if …”).</p>
+    <textarea id="flagNote" rows="5" required></textarea>
+    <div class="row between">
+      <button type="button" class="link danger" id="flagDelete">Delete flag</button>
+      <div class="row">
+        <button value="cancel" class="btn" formnovalidate>Cancel</button>
+        <button value="ok" class="btn primary" id="flagSave">Save flag</button>
+      </div>
+    </div>
+  </form>
+</dialog>
+
+<!-- submit dialog -->
+<dialog id="submitDlg" class="dlg">
+  <form method="dialog">
+    <h3>Submit <span id="subTitle"></span>?</h3>
+    <p class="muted small" id="subSummary"></p>
+    <ul class="checks tight">
+      <li><label class="check"><input type="checkbox" class="subchk"> <span>I read the full trace, including long passages.</span></label></li>
+      <li><label class="check"><input type="checkbox" class="subchk"> <span>Each segment expresses one operation with its necessary context.</span></label></li>
+      <li><label class="check"><input type="checkbox" class="subchk"> <span>I flagged genuinely ambiguous locations and explained the alternatives.</span></label></li>
+      <li><label class="check"><input type="checkbox" class="subchk"> <span>I made every decision myself, without AI assistance.</span></label></li>
+    </ul>
+    <div class="note" id="subNote" hidden></div>
+    <p class="muted small">After submission this trace is locked.</p>
+    <div class="row end">
+      <button value="cancel" class="btn" formnovalidate>Keep working</button>
+      <button value="ok" class="btn primary" id="subConfirm" disabled>Submit trace</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="config.js"></script>
+<script src="traces.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
