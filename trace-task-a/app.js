@@ -354,20 +354,22 @@
     }
   }
   // ---------------- workspace ----------------
-  const W = { trace: null, ed: null, status: 'draft', activeMs: 0, lastAct: 0, readMax: 0, dirty: false, saving: false, lastSync: '', tick: 0, version: 0, clientUpdated: '' };
+  const W = { trace: null, ed: null, ready: false, status: 'draft', activeMs: 0, lastAct: 0, readMax: 0, dirty: false, saving: false, lastSync: '', tick: 0, version: 0, clientUpdated: '' };
 
   function setSave(txt, err) { const s = $('saveState'); s.textContent = txt; s.classList.toggle('err', !!err); }
   function draftObj() {
     return { cuts: W.ed.cutList(), flags: W.ed.flagList(), active_ms: W.activeMs, read_pct: Math.round(W.readMax * 1000) / 1000, status: W.status, client_updated: W.clientUpdated, version: W.version };
   }
-  function saveLocal() { W.clientUpdated = nowIso(); jset(key('draft', W.trace.id), draftObj()); }
+  // Nothing is saved until the trace has finished loading (W.ready), so a click or a page exit during
+  // loading can never overwrite saved work with an empty state.
+  function saveLocal() { if (!W.ready) return; W.clientUpdated = nowIso(); jset(key('draft', W.trace.id), draftObj()); }
   function payload() {
     const d = draftObj();
     return { trace_id: W.trace.id, cuts: d.cuts, flags: d.flags, active_ms: d.active_ms, read_pct: d.read_pct, text_sha256: W.trace.sha256, client_updated: d.client_updated,
       meta: { ua: navigator.userAgent.slice(0, 160), viewport: innerWidth + 'x' + innerHeight, undo_depth: W.ed.undo.length } };
   }
   async function syncNow() {
-    if (LOCAL_ONLY || !W.trace || W.saving || !W.dirty || W.status === 'submitted') return;
+    if (LOCAL_ONLY || !W.trace || !W.ready || W.saving || !W.dirty || W.status === 'submitted') return;
     W.saving = true; W.dirty = false;
     try {
       const r = await api('save', payload());
@@ -381,7 +383,7 @@
     } finally { W.saving = false; }
   }
   function flushSave(beacon) {
-    if (!W.trace || W.status === 'submitted') return;
+    if (!W.trace || !W.ready || W.status === 'submitted') return;
     saveLocal();
     if (LOCAL_ONLY || !W.dirty) return;
     if (beacon && navigator.sendBeacon) {
@@ -411,6 +413,7 @@
     });
   }
   function onChange() {
+    if (!W.ready) return;
     W.dirty = true; W.lastAct = Date.now();
     saveLocal(); updateStats();
     setSave(LOCAL_ONLY ? 'Saved on this device' : 'Unsaved changes…');
@@ -443,10 +446,10 @@
   }
   $('toolCut').addEventListener('click', () => setTool('cut'));
   $('toolFlag').addEventListener('click', () => setTool('flag'));
-  $('undoBtn').addEventListener('click', () => { if (W.ed && W.status !== 'submitted') W.ed.doUndo(); });
+  $('undoBtn').addEventListener('click', () => { if (W.ed && W.ready && W.status !== 'submitted') W.ed.doUndo(); });
   $('shade').addEventListener('change', () => { $('trace').classList.toggle('shade', $('shade').checked); jset('tta:shade', $('shade').checked); });
   document.addEventListener('keydown', e => {
-    if (!W.trace || document.body.dataset.view !== 'work') return;
+    if (!W.trace || !W.ready || document.body.dataset.view !== 'work') return;
     if (e.target.closest('input, textarea, dialog[open]')) return;
     if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z') { e.preventDefault(); if (W.status !== 'submitted') W.ed.doUndo(); return; }
     if (e.ctrlKey || e.metaKey || e.altKey || W.status === 'submitted') return;
@@ -458,7 +461,8 @@
     const t = TBY[tid]; if (!t) return go('traces');
     if (W.trace && W.trace.id === tid) return show('work');
     show('work');
-    W.trace = t; W.dirty = false; W.saving = false; W.readMax = 0; W.lastAct = Date.now();
+    W.trace = t; W.ready = false; W.dirty = false; W.saving = false; W.readMax = 0; W.lastAct = Date.now();
+    clearInterval(W.tick); clearTimeout(W.syncT);
     $('wTitle').textContent = t.label;
     $('wSub').textContent = t.words.toLocaleString() + ' words · click before a word to insert CUT';
     $('problem').textContent = t.question; typeset($('problem'));
@@ -466,6 +470,7 @@
     host.textContent = 'Loading…';
     await new Promise(r => setTimeout(r, 0));
     W.ed = Editor(host, t.text, { onChange: onChange, onFlag: openFlag });
+    W.ed.setEditable(false); // read-only until the saved annotation has loaded
     host.classList.toggle('shade', jget('tta:shade', true) !== false); $('shade').checked = host.classList.contains('shade');
     setTool('cut');
     // local first, then reconcile with the server
@@ -488,6 +493,7 @@
     d = d || { cuts: [], flags: [], active_ms: 0, read_pct: 0, status: 'draft', client_updated: '', version: 0 };
     W.ed.load(d.cuts, d.flags);
     W.activeMs = d.active_ms || 0; W.readMax = d.read_pct || 0; W.status = d.status || 'draft'; W.clientUpdated = d.client_updated || ''; W.version = d.version || 0;
+    W.ready = true;
     if (localAhead) { W.dirty = true; setTimeout(syncNow, 1000); }
     applyLock(); computeRead();
     if (LOCAL_ONLY) setSave(d.client_updated ? 'Saved on this device' : '');
@@ -504,7 +510,7 @@
     if (!W.trace) return;
     flushSave(false);
     clearInterval(W.tick); clearTimeout(W.syncT);
-    W.trace = null; W.ed = null; $('trace').textContent = '';
+    W.trace = null; W.ed = null; W.ready = false; $('trace').textContent = '';
   }
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushSave(true); });
   window.addEventListener('pagehide', () => flushSave(true));
@@ -512,7 +518,7 @@
   // ---------------- flags ----------------
   let flagPos = null;
   function openFlag(pos) {
-    if (!W.ed || W.status === 'submitted') return;
+    if (!W.ed || !W.ready || W.status === 'submitted') return;
     flagPos = pos;
     const cur = W.ed.flags.get(pos);
     $('flagWord').textContent = W.ed.wordAt(pos);
@@ -531,7 +537,7 @@
 
   // ---------------- submit ----------------
   $('submitBtn').addEventListener('click', () => {
-    if (!W.ed || W.status === 'submitted') return;
+    if (!W.ed || !W.ready || W.status === 'submitted') return;
     computeRead();
     $('subTitle').textContent = W.trace.label;
     $('subSummary').textContent = (W.ed.cuts.size + 1) + ' segments · ' + W.ed.cuts.size + ' CUTs · ' + W.ed.flags.size + ' uncertainty flags · ' + Math.round(W.readMax * 100) + '% of the trace scrolled through.';

@@ -103,7 +103,9 @@ class TraceUnits:
         self.n_words = len(self.word_starts)
         self.gaps = self.word_starts[1:]  # candidate boundary positions
         self.index = {p: i for i, p in enumerate(self.gaps)}
-        self.sha = hashlib.sha256(text.encode("utf-8")).hexdigest()
+        # Hash of exactly the text the website shows (up to and including </think>), as stored with each annotation.
+        shown = text[: k + len("</think>")] if k >= 0 else text
+        self.sha = hashlib.sha256(shown.encode("utf-8")).hexdigest()
 
     def snap(self, pos):
         """Snap a char offset to the next word start (AI segments start at the preceding space)."""

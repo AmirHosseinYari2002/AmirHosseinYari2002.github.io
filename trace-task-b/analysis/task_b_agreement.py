@@ -37,7 +37,7 @@ Metrics
 
 Only the Python standard library is required.
 """
-import argparse, csv, itertools, json, os, random, statistics
+import argparse, csv, hashlib, itertools, json, os, random, statistics
 from collections import Counter, defaultdict
 
 LABELS = ["CONSTRUCT", "INSPECT", "REVISE", "REDIRECT", "NONACTION"]
@@ -46,24 +46,30 @@ THINK_END = "</think>"
 
 
 def load_bundle(root):
+    """Returns ({trace_id: [segment dicts]}, {trace_id: (text_sha256, seg_sha256)}) for the text shown on the site."""
     res = os.path.join(root, "deepseek-pilot", "results")
-    ends = {}
+    ends, texts = {}, {}
     with open(os.path.join(res, "trajectories.jsonl"), encoding="utf-8") as f:
         for line in f:
             r = json.loads(line)
             ends[r["trace_id"]] = r["completion_text"].find(THINK_END)
+            texts[r["trace_id"]] = r["completion_text"]
     segs = defaultdict(list)
     with open(os.path.join(res, "segments.jsonl"), encoding="utf-8") as f:
         for line in f:
             s = json.loads(line)
             if int(s["char_start"]) < ends[s["trace_id"]] + len(THINK_END):
                 segs[s["trace_id"]].append(s)
-    out = {}
+    out, hashes = {}, {}
     for tid, ss in segs.items():
         ss.sort(key=lambda s: s["segment_id"])
         out[tid] = [{"segment_id": s["segment_id"], "ai": (s.get("semantic") or {}).get("action_code"),
                      "text": s["text"]} for s in ss]
-    return out
+        shown = texts[tid][: ends[tid] + len(THINK_END)]
+        u16 = lambda cp: len(shown[:cp].encode("utf-16-le")) // 2
+        bounds = [[s["segment_id"], u16(int(s["char_start"])), u16(min(int(s["char_end"]), len(shown)))] for s in ss]
+        hashes[tid] = (hashlib.sha256(shown.encode("utf-8")).hexdigest(), hashlib.sha256(json.dumps(bounds).encode()).hexdigest())
+    return out, hashes
 
 
 def load_annotations(paths, include_drafts):
@@ -163,7 +169,7 @@ def main():
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
 
-    bundle = load_bundle(args.bundle)
+    bundle, hashes = load_bundle(args.bundle)
     ann = load_annotations(args.annotations, args.include_drafts)
     excl = {e.lower() for e in args.exclude}
     humans = sorted({k[0] for k in ann if k[0] not in excl})
@@ -176,6 +182,10 @@ def main():
         segs = bundle[tid]
         for h in humans:
             a = ann.get((h, tid))
+            if a and a.get("text_sha256") and a["text_sha256"] != hashes[tid][0]:
+                warn.append("%s %s: text hash differs from the bundle — this annotation was made on different text" % (h, tid))
+            if a and a.get("seg_sha256") and a["seg_sha256"] != hashes[tid][1]:
+                warn.append("%s %s: segmentation hash differs from the bundle — labels may not line up with segments" % (h, tid))
             if a and len(a.get("labels") or []) != len(segs):
                 warn.append("%s %s: %d labels for %d segments" % (h, tid, len(a.get("labels") or []), len(segs)))
         for i, s in enumerate(segs):
