@@ -85,6 +85,7 @@
     if (c === 'bad_email') return 'Enter a valid email address, like name@example.com.';
     if (c === 'no_skips') return 'You have used both of your skips. Please give this question your best attempt.';
     if (c === 'unknown_code') return 'That participation was not found. It may already have been deleted.';
+    if (c === 'submitted') return 'This response was submitted, so it can no longer be withdrawn or deleted.';
     return 'The study server couldn\'t be reached. Check your connection and try again.';
   }
 
@@ -186,7 +187,7 @@
       left.querySelector('.small').textContent = (label[m.state] || m.state) + (m.lastActive ? ' · last saved ' + fmtTime(m.lastActive) : '');
       const right = document.createElement('div'); right.className = 'row';
       if (m.state === 'active' && st.open) { const b = document.createElement('button'); b.className = 'primary'; b.type = 'button'; b.textContent = 'Continue'; b.onclick = () => resume(c); right.append(b); }
-      if (m.state !== 'expired') { const w = document.createElement('button'); w.type = 'button'; w.className = 'link danger-link'; w.textContent = 'Withdraw and delete'; w.onclick = () => confirmInline(item, c); right.append(w); }
+      if (m.state !== 'expired' && m.state !== 'done') { const w = document.createElement('button'); w.type = 'button'; w.className = 'link danger-link'; w.textContent = 'Withdraw and delete'; w.onclick = () => confirmInline(item, c); right.append(w); }
       else { const f = document.createElement('button'); f.type = 'button'; f.className = 'link'; f.textContent = 'Remove from list'; f.onclick = () => { dropCode(c.code); refreshStatus(); }; right.append(f); }
       item.append(left, right); list.append(item);
     });
