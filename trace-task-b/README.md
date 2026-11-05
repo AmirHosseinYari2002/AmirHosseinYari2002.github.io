@@ -7,7 +7,7 @@ Same 4 traces, same text and order as Task A (reasoning up to and including `</t
 
 | File | Purpose |
 |---|---|
-| `index.html`, `app.js`, `styles.css` | Annotator site: sign in with email → handbook → practice → 4 traces → label segments |
+| `index.html`, `app.js`, `styles.css` | Annotator site: sign in with email → handbook → practice → 4 traces → label segments (no word counts, time estimates or downloads shown to annotators) |
 | `admin.html` | Researcher page: add annotators by email, track progress, reopen a trace, export all labels |
 | `config.js` | Backend URL and contact email |
 | `traces.js` | Trace text, problem statements and segment boundaries (generated; **no** LLM labels) |
@@ -40,8 +40,8 @@ Task B uses its **own** Google Sheet and Apps Script, separate from Task A.
 6. Open `/trace-task-b/admin.html`, enter the admin key and **add each annotator's email address**
    (annotators registered for Task A must be added again here). Send them the link `/trace-task-b/`.
 
-If `apiUrl` is empty (the default until you do step 5), the site runs in *local mode*: work is saved only in the browser,
-and annotators send you the JSON file from "Download a backup of my work".
+If `apiUrl` is empty, the site runs in *local mode*: work is saved only in the browser and is not sent anywhere.
+Annotators have no download option, so keep `apiUrl` set for the real study.
 
 ## 2. What gets recorded
 
@@ -53,7 +53,7 @@ Each submission is also written in full to the append-only `Log` sheet.
 
 ## 3. Compute agreement
 
-Download the export from `admin.html`, then:
+Download the export from `admin.html` ("Download all annotations (JSON)"), then:
 
 ```bash
 python3 trace-task-b/analysis/task_b_agreement.py \

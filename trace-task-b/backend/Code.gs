@@ -50,7 +50,8 @@ function rows_(k) {
   const sh = sheet_(k);
   const v = sh.getDataRange().getValues();
   const head = v.shift();
-  return v.map(function (r, i) { const o = { _row: i + 2 }; head.forEach(function (h, j) { o[h] = r[j]; }); return o; });
+  // Sheets may turn ISO timestamps into Date objects; read them back as ISO text.
+  return v.map(function (r, i) { const o = { _row: i + 2 }; head.forEach(function (h, j) { o[h] = r[j] instanceof Date ? r[j].toISOString() : r[j]; }); return o; });
 }
 
 function doGet() { return out_({ ok: true, service: 'trace-task-b' }); }

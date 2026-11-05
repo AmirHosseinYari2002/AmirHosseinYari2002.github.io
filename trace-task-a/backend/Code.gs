@@ -46,7 +46,8 @@ function rows_(k) {
   const sh = sheet_(k);
   const v = sh.getDataRange().getValues();
   const head = v.shift();
-  return v.map(function (r, i) { const o = { _row: i + 2 }; head.forEach(function (h, j) { o[h] = r[j]; }); return o; });
+  // Sheets may turn ISO timestamps into Date objects; read them back as ISO text.
+  return v.map(function (r, i) { const o = { _row: i + 2 }; head.forEach(function (h, j) { o[h] = r[j] instanceof Date ? r[j].toISOString() : r[j]; }); return o; });
 }
 
 function doGet() { return out_({ ok: true, service: 'trace-task-a' }); }
@@ -112,7 +113,7 @@ function load_(id, traceId) {
 function clean_(body) {
   const cuts = (body.cuts || []).map(Number).filter(function (n) { return isFinite(n) && n > 0; });
   cuts.sort(function (a, b) { return a - b; });
-  const flags = (body.flags || []).map(function (f) { return { pos: Number(f.pos), note: String(f.note || '').slice(0, 4000), created: f.created || '' }; })
+  const flags = (body.flags || []).map(function (f) { return { pos: Number(f.pos), note: String(f.note || '').slice(0, 1500), created: f.created || '' }; })
     .filter(function (f) { return isFinite(f.pos); });
   return { cuts: cuts, flags: flags };
 }
@@ -126,7 +127,10 @@ function save_(id, body, submit) {
   if (r && r.status === 'submitted') return { ok: false, error: 'locked', status: 'submitted' };
   const version = (r ? Number(r.version) || 0 : 0) + 1;
   const status = submit ? 'submitted' : (r && r.status === 'reopened' ? 'reopened' : 'draft');
-  const row = [id, traceId, status, JSON.stringify(c.cuts), JSON.stringify(c.flags), c.cuts.length, c.flags.length,
+  // Google Sheets cells hold at most 50,000 characters: shorten notes rather than fail the save.
+  let flagsJson = JSON.stringify(c.flags);
+  if (flagsJson.length > 49000) { c.flags.forEach(function (f) { f.note = f.note.slice(0, 300); }); flagsJson = JSON.stringify(c.flags); }
+  const row = [id, traceId, status, JSON.stringify(c.cuts), flagsJson, c.cuts.length, c.flags.length,
     Number(body.active_ms) || 0, Number(body.read_pct) || 0, String(body.text_sha256 || ''), String(body.client_updated || ''),
     now_(), submit ? now_() : (r ? r.submitted_at : ''), version, JSON.stringify(body.meta || {})];
   if (r) sh.getRange(r._row, 1, 1, row.length).setValues([row]); else sh.appendRow(row);
@@ -136,7 +140,7 @@ function save_(id, body, submit) {
 }
 
 function log_(id, traceId, action, status, nCuts, nFlags, payload) {
-  sheet_('log').appendRow([now_(), id, traceId, action, status, nCuts, nFlags, payload ? JSON.stringify(payload) : '']);
+  sheet_('log').appendRow([now_(), id, traceId, action, status, nCuts, nFlags, payload ? JSON.stringify(payload).slice(0, 49000) : '']);
 }
 
 // ---------------- researcher ----------------

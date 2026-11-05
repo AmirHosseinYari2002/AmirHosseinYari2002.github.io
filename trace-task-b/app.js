@@ -34,7 +34,6 @@
   function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2600); }
   function note(el, kind, html) { el.className = 'note' + (kind ? ' ' + kind : ''); el.innerHTML = html; el.hidden = false; }
   function fmtTime(iso) { try { return new Date(iso).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } }
-  function fmtMin(ms) { const m = Math.round((ms || 0) / 60000); return m < 1 ? '<1 min' : m + ' min'; }
   function typeset(el) {
     const go = () => { try { window.MathJax.typesetClear([el]); window.MathJax.typesetPromise([el]).catch(() => {}); } catch (e) {} };
     if (window.MathJax && window.MathJax.typesetPromise) go();
@@ -257,37 +256,25 @@
       const label = { new: 'Not started', draft: 'In progress', submitted: 'Submitted', reopened: 'Reopened' }[st];
       const pct = Math.round(100 * lab / n);
       card.innerHTML = '<div><h3>' + esc(t.label) + '<span class="pill ' + st + '">' + label + '</span></h3>' +
-        '<p class="muted">' + n.toLocaleString() + ' segments · ' + t.words.toLocaleString() + ' words · about ' + Math.max(5, Math.round(n * 12 / 60 / 5) * 5) + '–' + Math.max(10, Math.round(n * 25 / 60 / 5) * 5) + ' min' +
-        (st !== 'new' ? ' · ' + lab + ' labeled' + (l && l.active_ms ? ' · ' + fmtMin(l.active_ms) + ' active' : '') : '') + '</p>' +
+        '<p class="muted">' + n.toLocaleString() + ' segments' +
+        (st !== 'new' ? ' · ' + lab + ' labeled' : '') + '</p>' +
         (st !== 'new' ? '<div class="mini-bar"><span style="width:' + pct + '%"></span></div>' : '') + '</div>' +
         '<button class="btn ' + (st === 'submitted' ? '' : 'primary sm') + '" type="button">' + (st === 'submitted' ? 'View' : st === 'new' ? 'Start' : 'Continue') + '</button>';
       card.querySelector('button').addEventListener('click', () => go('trace/' + t.id));
       list.appendChild(card);
     });
-    if (LOCAL_ONLY) note($('syncNote'), 'warn', '<b>Local mode.</b> No server is configured, so your work is saved only in this browser. Use “Download a backup” below and send the file to the researcher.');
+    if (LOCAL_ONLY) note($('syncNote'), 'warn', '<b>Local mode.</b> No server is configured, so your work is saved only in this browser. Please contact the researcher.');
     if (done === TRACES.length && TRACES.length) {
       const n = document.createElement('div'); n.className = 'note';
       n.innerHTML = '<b>All traces submitted.</b> Thank you — you can close this page.';
       list.prepend(n);
     }
   }
-  $('downloadAll').addEventListener('click', () => {
-    const out = { format: 'trace-task-b/v1', exported_at: nowIso(), source: 'annotator-backup', annotations: [] };
-    TRACES.forEach(t => {
-      const l = localDraft(t.id); if (!l) return;
-      out.annotations.push({ annotator_id: S.id, trace_id: t.id, status: l.status || 'draft', labels: l.labels, flags: l.flags, dwell_ms: l.dwell, active_ms: l.active_ms || 0,
-        n_segments: t.segs.length, text_sha256: t.sha256, seg_sha256: t.seg_sha256, client_updated: l.client_updated });
-    });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 1)], { type: 'application/json' }));
-    a.download = 'task-b_' + S.id.replace(/[^a-z0-9._-]+/gi, '_') + '_' + new Date().toISOString().slice(0, 10) + '.json';
-    document.body.appendChild(a); a.click(); a.remove();
-  });
 
   // =========================================================
   // Workspace: fixed segments, one label each.
   // =========================================================
-  const W = { trace: null, els: [], cores: [], labels: [], flags: new Map(), dwell: [], active: 0, status: 'draft', activeMs: 0, lastAct: 0,
+  const W = { trace: null, ready: false, els: [], cores: [], labels: [], flags: new Map(), dwell: [], active: 0, status: 'draft', activeMs: 0, lastAct: 0,
     dirty: false, saving: false, tick: 0, version: 0, clientUpdated: '', changes: 0, undo: [] };
   labelButtons($('lpBtns'), 'lb');
 
@@ -365,7 +352,7 @@
     return r.top >= top && r.bottom <= innerHeight - 8;
   }
   function setActive(i, scroll) {
-    if (!W.trace) return;
+    if (!W.trace || !W.ready) return;
     i = Math.max(0, Math.min(W.trace.segs.length - 1, i));
     const prev = W.active; W.active = i;
     paintSeg(prev); paintSeg(i);
@@ -378,7 +365,7 @@
   }
   function locked() { return W.status === 'submitted'; }
   function setLabel(i, code, rec) {
-    if (locked()) return;
+    if (locked() || !W.ready) return;
     const before = W.labels[i] || null;
     if (before === code) return;
     if (rec !== false) W.undo.push({ i: i, before: before, flag: W.flags.get(i) || null });
@@ -386,7 +373,7 @@
     paintSeg(i); onChange();
   }
   function choose(code) {
-    if (locked() || !W.trace) return;
+    if (locked() || !W.trace || !W.ready) return;
     const i = W.active;
     setLabel(i, code);
     if ($('autoAdv').checked && i < W.trace.segs.length - 1) setActive(i + 1);
@@ -397,7 +384,7 @@
     toast('Every segment is labeled or flagged.');
   }
   function doUndo() {
-    if (locked()) return;
+    if (locked() || !W.ready) return;
     const op = W.undo.pop(); if (!op) return toast('Nothing to undo');
     W.labels[op.i] = op.before;
     if (op.flag) W.flags.set(op.i, op.flag); else W.flags.delete(op.i);
@@ -418,7 +405,7 @@
   $('tint').addEventListener('change', () => { $('trace').classList.toggle('tint', $('tint').checked); jset(P + 'tint', $('tint').checked); });
 
   document.addEventListener('keydown', e => {
-    if (!W.trace || document.body.dataset.view !== 'work') return;
+    if (!W.trace || !W.ready || document.body.dataset.view !== 'work') return;
     if (document.querySelector('dialog[open]') || e.target.closest('input, textarea, select')) return;
     if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z') { e.preventDefault(); doUndo(); return; }
     if (e.ctrlKey || e.metaKey || e.altKey) return;
@@ -439,7 +426,9 @@
   function draftObj() {
     return { labels: W.labels.slice(), flags: flagArr(), dwell: W.dwell.slice(), active_ms: W.activeMs, status: W.status, client_updated: W.clientUpdated, version: W.version, changes: W.changes };
   }
-  function saveLocal() { W.clientUpdated = nowIso(); jset(key('draft', W.trace.id), draftObj()); }
+  // Nothing is saved until the trace has finished loading (W.ready), so a click, key press or page exit
+  // during loading can never overwrite saved work with an empty state.
+  function saveLocal() { if (!W.ready) return; W.clientUpdated = nowIso(); jset(key('draft', W.trace.id), draftObj()); }
   function payload() {
     const d = draftObj();
     return { trace_id: W.trace.id, labels: d.labels, flags: d.flags, dwell_ms: d.dwell, active_ms: d.active_ms, n_segments: W.trace.segs.length,
@@ -447,7 +436,7 @@
       meta: { ua: navigator.userAgent.slice(0, 160), viewport: innerWidth + 'x' + innerHeight, n_changes: W.changes, auto_advance: $('autoAdv').checked } };
   }
   async function syncNow() {
-    if (LOCAL_ONLY || !W.trace || W.saving || !W.dirty || locked()) return;
+    if (LOCAL_ONLY || !W.trace || !W.ready || W.saving || !W.dirty || locked()) return;
     W.saving = true; W.dirty = false;
     try {
       const r = await api('save', payload());
@@ -461,7 +450,7 @@
     } finally { W.saving = false; }
   }
   function flushSave(beacon) {
-    if (!W.trace || locked()) return;
+    if (!W.trace || !W.ready || locked()) return;
     saveLocal();
     if (LOCAL_ONLY || !W.dirty) return;
     if (beacon && navigator.sendBeacon) {
@@ -490,7 +479,8 @@
     const t = TBY[tid]; if (!t) return go('traces');
     if (W.trace && W.trace.id === tid) return show('work');
     show('work');
-    W.trace = t; W.dirty = false; W.saving = false; W.lastAct = Date.now(); W.undo = [];
+    W.trace = t; W.ready = false; W.dirty = false; W.saving = false; W.lastAct = Date.now(); W.undo = [];
+    clearInterval(W.tick); clearTimeout(W.syncT);
     $('wTitle').textContent = t.label;
     $('problem').textContent = t.question; typeset($('problem'));
     $('trace').textContent = 'Loading…';
@@ -527,6 +517,7 @@
     let start = jget(key('pos', tid), null);
     if (start == null || start >= n) { start = W.labels.findIndex((l, i) => !l && !W.flags.has(i)); if (start < 0) start = 0; }
     W.active = start;
+    W.ready = true;
     applyLock();
     setActive(start, start > 0);
     if (LOCAL_ONLY) setSave(d.client_updated ? 'Saved on this device' : '');
@@ -545,7 +536,7 @@
     if (!W.trace) return;
     flushSave(false);
     clearInterval(W.tick); clearTimeout(W.syncT);
-    W.trace = null; W.els = []; $('trace').textContent = '';
+    W.trace = null; W.ready = false; W.els = []; $('trace').textContent = '';
   }
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushSave(true); });
   window.addEventListener('pagehide', () => flushSave(true));
@@ -554,7 +545,7 @@
   let flagSeg = null;
   $('flagAltRow').innerHTML = LABELS.map(l => '<label class="alt"><input type="checkbox" value="' + l.code + '"><span class="tagc t-' + l.code + '">' + esc(l.name) + '</span></label>').join('');
   function openFlag(i) {
-    if (!W.trace || locked()) return;
+    if (!W.trace || !W.ready || locked()) return;
     flagSeg = i;
     const cur = W.flags.get(i);
     $('flagSegNum').textContent = i + 1;
@@ -588,10 +579,10 @@
 
   // ---------------- submit ----------------
   $('submitBtn').addEventListener('click', () => {
-    if (!W.trace || locked()) return;
+    if (!W.trace || !W.ready || locked()) return;
     const n = W.labels.length, lab = W.labels.filter(Boolean).length, open = unresolved();
     $('subTitle').textContent = W.trace.label;
-    $('subSummary').textContent = n + ' segments · ' + lab + ' labeled · ' + W.flags.size + ' flagged · ' + open + ' unresolved · ' + fmtMin(W.activeMs) + ' active.';
+    $('subSummary').textContent = n + ' segments · ' + lab + ' labeled · ' + W.flags.size + ' flagged · ' + open + ' unresolved.';
     document.querySelectorAll('.subchk').forEach(c => { c.checked = false; });
     if (open) {
       const first = W.labels.findIndex((l, i) => !l && !W.flags.has(i));
@@ -610,7 +601,7 @@
     const prev = W.status;
     if (LOCAL_ONLY) {
       W.status = 'submitted'; saveLocal(); applyLock(); setSave('Submitted (this device)');
-      toast('Submitted. Remember to download your backup.');
+      toast('Trace submitted. Thank you!');
       return afterSubmit();
     }
     setSave('Submitting…'); $('submitBtn').disabled = true;
