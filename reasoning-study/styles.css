@@ -5,9 +5,10 @@
   --ink: #1f2d27;
   --ink-2: #34413b;
   --muted: #55615b;
-  --key-bg: #2f5c49;
-  --key-ink: #ffffff;
-  --key-soft: rgba(255, 255, 255, .86);
+  --key-bg: #e5f0e7;
+  --key-ink: #1f4a37;
+  --key-soft: #2c3a33;
+  --key-edge: #33694f;
   --line: #dde4dd;
   --line-2: #cfdacf;
   --green: #2f5c49;
@@ -30,12 +31,7 @@
   --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
   --radius: 14px;
 }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #141a17; --card: #1b2420; --ink: #e6ede8; --ink-2: #cdd7d0; --muted: #a7b4ad; --key-bg: #24402f; --key-ink: #e9f2ec; --key-soft: #c9dbcf; --line: #2a3530; --line-2: #34433b;
-  --green: #6fae8c; --green-hover: #84c0a0; --green-soft: #1f2d26; --green-ink: #8cc4a5;
-  --amber-bg: #2a2418; --amber-line: #8a6a3c; --amber-ink: #e0b77a; --red: #e58a7f; --red-soft: #2c1d1b; --ok: #7cc79c;
-  --cell-0: #1b2420; --cell-1: #2e4a3b; --cell-2: #4f7d63; --cell-3: #8cc4a5;
-  --shadow: none; color-scheme: dark } }
+:root { color-scheme: light; }
 :root[data-theme="dark"] {
   --bg: #141a17; --card: #1b2420; --ink: #e6ede8; --ink-2: #cdd7d0; --muted: #a7b4ad; --key-bg: #24402f; --key-ink: #e9f2ec; --key-soft: #c9dbcf; --line: #2a3530; --line-2: #34433b;
   --green: #6fae8c; --green-hover: #84c0a0; --green-soft: #1f2d26; --green-ink: #8cc4a5;
@@ -102,7 +98,6 @@ button:hover, .btn:hover { border-color: var(--green); }
 .primary { background: var(--green); border-color: var(--green); color: #fff; }
 .primary:hover { background: var(--green-hover); border-color: var(--green-hover); }
 :root[data-theme="dark"] .primary { color: #10201a; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .primary { color: #10201a; } }
 .link { background: none; border: 0; padding: 0; color: var(--green-ink); text-decoration: underline; text-underline-offset: 3px; font-weight: 500; font-size: inherit; border-radius: 0; }
 .danger-link { color: var(--red); }
 button:disabled { opacity: .5; cursor: not-allowed; }
@@ -269,9 +264,9 @@ code { font-family: var(--f-mono); font-size: .9em; }
 details.example .ex { margin-top: 14px; box-shadow: none; }
 
 /* "correctness doesn't matter" panel: the study's most important message */
-.key { background: var(--key-bg); color: var(--key-ink); border-radius: var(--radius); padding: clamp(24px, 4vw, 40px) clamp(22px, 4.5vw, 48px); display: flex; flex-direction: column; gap: 10px; box-shadow: var(--shadow); }
+.key { background: var(--key-bg); color: var(--key-ink); border: 1px solid #c9dfcf; border-left: 6px solid var(--key-edge); border-radius: var(--radius); padding: clamp(24px, 4vw, 40px) clamp(22px, 4.5vw, 48px); display: flex; flex-direction: column; gap: 10px; box-shadow: var(--shadow); }
 .key p { margin: 0; }
-.key-eyebrow { font-size: .78rem; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--key-soft); }
+.key-eyebrow { font-size: .78rem; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--key-edge); }
 .key-title { font-family: var(--f-display); font-size: clamp(1.6rem, 3.4vw, 2.3rem); font-weight: 600; line-height: 1.2; letter-spacing: -.015em; color: var(--key-ink); text-wrap: balance; }
 .key-text { font-size: 1.12rem; line-height: 1.7; color: var(--key-soft); max-width: 64ch; }
 .key-sm { padding: 18px 20px; gap: 6px; border-radius: 12px; }

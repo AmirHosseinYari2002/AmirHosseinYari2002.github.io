@@ -67,8 +67,12 @@
   // ---------------- api ----------------
   async function api(action, payload) {
     if (!API || API.indexOf('PASTE') === 0) throw Object.assign(new Error('not_configured'), { code: 'not_configured' });
-    const res = await fetch(API, { method: 'POST', body: JSON.stringify(Object.assign({ action: action }, payload || {})) });
-    const j = await res.json();
+    const ctl = window.AbortController ? new AbortController() : null, timer = ctl && setTimeout(() => ctl.abort(), 25000);
+    let j;
+    try {
+      const res = await fetch(API, { method: 'POST', body: JSON.stringify(Object.assign({ action: action }, payload || {})), signal: ctl ? ctl.signal : undefined });
+      j = await res.json();
+    } finally { if (timer) clearTimeout(timer); }
     if (!j.ok) throw Object.assign(new Error(j.error || 'error'), { code: j.error });
     return j;
   }
@@ -93,7 +97,8 @@
 
   // ---------------- edit log: every change, deletions included ----------------
   const L = { code: null, ops: [], prev: { w: '', a: '' } };
-  function logStart(code, w, a) { L.code = code; L.prev = { w: w, a: a }; L.ops = [{ t: Date.now(), k: 'open', w: w, a: a }]; S.dirty = true; }
+  const SID = Math.random().toString(36).slice(2, 10); let SEQ = 0;  // ids let the server drop a batch sent twice
+  function logStart(code, w, a) { L.code = code; L.prev = { w: w, a: a }; L.ops = [{ t: Date.now(), k: 'open', w: w, a: a, s: SID, q: ++SEQ }]; S.dirty = true; }
   function logChange(f) {
     if (!L.code) return;
     const nv = f === 'w' ? $('working').value : $('finalAnswer').value, ov = L.prev[f];
@@ -108,7 +113,7 @@
     if (near && !d && !last.d && last.i && p === last.p + last.i.length) { last.i += i; last.t2 = t; }
     else if (near && d && !i && !last.i && last.d && p + d.length === last.p) { last.d = d + last.d; last.p = p; last.t2 = t; }
     else if (near && d && !i && !last.i && last.d && p === last.p) { last.d += d; last.t2 = t; }
-    else L.ops.push({ t: t, f: f, p: p, d: d, i: i });
+    else L.ops.push({ t: t, f: f, p: p, d: d, i: i, s: SID, q: ++SEQ });
     S.dirty = true;
   }
   function setSave(text, cls) { const el = $('saveState'); el.className = 'savestate' + (cls ? ' ' + cls : ''); el.innerHTML = '<i class="dot"></i>'; el.append(text); }
@@ -138,14 +143,20 @@
     } finally { S.saving = null; }
   }
   setInterval(() => { if (S.cur) save().catch(() => {}); }, SAVE_MS);
+  window.addEventListener('online', () => { if (S.cur) save().catch(() => {}); });
+  function keepLocal() { if (S.cur) lsSet('rs_draft:' + S.cur.code, JSON.stringify({ w: $('working').value, a: $('finalAnswer').value })); }
+  // Page closing: keep a copy in this browser, then send a last save that survives the page closing.
   function beacon() {
-    if (!S.cur || !S.dirty || !navigator.sendBeacon || !API) return;
-    const body = Object.assign(payload(), { ops: L.ops.splice(0), action: 'save' });
+    keepLocal();
+    if (!S.cur || !S.dirty || !API || API.indexOf('PASTE') === 0) return;
+    const body = JSON.stringify(Object.assign(payload(), { ops: L.ops.splice(0), action: 'save' }));
     S.dirty = false;
-    try { navigator.sendBeacon(API, new Blob([JSON.stringify(body)], { type: 'text/plain' })); } catch (e) {}
+    try { fetch(API, { method: 'POST', body: body, keepalive: true }).catch(() => {}); }
+    catch (e) { try { navigator.sendBeacon(API, new Blob([body], { type: 'text/plain' })); } catch (x) {} }
   }
   window.addEventListener('pagehide', beacon);
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') beacon(); });
+  // Switching tabs or apps: an ordinary save, which keeps its edits queued and retries if it fails.
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { keepLocal(); if (S.cur) save().catch(() => {}); } });
 
   // ---------------- landing ----------------
   async function refreshStatus() {
@@ -281,7 +292,7 @@
     S.lastInput = Date.now();
     if (e.target.id === 'working') updateCount();
     if (!$('preview').hidden) { clearTimeout(onInput.pt); onInput.pt = setTimeout(renderPreview, 700); }
-    clearTimeout(onInput.lt); onInput.lt = setTimeout(() => { if (S.cur) lsSet('rs_draft:' + S.cur.code, JSON.stringify({ w: $('working').value, a: $('finalAnswer').value })); }, 1500);
+    clearTimeout(onInput.lt); onInput.lt = setTimeout(keepLocal, 300);
   }
   $('working').addEventListener('input', onInput);
   $('finalAnswer').addEventListener('input', onInput);
