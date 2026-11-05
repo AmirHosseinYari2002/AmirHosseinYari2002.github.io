@@ -189,6 +189,10 @@ exclude:
   - README
   - tmp
   - vendor
+  - trace-task-a/README.md
+  - trace-task-a/backend
+  - trace-task-a/analysis
+  - trace-task-a/tools
 keep_files:
   - .git
   - .svn
