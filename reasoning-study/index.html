@@ -159,11 +159,11 @@ window.MathJax = {
         <p>Revision history and approximate timestamps are recorded, including deleted text, and a full copy of your text is saved about every 30 seconds. Your name, email, background, and working notes are saved to the study after you consent and begin. They are accessible to the researcher; participation is not anonymous. No audio or video is collected.</p>
         <p>Your responses may be analyzed by external AI services for research annotation and evaluation. Names and email addresses will be removed before that analysis. Results and de-identified excerpts may appear in academic publications. Please avoid including personal or sensitive information in your working.</p>
         <p>Your name and email address will remain confidential and will not be published. We will report educational background and subject expertise only in aggregate to describe the participant group in our publications.</p>
-        <p>You can withdraw and delete your current participation from this browser using the button on the question and confirmation pages, including after submission. Each participation gets a code. If you participate again, keep the previous participation code and contact the researcher if you later want that earlier response withdrawn.<span class="contact-line"></span></p>
+        <p><strong>Before you submit</strong>, you can withdraw and delete your participation with the <strong>Withdraw and delete</strong> button on the question page. <strong>Once you submit, your response becomes part of the study and can no longer be withdrawn or deleted.</strong><span class="contact-line"></span></p>
       </div>
       <div class="checks">
         <label class="check" for="cAdult"><input type="checkbox" id="cAdult"><span>I am at least 18 years old.</span></label>
-        <label class="check" for="cConsent"><input type="checkbox" id="cConsent"><span>I have read the information and agree to the collection of my name, email address, background, working notes, edits, and timestamps.</span></label>
+        <label class="check" for="cConsent"><input type="checkbox" id="cConsent"><span>I have read the information and agree to the collection of my name, email address, background, working notes, edits, and timestamps. I understand that once I submit, my response can't be withdrawn or deleted.</span></label>
         <label class="check" for="cNoAI"><input type="checkbox" id="cNoAI"><span>I will not use ChatGPT, Gemini, Claude, or any other AI or automated solver.</span></label>
       </div>
     </div>
@@ -240,7 +240,7 @@ window.MathJax = {
         <button type="button" class="link danger-link" id="withdrawWorkBtn">Withdraw and delete</button>
       </div>
       <div class="confirm" id="submitConfirm" hidden>
-        <p><strong>Review before you submit.</strong> Your working (<span id="rvWords"></span>) and final answer can't be edited afterwards.</p>
+        <p><strong>Review before you submit.</strong> Your working (<span id="rvWords"></span>) and final answer can't be edited, withdrawn or deleted afterwards.</p>
         <p class="small">Final answer: <strong id="rvAnswer"></strong></p>
         <div class="row"><button class="primary" type="button" id="submitYes">Submit</button><button type="button" id="submitNo">Keep working</button></div>
       </div>
@@ -258,8 +258,8 @@ window.MathJax = {
   </div>
   <div class="card stack" id="doneCodeBox">
     <p>Your participation code: <span class="code-chip" id="doneCode"></span></p>
-    <p class="small muted">Keep this code. To withdraw this response later from another device, send the code to the researcher.</p>
-    <div class="row"><button type="button" class="link danger-link" id="withdrawDoneBtn">Withdraw and delete this response</button></div>
+    <p class="small muted">Your response is now part of the study. Submitted responses can't be withdrawn or deleted.</p>
+    <div class="row" hidden><button type="button" class="link danger-link" id="withdrawDoneBtn">Withdraw and delete this response</button></div>
     <div class="confirm" id="withdrawDoneConfirm" hidden><p><strong>Delete this response from the study?</strong> This can't be undone.</p><div class="row"><button type="button" id="withdrawDoneYes" style="color:var(--red)">Delete my response</button><button type="button" id="withdrawDoneNo">Cancel</button></div></div>
   </div>
   <div class="row">
