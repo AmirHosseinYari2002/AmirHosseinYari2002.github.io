@@ -193,6 +193,10 @@ exclude:
   - trace-task-a/backend
   - trace-task-a/analysis
   - trace-task-a/tools
+  - trace-task-b/README.md
+  - trace-task-b/backend
+  - trace-task-b/analysis
+  - trace-task-b/tools
 keep_files:
   - .git
   - .svn

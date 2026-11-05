@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TRACE · Task B · Researcher</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .grid-tbl { width: 100%; border-collapse: collapse; font-size: 14px; background: var(--paper); }
+  .grid-tbl th, .grid-tbl td { border-bottom: 1px solid var(--line); padding: 10px 12px; text-align: left; vertical-align: top; }
+  .grid-tbl th { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; }
+  .tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin: 12px 0 32px; }
+  .adm-form { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin: 8px 0 12px; }
+  .adm-form label { display: grid; gap: 4px; font-size: 13px; font-weight: 600; color: var(--ink-2); }
+  .adm-form input { font: inherit; border: 1px solid var(--line-2); border-radius: 8px; padding: 9px 10px; min-width: 200px; background: #fff; }
+  .cell small { display: block; color: var(--muted); }
+  code.k { user-select: all; }
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap top-in"><a class="brand" href="./" style="text-decoration:none">TRACE <span>/ Task B · Researcher</span></a></div></header>
+<main class="wrap view">
+  <h1 class="h1">Researcher workspace</h1>
+  <div class="note warn" id="cfgNote" hidden>No <code>apiUrl</code> in <code>config.js</code>. Deploy the Apps Script backend first (see <code>README.md</code>).</div>
+
+  <form class="adm-form" id="keyForm">
+    <label>Admin key <input id="adminKey" type="password" autocomplete="off" required></label>
+    <button class="btn primary sm" type="submit">Load</button>
+    <button class="btn sm" type="button" id="exportBtn" disabled>Download all annotations (JSON)</button>
+  </form>
+  <div class="note" id="msg" hidden></div>
+
+  <div id="panel" hidden>
+    <h2 style="margin-top:28px">Progress</h2>
+    <div class="tbl-wrap"><table class="grid-tbl" id="progTbl"></table></div>
+
+    <h2>Annotators</h2>
+    <form class="adm-form" id="addForm">
+      <label>Annotator email <input id="newId" type="email" placeholder="name@example.com" required></label>
+      <label>Name (optional) <input id="newName" placeholder="Full name"></label>
+      <button class="btn primary sm" type="submit">Add annotator</button>
+    </form>
+    <p class="muted small">Send each annotator the site link; they sign in with the email you register here. Deactivating an annotator blocks sign-in but keeps their data.</p>
+    <div class="tbl-wrap"><table class="grid-tbl" id="annTbl"></table></div>
+  </div>
+</main>
+<script src="config.js"></script>
+<script src="traces.js"></script>
+<script>
+(function () {
+  'use strict';
+  const API = ((window.TASK_CONFIG || {}).apiUrl || '').trim();
+  const TRACES = window.TRACES || [];
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  if (!API) $('cfgNote').hidden = false;
+  try { $('adminKey').value = sessionStorage.getItem('ttb:admin') || ''; } catch (e) {}
+
+  function msg(kind, html) { const m = $('msg'); m.className = 'note' + (kind ? ' ' + kind : ''); m.innerHTML = html; m.hidden = false; }
+  async function api(action, extra) {
+    const res = await fetch(API, { method: 'POST', body: JSON.stringify(Object.assign({ action: action, admin_key: $('adminKey').value.trim() }, extra || {})) });
+    const j = await res.json();
+    if (!j.ok) throw Object.assign(new Error(j.error), { code: j.error });
+    return j;
+  }
+  async function load() {
+    try {
+      const r = await api('admin_overview');
+      try { sessionStorage.setItem('ttb:admin', $('adminKey').value.trim()); } catch (e) {}
+      $('msg').hidden = true; $('panel').hidden = false; $('exportBtn').disabled = false;
+      render(r);
+    } catch (err) { msg('err', err.code === 'auth' ? 'Wrong admin key.' : 'Could not reach the backend: ' + esc(err.message)); }
+  }
+  function render(r) {
+    const by = {};
+    r.annotations.forEach(a => { by[a.annotator_id + '|' + a.trace_id] = a; });
+    let h = '<thead><tr><th>Annotator</th>' + TRACES.map(t => '<th>' + esc(t.label) + '<small style="display:block;text-transform:none;letter-spacing:0">' + t.segs.length + ' segments</small></th>').join('') + '</tr></thead><tbody>';
+    r.annotators.forEach(a => {
+      const id = String(a.annotator_id).toLowerCase();
+      h += '<tr><td><b>' + esc(id) + '</b><small class="muted" style="display:block">' + esc(a.name) + '</small></td>' + TRACES.map(t => {
+        const x = by[id + '|' + t.id];
+        if (!x) return '<td class="cell muted">—</td>';
+        return '<td class="cell"><span class="pill ' + esc(x.status) + '" style="margin:0">' + esc(x.status) + '</span>' +
+          '<small>' + x.n_labeled + '/' + x.n_segments + ' labeled · ' + x.n_flags + ' flags · ' + x.n_unresolved + ' open</small><small>' + Math.round((x.active_ms || 0) / 60000) + ' min active</small>' +
+          (x.status === 'submitted' ? '<button class="link small" data-reopen="' + esc(id) + '|' + esc(t.id) + '">Reopen</button>' : '') + '</td>';
+      }).join('') + '</tr>';
+    });
+    $('progTbl').innerHTML = h + '</tbody>';
+    $('annTbl').innerHTML = '<thead><tr><th>Email</th><th>Name</th><th>Active</th><th>Created</th><th></th></tr></thead><tbody>' +
+      r.annotators.map(a => '<tr><td><b>' + esc(a.annotator_id) + '</b></td><td>' + esc(a.name) + '</td><td>' + (String(a.active) !== 'false' ? 'yes' : 'no') + '</td><td class="small muted">' + esc(String(a.created_at).slice(0, 10)) + '</td>' +
+        '<td><button class="link small" data-active="' + esc(a.annotator_id) + '" data-to="' + (String(a.active) === 'false' ? '1' : '') + '">' + (String(a.active) === 'false' ? 'Activate' : 'Deactivate') + '</button></td></tr>').join('') + '</tbody>';
+  }
+  $('keyForm').addEventListener('submit', e => { e.preventDefault(); load(); });
+  $('addForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    try {
+      const r = await api('admin_add_annotator', { annotator_id: $('newId').value.trim().toLowerCase(), name: $('newName').value.trim() });
+      msg('', 'Added <b>' + esc(r.annotator_id) + '</b>. They can now sign in with this email.');
+      $('newId').value = ''; $('newName').value = ''; load();
+    } catch (err) { msg('err', err.code === 'exists' ? 'That email is already registered.' : err.code === 'bad_id' ? 'Please enter a valid email address.' : esc(err.message)); }
+  });
+  document.addEventListener('click', async e => {
+    const ro = e.target.closest('[data-reopen]');
+    if (ro) {
+      const [id, tid] = ro.dataset.reopen.split('|');
+      if (!confirm('Reopen ' + tid + ' for ' + id + '? They will be able to edit and must submit again.')) return;
+      try { await api('admin_reopen', { annotator_id: id, trace_id: tid }); load(); } catch (err) { msg('err', esc(err.message)); }
+    }
+    const ac = e.target.closest('[data-active]');
+    if (ac) { try { await api('admin_set_active', { annotator_id: ac.dataset.active, active: !!ac.dataset.to }); load(); } catch (err) { msg('err', esc(err.message)); } }
+  });
+  $('exportBtn').addEventListener('click', async () => {
+    try {
+      const r = await api('admin_export');
+      const out = { format: r.format, exported_at: r.exported_at, source: 'server', traces: TRACES.map(t => ({ id: t.id, sha256: t.sha256, seg_sha256: t.seg_sha256, n_segments: t.segs.length })), annotations: r.annotations };
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 1)], { type: 'application/json' }));
+      a.download = 'task-b_annotations_' + r.exported_at.slice(0, 10) + '.json';
+      document.body.appendChild(a); a.click(); a.remove();
+    } catch (err) { msg('err', esc(err.message)); }
+  });
+  if ($('adminKey').value && API) load();
+})();
+</script>
+</body>
+</html>
