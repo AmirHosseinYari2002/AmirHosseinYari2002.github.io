@@ -341,31 +341,19 @@
       const card = document.createElement('div'); card.className = 'card tcard';
       const label = { new: 'Not started', draft: 'In progress', submitted: 'Submitted', reopened: 'Reopened' }[st];
       card.innerHTML = '<div><h3>' + esc(t.label) + '<span class="pill ' + st + '">' + label + '</span></h3>' +
-        '<p class="muted">' + t.words.toLocaleString() + ' words · about ' + Math.max(1, Math.round(t.words / 180)) + '–' + Math.max(2, Math.round(t.words / 90)) + ' min' +
+        '<p class="muted">' + t.words.toLocaleString() + ' words' +
         (st !== 'new' ? ' · ' + nCuts + ' CUTs' + (l && l.active_ms ? ' · ' + fmtMin(l.active_ms) + ' active' : '') : '') + '</p></div>' +
         '<button class="btn ' + (st === 'submitted' ? '' : 'primary sm') + '" type="button">' + (st === 'submitted' ? 'View' : st === 'new' ? 'Start' : 'Continue') + '</button>';
       card.querySelector('button').addEventListener('click', () => go('trace/' + t.id));
       list.appendChild(card);
     });
-    if (LOCAL_ONLY) note($('syncNote'), 'warn', '<b>Local mode.</b> No server is configured, so your work is saved only in this browser. Use “Download a backup” below and send the file to the researcher.');
+    if (LOCAL_ONLY) note($('syncNote'), 'warn', '<b>Local mode.</b> No server is configured, so your work is saved only in this browser.');
     if (done === TRACES.length && TRACES.length) {
       const n = document.createElement('div'); n.className = 'note';
       n.innerHTML = '<b>All traces submitted.</b> Thank you — you can close this page.';
       list.prepend(n);
     }
   }
-  $('downloadAll').addEventListener('click', () => {
-    const out = { format: 'trace-task-a/v1', exported_at: nowIso(), source: 'annotator-backup', annotations: [] };
-    TRACES.forEach(t => {
-      const l = localDraft(t.id); if (!l) return;
-      out.annotations.push({ annotator_id: S.id, trace_id: t.id, status: l.status || 'draft', cuts: l.cuts, flags: l.flags, active_ms: l.active_ms || 0, read_pct: l.read_pct || 0, text_sha256: t.sha256, client_updated: l.client_updated });
-    });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 1)], { type: 'application/json' }));
-    a.download = 'task-a_' + S.id.replace(/[^a-z0-9._-]+/gi, '_') + '_' + new Date().toISOString().slice(0, 10) + '.json';
-    document.body.appendChild(a); a.click(); a.remove();
-  });
-
   // ---------------- workspace ----------------
   const W = { trace: null, ed: null, status: 'draft', activeMs: 0, lastAct: 0, readMax: 0, dirty: false, saving: false, lastSync: '', tick: 0, version: 0, clientUpdated: '' };
 
@@ -563,7 +551,7 @@
     const prev = W.status;
     if (LOCAL_ONLY) {
       W.status = 'submitted'; saveLocal(); applyLock(); setSave('Submitted (this device)');
-      toast('Submitted. Remember to download your backup.');
+      toast('Trace submitted (saved on this device).');
       return afterSubmit();
     }
     setSave('Submitting…'); $('submitBtn').disabled = true;
