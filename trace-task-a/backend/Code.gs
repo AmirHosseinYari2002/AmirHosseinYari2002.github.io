@@ -7,11 +7,11 @@
  *      and prints the ADMIN KEY in the execution log (also stored in Script Properties).
  *   3. Deploy → New deployment → Web app. Execute as: Me. Who has access: Anyone.
  *      Copy the /exec URL into trace-task-a/config.js (apiUrl).
- *   4. Open trace-task-a/admin.html, paste the admin key, and add your annotators.
- *      Each annotator gets an ID + access code to sign in.
+ *   4. Open trace-task-a/admin.html, paste the admin key, and add your annotators by email.
+ *      Annotators sign in with that email address.
  *
  * Sheets:
- *   Annotators  — one row per annotator (id, access code, name, active)
+ *   Annotators  — one row per annotator (email, name, active)
  *   Annotations — latest state per (annotator, trace): cuts, flags, status
  *   Log         — append-only history (every submit stores the full payload)
  */
@@ -59,7 +59,7 @@ function doPost(e) {
     lock.waitLock(20000);
     const a = body.action;
     if (a && a.indexOf('admin_') === 0) return out_(admin_(body));
-    const who = auth_(body.annotator_id, body.access_code);
+    const who = auth_(body.annotator_id);
     if (!who) return out_({ ok: false, error: 'auth' });
     if (a === 'login') return out_({ ok: true, name: who.name, progress: progress_(who.annotator_id), practiced: practiced_(who.annotator_id) });
     if (a === 'load') return out_(load_(who.annotator_id, body.trace_id));
@@ -74,12 +74,16 @@ function doPost(e) {
   }
 }
 
-function auth_(id, code) {
-  if (!id || !code) return null;
-  id = String(id).trim().toLowerCase(); code = String(code).trim();
-  const r = rows_('annotators').filter(function (x) { return String(x.annotator_id).toLowerCase() === id && String(x.access_code) === code; })[0];
+function normEmail_(e) { return String(e || '').trim().toLowerCase(); }
+function isEmail_(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) && e.length <= 120; }
+
+// Annotators sign in with the email address the researcher registered.
+function auth_(id) {
+  id = normEmail_(id);
+  if (!id) return null;
+  const r = rows_('annotators').filter(function (x) { return normEmail_(x.annotator_id) === id; })[0];
   if (!r || r.active === false || String(r.active).toLowerCase() === 'false') return null;
-  return { annotator_id: String(r.annotator_id).toLowerCase(), name: r.name };
+  return { annotator_id: id, name: r.name };
 }
 
 function find_(id, traceId) {
@@ -143,26 +147,25 @@ function admin_(body) {
   if (a === 'admin_overview') {
     return {
       ok: true,
-      annotators: rows_('annotators').map(function (x) { return { annotator_id: x.annotator_id, access_code: x.access_code, name: x.name, active: x.active, created_at: x.created_at }; }),
+      annotators: rows_('annotators').map(function (x) { return { annotator_id: normEmail_(x.annotator_id), name: x.name, active: x.active, created_at: x.created_at }; }),
       annotations: rows_('annotations').map(function (x) { return { annotator_id: x.annotator_id, trace_id: x.trace_id, status: x.status, n_cuts: x.n_cuts, n_flags: x.n_flags, active_ms: x.active_ms, read_pct: x.read_pct, server_updated: x.server_updated, submitted_at: x.submitted_at, version: x.version }; })
     };
   }
   if (a === 'admin_add_annotator') {
-    const id = String(body.annotator_id || '').trim().toLowerCase();
-    if (!/^[a-z0-9_-]{2,32}$/.test(id)) return { ok: false, error: 'bad_id' };
-    if (rows_('annotators').some(function (x) { return String(x.annotator_id).toLowerCase() === id; })) return { ok: false, error: 'exists' };
-    const code = String(Math.floor(100000 + Math.random() * 900000));
-    sheet_('annotators').appendRow([id, code, String(body.name || ''), true, now_()]);
-    return { ok: true, annotator_id: id, access_code: code };
+    const id = normEmail_(body.annotator_id);
+    if (!isEmail_(id)) return { ok: false, error: 'bad_id' };
+    if (rows_('annotators').some(function (x) { return normEmail_(x.annotator_id) === id; })) return { ok: false, error: 'exists' };
+    sheet_('annotators').appendRow([id, '', String(body.name || ''), true, now_()]);
+    return { ok: true, annotator_id: id };
   }
   if (a === 'admin_set_active') {
-    const r = rows_('annotators').filter(function (x) { return String(x.annotator_id).toLowerCase() === String(body.annotator_id).toLowerCase(); })[0];
+    const r = rows_('annotators').filter(function (x) { return normEmail_(x.annotator_id) === normEmail_(body.annotator_id); })[0];
     if (!r) return { ok: false, error: 'not_found' };
     sheet_('annotators').getRange(r._row, 4).setValue(!!body.active);
     return { ok: true };
   }
   if (a === 'admin_reopen') {
-    const r = find_(String(body.annotator_id).toLowerCase(), String(body.trace_id));
+    const r = find_(normEmail_(body.annotator_id), String(body.trace_id));
     if (!r) return { ok: false, error: 'not_found' };
     sheet_('annotations').getRange(r._row, 3).setValue('reopened');
     log_(r.annotator_id, r.trace_id, 'reopen', 'reopened', r.n_cuts, r.n_flags, null);

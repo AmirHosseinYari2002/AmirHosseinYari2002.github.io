@@ -1,12 +1,13 @@
 # TRACE · Task A: annotation platform
 
 Annotators read the reasoning traces and insert their own `<CUT>` boundaries from scratch (no LLM
-suggestions are shown). Hosted by GitHub Pages at `https://<your-site>/trace-task-a/`.
+suggestions are shown). Each trace is shown up to and including `</think>`, so it ends with the model's
+`**Final Answer**` box; the summary the model writes after `</think>` is not shown. Hosted by GitHub Pages at `https://<your-site>/trace-task-a/`.
 
 | File | Purpose |
 |---|---|
-| `index.html`, `app.js`, `styles.css` | Annotator site: sign in → guidelines → practice → 4 traces |
-| `admin.html` | Researcher page: add annotators, track progress, reopen a trace, export all annotations |
+| `index.html`, `app.js`, `styles.css` | Annotator site: sign in with email → guidelines → practice → 4 traces |
+| `admin.html` | Researcher page: add annotators by email, track progress, reopen a trace, export all annotations |
 | `config.js` | Backend URL and contact email |
 | `traces.js` | The 4 traces and problem statements (generated, text only, **no** LLM boundaries) |
 | `backend/Code.gs` | Google Apps Script backend (stores everything in a Google Sheet) |
@@ -22,8 +23,8 @@ suggestions are shown). Hosted by GitHub Pages at `https://<your-site>/trace-tas
 4. **Deploy → New deployment → Web app**. Set *Execute as*: **Me** and *Who has access*: **Anyone**.
    Copy the URL that ends in `/exec`.
 5. Paste that URL into `config.js` (`apiUrl: 'https://script.google.com/macros/s/…/exec'`), then commit and push.
-6. Open `/trace-task-a/admin.html`, enter the admin key, and **add each annotator**. Each one gets a
-   6-digit access code. Send them the site link, their ID and their code.
+6. Open `/trace-task-a/admin.html`, enter the admin key, and **add each annotator's email address**.
+   Send them the site link; they sign in with that email (case does not matter). Only registered emails can sign in.
 
 If you edit `Code.gs` later, use **Deploy → Manage deployments → Edit → New version** so the URL stays the same.
 If `apiUrl` is left empty, the site runs in *local mode*: work is saved only in the browser, and annotators
@@ -68,8 +69,9 @@ word starts, and every LLM boundary also falls on a word start, so humans and th
 with a block-bootstrap 95% CI of the difference, α with and without the AI, and a leave-one-out test:
 κ(AI, majority of the other humans) vs κ(held-out human, the same majority).
 
+By default only the text annotators saw is scored (`--section shown`, up to and including `</think>`).
 Useful options: `--section reasoning` (only the text before `</think>`), `--include-drafts`,
-`--exclude ann03`, and `pip install segeval` to add Boundary Similarity.
+`--exclude someone@example.com`, and `pip install segeval` to add Boundary Similarity.
 
 ## Regenerating `traces.js`
 

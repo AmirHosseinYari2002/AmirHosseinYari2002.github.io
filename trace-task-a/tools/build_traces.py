@@ -6,12 +6,13 @@ Usage:
 
 Only the source text and the problem statement are exported. The LLM segmentation is
 deliberately NOT written to the website, so annotators segment independently.
-Character offsets in the website refer to `completion_text` exactly as stored in
-deepseek-pilot/results/trajectories.jsonl (the trailing end-of-sentence token is hidden).
+Only the reasoning up to and including </think> is shown. Character offsets in the website refer
+to `completion_text` exactly as stored in deepseek-pilot/results/trajectories.jsonl (a prefix of it).
 """
 import json, sys, os, hashlib
 
 EOS = "<｜end▁of▁sentence｜>"
+THINK_END = "</think>"
 # Fixed presentation order (shortest first) - identical for every annotator.
 ORDER = ["tr_c984bb200fcad93b2061", "tr_bd762da13a9edec43b6e", "tr_1e2d7e5f49120fe5a74d", "tr_2eb4a94d173163db6303"]
 
@@ -29,8 +30,10 @@ def main(root, out):
     for n, tid in enumerate(ORDER, 1):
         t = traj[tid]
         text = t["completion_text"]
-        if text.endswith(EOS):
-            text = text[: -len(EOS)]
+        # Annotators see the reasoning only: everything up to and including </think>
+        # (this ends with the model's **Final Answer** box). The summary after </think> is hidden.
+        end = text.find(THINK_END)
+        text = text[: end + len(THINK_END)] if end >= 0 else (text[: -len(EOS)] if text.endswith(EOS) else text)
         items.append({
             "id": tid,
             "label": "Trace %d" % n,

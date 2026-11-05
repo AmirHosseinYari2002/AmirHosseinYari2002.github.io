@@ -40,11 +40,11 @@
 
     <h2>Annotators</h2>
     <form class="adm-form" id="addForm">
-      <label>New annotator ID <input id="newId" placeholder="ann01" pattern="[a-zA-Z0-9_\-]{2,32}" required></label>
+      <label>Annotator email <input id="newId" type="email" placeholder="name@example.com" required></label>
       <label>Name (optional) <input id="newName" placeholder="Full name"></label>
       <button class="btn primary sm" type="submit">Add annotator</button>
     </form>
-    <p class="muted small">Send each annotator the site link, their ID and their access code. Deactivating an annotator blocks sign-in but keeps their data.</p>
+    <p class="muted small">Send each annotator the site link; they sign in with the email you register here. Deactivating an annotator blocks sign-in but keeps their data.</p>
     <div class="tbl-wrap"><table class="grid-tbl" id="annTbl"></table></div>
   </div>
 </main>
@@ -90,8 +90,8 @@
       }).join('') + '</tr>';
     });
     $('progTbl').innerHTML = h + '</tbody>';
-    $('annTbl').innerHTML = '<thead><tr><th>ID</th><th>Access code</th><th>Name</th><th>Active</th><th>Created</th><th></th></tr></thead><tbody>' +
-      r.annotators.map(a => '<tr><td><b>' + esc(a.annotator_id) + '</b></td><td><code class="k">' + esc(a.access_code) + '</code></td><td>' + esc(a.name) + '</td><td>' + (String(a.active) !== 'false' ? 'yes' : 'no') + '</td><td class="small muted">' + esc(String(a.created_at).slice(0, 10)) + '</td>' +
+    $('annTbl').innerHTML = '<thead><tr><th>Email</th><th>Name</th><th>Active</th><th>Created</th><th></th></tr></thead><tbody>' +
+      r.annotators.map(a => '<tr><td><b>' + esc(a.annotator_id) + '</b></td><td>' + esc(a.name) + '</td><td>' + (String(a.active) !== 'false' ? 'yes' : 'no') + '</td><td class="small muted">' + esc(String(a.created_at).slice(0, 10)) + '</td>' +
         '<td><button class="link small" data-active="' + esc(a.annotator_id) + '" data-to="' + (String(a.active) === 'false' ? '1' : '') + '">' + (String(a.active) === 'false' ? 'Activate' : 'Deactivate') + '</button></td></tr>').join('') + '</tbody>';
   }
   $('keyForm').addEventListener('submit', e => { e.preventDefault(); load(); });
@@ -99,9 +99,9 @@
     e.preventDefault();
     try {
       const r = await api('admin_add_annotator', { annotator_id: $('newId').value.trim().toLowerCase(), name: $('newName').value.trim() });
-      msg('', 'Added <b>' + esc(r.annotator_id) + '</b> — access code <code class="k">' + esc(r.access_code) + '</code>');
+      msg('', 'Added <b>' + esc(r.annotator_id) + '</b>. They can now sign in with this email.');
       $('newId').value = ''; $('newName').value = ''; load();
-    } catch (err) { msg('err', err.code === 'exists' ? 'That ID already exists.' : err.code === 'bad_id' ? 'IDs use 2–32 letters, digits, “-” or “_”.' : esc(err.message)); }
+    } catch (err) { msg('err', err.code === 'exists' ? 'That ID already exists.' : err.code === 'bad_id' ? 'Please enter a valid email address.' : esc(err.message)); }
   });
   document.addEventListener('click', async e => {
     const ro = e.target.closest('[data-reopen]');

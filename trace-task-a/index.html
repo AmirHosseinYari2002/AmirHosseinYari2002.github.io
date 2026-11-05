@@ -43,9 +43,8 @@ window.MathJax = {
 
   <form class="signin card" id="signinForm" autocomplete="on">
     <h2>Sign in</h2>
-    <p class="muted">Use the annotator ID and access code you received from the researcher. Your progress is saved to your account, so you can leave and return later.</p>
-    <label>Annotator ID <input id="inId" name="username" autocomplete="username" required spellcheck="false" autocapitalize="off" placeholder="e.g. ann01"></label>
-    <label>Access code <input id="inCode" name="password" type="password" autocomplete="current-password" required placeholder="6-digit code"></label>
+    <p class="muted">Use the email address the researcher registered for you. Your progress is saved to your account, so you can leave and return later.</p>
+    <label>Email address <input id="inId" name="email" type="email" autocomplete="email" required spellcheck="false" autocapitalize="off" placeholder="you@example.com"></label>
     <div class="note" id="signinNote" hidden></div>
     <button class="btn primary" type="submit" id="signinBtn">Sign in <svg class="arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg></button>
   </form>

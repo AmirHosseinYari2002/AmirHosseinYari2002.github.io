@@ -95,8 +95,11 @@ class TraceUnits:
         self.tid, self.text = tid, text
         starts = [m.start() for m in re.finditer(r"\S+", text)]
         end = len(text)
-        if section == "reasoning" and "</think>" in text:
-            end = text.index("</think>")
+        k = text.find("</think>")
+        if section == "shown" and k >= 0:
+            end = k + len("</think>")   # exactly the text annotators saw
+        elif section == "reasoning" and k >= 0:
+            end = k
         self.word_starts = [s for s in starts if s < end]
         self.n_words = len(self.word_starts)
         self.gaps = self.word_starts[1:]  # candidate boundary positions
@@ -313,8 +316,9 @@ def main():
     ap.add_argument("--annotations", nargs="+", required=True)
     ap.add_argument("--out", default="task_a_results")
     ap.add_argument("--include-drafts", action="store_true", help="also use unsubmitted drafts")
-    ap.add_argument("--section", choices=["all", "reasoning"], default="all",
-                    help="'reasoning' = only the text before </think>")
+    ap.add_argument("--section", choices=["shown", "reasoning", "all"], default="shown",
+                    help="shown (default) = the text annotators saw, up to and including </think>; "
+                         "reasoning = before </think>; all = also the summary after </think> (not shown to annotators)")
     ap.add_argument("--exclude", nargs="*", default=[], help="annotator IDs to leave out")
     ap.add_argument("--block", type=int, default=200, help="bootstrap block size in gaps")
     ap.add_argument("--reps", type=int, default=2000)
@@ -337,7 +341,7 @@ def main():
         cp = utf16_to_cp(texts[tid])
         tv = {}
         ai_pos = {U.snap(p) for p in ai_starts.get(tid, ()) if p > 0}
-        tv[AI], bad = U.vector(ai_pos)
+        tv[AI], bad = U.vector(p for p in ai_pos if p in U.index)  # AI boundaries outside the scored section are dropped
         for h in humans_all:
             a = ann.get((h, tid))
             if not a:
@@ -346,10 +350,10 @@ def main():
                 warnings.append("%s/%s: text hash differs from the bundle — offsets may be wrong" % (h, tid))
             cuts = [cp[c] if cp else c for c in a.get("cuts", [])]
             if args.section == "reasoning":
-                cuts = [c for c in cuts if c in U.index]
+                cuts = [c for c in cuts if c < (U.word_starts[-1] + 1 if U.word_starts else 0)]
             tv[h], bad = U.vector(cuts)
             if bad:
-                warnings.append("%s/%s: %d CUT(s) not at a word start were ignored" % (h, tid, bad))
+                warnings.append("%s/%s: %d CUT(s) outside the scored text or not at a word start were ignored" % (h, tid, bad))
             for fl in a.get("flags", []):
                 pos = cp[fl["pos"]] if cp else fl["pos"]
                 i = U.index.get(pos)

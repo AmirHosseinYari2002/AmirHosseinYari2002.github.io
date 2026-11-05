@@ -38,13 +38,13 @@
   $('metaTraces').textContent = TRACES.length + ' shared traces';
 
   // ---------------- session + API ----------------
-  let S = jget('tta:session', null); // {id, code, name}
+  let S = jget('tta:session', null); // {id (email), name}
   const key = (...p) => 'tta:' + S.id + ':' + p.join(':');
   let serverProgress = {}, serverPracticed = false;
 
   async function api(action, payload) {
     if (LOCAL_ONLY) throw Object.assign(new Error('local'), { code: 'local' });
-    const body = Object.assign({ action: action, annotator_id: S && S.id, access_code: S && S.code }, payload || {});
+    const body = Object.assign({ action: action, annotator_id: S && S.id }, payload || {});
     const res = await fetch(API, { method: 'POST', body: JSON.stringify(body) });
     const j = await res.json();
     if (!j.ok) throw Object.assign(new Error(j.error || 'error'), { code: j.error });
@@ -83,23 +83,23 @@
   // ---------------- sign in ----------------
   $('signinForm').addEventListener('submit', async e => {
     e.preventDefault();
-    const id = $('inId').value.trim().toLowerCase(), code = $('inCode').value.trim();
+    const id = $('inId').value.trim().toLowerCase();
     const n = $('signinNote'); n.hidden = true;
-    if (!/^[a-z0-9_-]{2,32}$/.test(id)) return note(n, 'err', 'Annotator IDs use letters, digits, “-” or “_”.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(id)) return note(n, 'err', 'Please enter a valid email address.');
     if (LOCAL_ONLY) {
-      S = { id: id, code: code, name: '' }; jset('tta:session', S);
+      S = { id: id, name: '' }; jset('tta:session', S);
       toast('Local mode: your work is kept in this browser.');
       return go('');
     }
     $('signinBtn').disabled = true;
     try {
-      S = { id: id, code: code };
+      S = { id: id };
       const r = await api('login');
       S.name = r.name || ''; serverProgress = r.progress || {}; serverPracticed = !!r.practiced;
       jset('tta:session', S); go('');
     } catch (err) {
       S = null;
-      note(n, 'err', err.code === 'auth' ? 'That ID and access code do not match. Check them and try again.' : 'Could not reach the server. Check your connection and try again.');
+      note(n, 'err', err.code === 'auth' ? 'This email is not registered for the study. Use the address you gave the researcher, or contact them.' : 'Could not reach the server. Check your connection and try again.');
     } finally { $('signinBtn').disabled = false; }
   });
   $('signOutBtn').addEventListener('click', () => {
@@ -362,7 +362,7 @@
     });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 1)], { type: 'application/json' }));
-    a.download = 'task-a_' + S.id + '_' + new Date().toISOString().slice(0, 10) + '.json';
+    a.download = 'task-a_' + S.id.replace(/[^a-z0-9._-]+/gi, '_') + '_' + new Date().toISOString().slice(0, 10) + '.json';
     document.body.appendChild(a); a.click(); a.remove();
   });
 
@@ -398,7 +398,7 @@
     saveLocal();
     if (LOCAL_ONLY || !W.dirty) return;
     if (beacon && navigator.sendBeacon) {
-      try { navigator.sendBeacon(API, new Blob([JSON.stringify(Object.assign({ action: 'save', annotator_id: S.id, access_code: S.code }, payload()))], { type: 'text/plain' })); W.dirty = false; } catch (e) {}
+      try { navigator.sendBeacon(API, new Blob([JSON.stringify(Object.assign({ action: 'save', annotator_id: S.id }, payload()))], { type: 'text/plain' })); W.dirty = false; } catch (e) {}
     } else syncNow();
   }
 
