@@ -264,25 +264,13 @@
       card.querySelector('button').addEventListener('click', () => go('trace/' + t.id));
       list.appendChild(card);
     });
-    if (LOCAL_ONLY) note($('syncNote'), 'warn', '<b>Local mode.</b> No server is configured, so your work is saved only in this browser. Use “Download a backup” below and send the file to the researcher.');
+    if (LOCAL_ONLY) note($('syncNote'), 'warn', '<b>Local mode.</b> No server is configured, so your work is saved only in this browser. Please contact the researcher.');
     if (done === TRACES.length && TRACES.length) {
       const n = document.createElement('div'); n.className = 'note';
       n.innerHTML = '<b>All traces submitted.</b> Thank you — you can close this page.';
       list.prepend(n);
     }
   }
-  $('downloadAll').addEventListener('click', () => {
-    const out = { format: 'trace-task-b/v1', exported_at: nowIso(), source: 'annotator-backup', annotations: [] };
-    TRACES.forEach(t => {
-      const l = localDraft(t.id); if (!l) return;
-      out.annotations.push({ annotator_id: S.id, trace_id: t.id, status: l.status || 'draft', labels: l.labels, flags: l.flags, dwell_ms: l.dwell, active_ms: l.active_ms || 0,
-        n_segments: t.segs.length, text_sha256: t.sha256, seg_sha256: t.seg_sha256, client_updated: l.client_updated });
-    });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 1)], { type: 'application/json' }));
-    a.download = 'task-b_' + S.id.replace(/[^a-z0-9._-]+/gi, '_') + '_' + new Date().toISOString().slice(0, 10) + '.json';
-    document.body.appendChild(a); a.click(); a.remove();
-  });
 
   // =========================================================
   // Workspace: fixed segments, one label each.
@@ -610,7 +598,7 @@
     const prev = W.status;
     if (LOCAL_ONLY) {
       W.status = 'submitted'; saveLocal(); applyLock(); setSave('Submitted (this device)');
-      toast('Submitted. Remember to download your backup.');
+      toast('Trace submitted. Thank you!');
       return afterSubmit();
     }
     setSave('Submitting…'); $('submitBtn').disabled = true;
