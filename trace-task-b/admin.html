@@ -78,7 +78,7 @@
   function render(r) {
     const by = {};
     r.annotations.forEach(a => { by[a.annotator_id + '|' + a.trace_id] = a; });
-    let h = '<thead><tr><th>Annotator</th>' + TRACES.map(t => '<th>' + esc(t.label) + '<small style="display:block;text-transform:none;letter-spacing:0">' + t.segs.length + ' segments</small></th>').join('') + '</tr></thead><tbody>';
+    let h = '<thead><tr><th>Annotator</th>' + TRACES.map(t => '<th>' + esc(t.label) + '<small style="display:block;text-transform:none;letter-spacing:0">' + t.segs.length + ' segments · ' + t.words.toLocaleString() + ' words</small><small style="display:block;text-transform:none;letter-spacing:0">est. ' + Math.max(5, Math.round(t.segs.length * 12 / 60 / 5) * 5) + '–' + Math.max(10, Math.round(t.segs.length * 25 / 60 / 5) * 5) + ' min</small></th>').join('') + '</tr></thead><tbody>';
     r.annotators.forEach(a => {
       const id = String(a.annotator_id).toLowerCase();
       h += '<tr><td><b>' + esc(id) + '</b><small class="muted" style="display:block">' + esc(a.name) + '</small></td>' + TRACES.map(t => {
