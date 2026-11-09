@@ -1,17 +1,283 @@
 // Question bank (no answers). Generated from benchmark.csv.
 window.QUESTIONS = [
 {
-"id": "OlymMATH-HARD-84-EN",
+"id": "OlymMATH-EASY-74-EN",
 "d": "math",
-"sub": "Number Theory",
-"q": "$a_1, a_2, \\cdots, a_{2016}$ is a permutation of $1, 2, \\cdots, 2016$, and satisfies $2017 | (a_1 a_2 + a_2 a_3 + \\cdots + a_{2015} a_{2016})$. There are $K$ such permutations, find the remainder when $K$ is divided by $4066272$.",
+"sub": "Combinatorics",
+"q": "Let $A = \\{1, 2, \\cdots, 6\\}$, and function $f: A \\rightarrow A$. Define $p(f) = f(1) \\cdots f(6)$. Find the number of functions such that $p(f) | 36$.",
 "u": ""
 },
 {
-"id": "OlymMATH-HARD-75-EN",
+"id": "OlymMATH-EASY-12-EN",
+"d": "math",
+"sub": "Geometry",
+"q": "Find the maximum number of right angles among all interior angles of a simple 300-sided polygon (without self-intersections) in a plane.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-27-EN",
+"d": "math",
+"sub": "Combinatorics",
+"q": "Consider all three-element subsets $\\{a, b, c\\}$ of the set $\\{1, 2, \\cdots, 81\\}$, where $a < b < c$. We call $b$ the middle element. Find the sum $S$ of all middle elements.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-30-EN",
+"d": "math",
+"sub": "Combinatorics",
+"q": "Given that the function $f\\colon \\mathbf{R}\\rightarrow \\mathbf{R}$ satisfies $f(x^2)+f(y^2)=f^2(x+y)-2xy$ for all $x$, $y\\in \\mathbf{R}$. Let $S={\\sum}_{n=-2020}^{2020}f(n)$. Find how many possible values $S$ can take.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-17-EN",
 "d": "math",
 "sub": "Algebra",
-"q": "For any 2016 complex numbers $z_{1}, z_{2}, \\cdots, z_{2016}$, we have $\\sum_{k=1}^{2016} | z_{k} |^{2} \\geq \\lambda \\min_{1 \\leq k \\leq 2016} \\{ | z_{k+1} - z_{k} |^{2} \\}$, where $z_{2017} = z_{1}$. Find the maximum value of $\\lambda$.",
+"q": "Given an integer sequence $\\{a_{i,j}\\}$ ($i, j \\in \\mathbf{N}$), where $a_{1,n} = n^n$ ($n \\in \\mathbf{Z}_{+}$), $a_{i,j} = a_{i-1,j} + a_{i-1,j+1}$ ($i, j \\geqslant 1$). Find the units digit of $a_{128,1}$.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-18-EN",
+"d": "math",
+"sub": "Combinatorics",
+"q": "There are $100$ distinct points and $n$ distinct lines $l_1, l_2, \\dots, l_n$ on a plane. Let $a_k$ denote the number of points that line $l_k$ passes through. If $a_1 + a_2 + \\dots + a_n = 250$, find the minimum possible value of $n$.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-63-EN",
+"d": "math",
+"sub": "Number Theory",
+"q": "If a positive integer $a$ satisfies: there exists a prime number $p$ such that $a^2+p$ is also a perfect square, then $a$ is called a good number. Find the number of good numbers in the set $M=\\{1, 2, \\cdots, 100\\}$.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-99-EN",
+"d": "math",
+"sub": "Combinatorics",
+"q": "A mathematics competition consists of $6$ problems, each worth $7$ points for a correct answer and $0$ points for an incorrect answer or no answer. After the competition, a participating team obtained a total score of $161$ points. When analyzing the scores, it was found that any two contestants from this team had at most two correctly solved problems in common, and there were no three contestants who all correctly solved the same two problems. Find the minimum number of contestants on this team.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-51-EN",
+"d": "math",
+"sub": "Combinatorics",
+"q": "A frisbee toy is a circular disc divided into 20 sectors by 20 rays emanating from the center, with each sector colored either red or blue (only the front side is colored), and any two opposite sectors are colored differently. If frisbee toys that are the same after rotation are considered identical, how many different frisbee toys are there in total? (Answer with a specific number.)",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-15-EN",
+"d": "math",
+"sub": "Combinatorics",
+"q": "In the Cartesian coordinate system, consider the set of points $\\{(m, n) | m, n \\in \\mathbf{Z}_{+}, 1 \\leqslant m, n \\leqslant 6\\}$. Each point is colored either red or blue. Find the number of different coloring schemes such that each unit square has exactly two red vertices.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-62-EN",
+"d": "math",
+"sub": "Number Theory",
+"q": "For a positive integer $n$, let $\\varphi(n)$ denote the number of positive integers not exceeding $n$ and coprime to $n$. Let $f(n)$ denote the smallest positive integer greater than $n$ that is not coprime to $n$. If $f(n) = m$ and $\\varphi(m) = n$, then $(m, n)$ is called a lucky pair. Consider the set $S$ of all lucky pairs, find the value of $\\sum_{(m, n)\\in S} (m + n)$.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-54-EN",
+"d": "math",
+"sub": "Number Theory",
+"q": "From $1, 2, 3, 4, 5, 6, 7, 8, 9, 10$, select $7$ different numbers to form a sequence $a_1, a_2, \\cdots, a_7$, such that the sum of any $4$ adjacent terms is a multiple of $3$. Find the number of such sequences.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-34-EN",
+"d": "math",
+"sub": "Combinatorics",
+"q": "Given the set $M = \\{1, 2, \\dots, 2020\\}$. Now each number in $M$ is colored either red, yellow, or blue, and each color exists. Let $S_1 = \\{(x, y, z) \\in M^3 \\mid x, y, z \\text{ are the same color}, 2020 \\mid (x+y+z)\\}$, $S_2 = \\{(x, y, z) \\in M^3 \\mid x, y, z \\text{ are pairwise different colors}, 2020 \\mid (x+y+z)\\}$. Find the minimum value of $2|S_1| - |S_2|$.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-21-EN",
+"d": "math",
+"sub": "Combinatorics",
+"q": "In an $n \\times n$ square grid, there are $(n+1)^2$ intersection points. The number of squares (which can be tilted) with vertices at these intersection points is denoted as $a_n$. It is known that when $n=2$, $a_2 = 6$, and when $n=3$, $a_3 = 20$. Find the value of $a_{26}$.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-98-EN",
+"d": "math",
+"sub": "Number Theory",
+"q": "Let the set $S$ consist of all integer solutions to the equation $2^x + 3^y = z^2$. Find $\\sum_{(x, y, z)\\in S}(x + y + z^2)$.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-45-EN",
+"d": "math",
+"sub": "Combinatorics",
+"q": "Define a function $f(x)$ on the set $\\{x\\in \\mathbb{Z}_{+} | 1\\leqslant x\\leqslant 12\\}$ satisfying $|f(x+1)-f(x)|=1$ ($x=1, 2, \\dots, 11$), and $f(1)$, $f(6)$, $f(12)$ form a geometric sequence. If $f(1)=1$, find the number of different functions $f(x)$ that satisfy these conditions.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-85-EN",
+"d": "math",
+"sub": "Geometry",
+"q": "In triangle $\\triangle ABC$, the sides opposite to angles $\\angle A$, $\\angle B$, $\\angle C$ are $a$, $b$, $c$ respectively. If $\\angle A = 39^{\\circ}$ and $(a^2 - b^2)(a^2 + ac - b^2) = b^2c^2$, find the value of $\\angle C$.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-10-EN",
+"d": "math",
+"sub": "Algebra",
+"q": "Given $x, y \\in \\mathbf{R}$, for any $n \\in \\mathbf{Z}_{+}$, $nx+\\frac{1}{n}y\\geq 1$. Find the minimum value of $41x+2y$.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-53-EN",
+"d": "math",
+"sub": "Algebra",
+"q": "Find the smallest positive real number $c$ such that for any positive integer $n(n \\geqslant 2)$ and positive real numbers $a_1 \\leqslant a_2 \\leqslant \\cdots \\leqslant a_n$, we have $\\sum_{k=2}^{n}\\frac{a_{k}-2\\sqrt{a_{k-1}(a_{k}-a_{k-1})}}{c^{k}}\\geqslant \\frac{a_{n}}{nc^{n}}-\\frac{a_{1}}{c}$.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-25-EN",
+"d": "math",
+"sub": "Algebra",
+"q": "Let $\\triangle ABC$ be an acute triangle where the lengths of the sides opposite to the angles are $a$, $b$, and $c$ respectively. If $2a^{2}=2b^{2}+c^{2}$, find the minimum value of $\\tan A+\\tan B+\\tan C$.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-55-EN",
+"d": "math",
+"sub": "Number Theory",
+"q": "For a positive integer $n$, denote the sum of its digits as $s(n)$ and the product of its digits as $p(n)$. If $s(n)+p(n)=n$, then $n$ is called a coincidental number. Find the sum of all coincidental numbers.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-11-EN",
+"d": "math",
+"sub": "Number Theory",
+"q": "Let $T$ be the set consisting of all positive divisors of $2020^{100}$. The set $S$ satisfies: (1) $S$ is a subset of $T$; (2) No element in $S$ is a multiple of another element in $S$. Find the maximum number of elements in $S$.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-78-EN",
+"d": "math",
+"sub": "Combinatorics",
+"q": "Color each cell in a $5 \\times 5$ grid with one of five colors, such that the number of cells of each color is the same. If two adjacent cells have different colors, their common edge is called a \"dividing edge\". Find the minimum number of dividing edges.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-59-EN",
+"d": "math",
+"sub": "Number Theory",
+"q": "Find the value of the integer $n$ that satisfies $133^5 + 110^5 + 84^5 + 27^5 = n^5$.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-42-EN",
+"d": "math",
+"sub": "Combinatorics",
+"q": "In a Cartesian coordinate system, four points are fixed: $A(0,0)$, $B(2,0)$, $C(4,2)$, $D(4,4)$. Two ants crawl from point $A$ to point $D$ and from point $B$ to point $C$ respectively. The ants can only move in the positive direction of the coordinate axes, and can only change direction at integer points. Find the number of path pairs such that the two ants never meet.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-60-EN",
+"d": "math",
+"sub": "Number Theory",
+"q": "Choose a set of numbers from $1, 2, \\cdots, 2018$ such that for any two numbers in the set, their sum cannot be divided by their difference. Find the maximum possible size of such a set.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-57-EN",
+"d": "math",
+"sub": "Number Theory",
+"q": "If the number of 1's in the binary representation of $n$ is greater than the number of 0's, then the positive integer $n$ is called a good number. Find the number of good numbers not exceeding $2017$.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-4-EN",
+"d": "math",
+"sub": "Algebra",
+"q": "Find the minimum value of $f(x) = \\sum_{i=1}^{2017} i|x-i|$ when $x \\in [1, 2017]$.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-80-EN",
+"d": "math",
+"sub": "Algebra",
+"q": "Given that the function $f(x) = 10x^2 + mx + n$ ($m, n \\in \\mathbf{Z}$) has two distinct real roots in the interval $(1, 3)$. Find the maximum possible value of $f(1)f(3)$.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-20-EN",
+"d": "math",
+"sub": "Combinatorics",
+"q": "Suppose 40 people vote anonymously, each with one ballot. Each person can vote for one or two candidates among three candidates. There are no invalid ballots. Find the number of different possible voting outcomes.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-43-EN",
+"d": "math",
+"sub": "Combinatorics",
+"q": "Let $h_n$ represent the number of regions that a convex polygon with $n+2$ sides is divided into by its diagonals. Assume that no three diagonals intersect at the same point, and define $h_0 = 0$. Find the value of $h_{26}$.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-82-EN",
+"d": "math",
+"sub": "Algebra",
+"q": "Given $x, y, z \\in \\mathbf{R}_{+}$ and $x+y+z=1$, find the maximum value of $x+\\sqrt{2xy}+3\\sqrt[3]{xyz}$.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-58-EN",
+"d": "math",
+"sub": "Number Theory",
+"q": "Consider each permutation of $1, 2, \\cdots, 8$ as an eight-digit number. Find the number of such eight-digit numbers that are divisible by $11$.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-2-EN",
+"d": "math",
+"sub": "Algebra",
+"q": "Calculate the value of $\\sqrt{9+8\\cos 20^{\\circ }}-\\sec 20^{\\circ }$.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-65-EN",
+"d": "math",
+"sub": "Algebra",
+"q": "Given a sequence $\\{a_n\\}$ that satisfies $a_{n+1} + (-1)^n a_n = 2n - 1$, and the sum of the first $2019$ terms of the sequence $\\{a_n - n\\}$ is $2019$, find the value of $a_{2020}$.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-56-EN",
+"d": "math",
+"sub": "Number Theory",
+"q": "Nine consecutive positive integers are arranged in ascending order as a sequence $a_1<\\cdots<a_9$. If $a_1+a_3+a_5+a_7+a_9$ is a perfect square, and $a_2+a_4+a_6+a_8$ is a perfect cube, find the minimum value of the sum of these nine positive integers.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-50-EN",
+"d": "math",
+"sub": "Algebra",
+"q": "Let $a$, $b$, $c$ be positive real numbers. Find the minimum value of $\\frac{(a+b+c)(a^2+3b^2+15c^2)}{abc}$.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-0-EN",
+"d": "math",
+"sub": "Combinatorics",
+"q": "Given a non-negative integer sequence $\\{a_n\\}$ satisfying $a_1 = 2016$, $a_{n+1} \\le \\sqrt{a_n}$, and if the number of terms is at least 2, then any two terms in the sequence are not equal. Find the number of such sequences $\\{a_n\\}$.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-16-EN",
+"d": "math",
+"sub": "Geometry",
+"q": "Given that circle $\\odot O$ has equation $x^2 + y^2 = 4$, circle $\\odot M$ has equation $(x - 5\\cos\\theta)^2 + (y - 5\\sin\\theta)^2 = 1 (\\theta \\in \\mathbf{R})$. From any point $P$ on circle $\\odot M$, draw two tangent lines $PE$ and $PF$ to circle $\\odot O$, with points of tangency $E$ and $F$ respectively. Find the minimum value of $\\overrightarrow{PE} \\cdot \\overrightarrow{PF}$.",
+"u": ""
+},
+{
+"id": "OlymMATH-EASY-13-EN",
+"d": "math",
+"sub": "Algebra",
+"q": "Let $x$, $y$, $z$ be complex numbers satisfying $x^2 + y^2 + z^2 = xy + yz + zx$, $|x+y+z| = 21$, $|x-y| = 2\\sqrt{3}$, $|x| = 3\\sqrt{3}$. Find the value of $|y|^2 + |z|^2$.",
 "u": ""
 },
 {
@@ -19,20 +285,6 @@ window.QUESTIONS = [
 "d": "math",
 "sub": "Number theory",
 "q": "For which integer $x$ from $1$ to $1717$ maximizes the number of positive integers $y$ for which $\\frac{1}{x} + \\frac{1}{y}$ is a unit fraction?",
-"u": ""
-},
-{
-"id": "OlymMATH-HARD-2-EN",
-"d": "math",
-"sub": "Algebra",
-"q": "For $i = 1, 2, \\cdots, n$, we have $x_i < 1$, and $| x_1 | + | x_2 | + \\cdots + | x_n | = 19 + | x_1 + x_2 + \\cdots + x_n |$. Find the minimum value of the positive integer $n$.",
-"u": ""
-},
-{
-"id": "OlymMATH-HARD-85-EN",
-"d": "math",
-"sub": "Number Theory",
-"q": "Given that $n$ is a positive integer not exceeding 2021, and satisfying $\\left( \\left[ \\sqrt{n} \\right]^2 + 1 \\right) | \\left( n^2 + 1 \\right)$, find the number of such $n$.",
 "u": ""
 },
 {
@@ -50,31 +302,10 @@ window.QUESTIONS = [
 "u": ""
 },
 {
-"id": "OlymMATH-HARD-81-EN",
-"d": "math",
-"sub": "Geometry",
-"q": "Through vertex $A$ of a regular tetrahedron $ABCD$, create a cross-section in the shape of an isosceles triangle, such that the angle between this cross-section and face $BCD$ is $75 ^{\\circ}$. Find how many such cross-sections exist.",
-"u": ""
-},
-{
 "id": "imo-bench-combinatorics-099",
 "d": "math",
 "sub": "Combinatorics",
 "q": "A $\\textit{lattice point}$ of a Tango dance floor is a point $(x,y)$ in which both $x$ and $y$ are integers. Find the smallest positive integer $c$ such that every lattice point of the dance floor can be colored with one of $c$ colors, such that the following two conditions hold:\nIf $(x,y)$ and $(a,b)$ are two distinct neighboring points; that is, $|x-a|\\leq1$ and $|y-b|\\leq1$, then $(x,y)$ and $(a,b)$ must be different colors.\nIf $(x,y)$ and $(a,b)$ are two lattice points such that $x\\equiv a\\pmod{2025}$ and $y\\equiv b\\pmod{2025}$, then $(x,y)$ and $(a,b)$ must be the same color.",
-"u": ""
-},
-{
-"id": "OlymMATH-HARD-12-EN",
-"d": "math",
-"sub": "Algebra",
-"q": "Given a positive integer $n=2024$. Find the maximum value of the integer $M$ such that for any positive integers $a_{1}, a_{2}, \\ldots, a_{n}$, we have $[\\sqrt{a_{1}}]+[\\sqrt{a_{2}}]+\\cdots +[\\sqrt{a_{n}}]\\geqslant [\\sqrt{a_{1}+a_{2}+\\cdots +a_{n}+M\\min \\{a_{1},a_{2},\\cdots ,a_{n}\\}}]$, where $[x]$ denotes the greatest integer not exceeding the real number $x$.",
-"u": ""
-},
-{
-"id": "OlymMATH-HARD-74-EN",
-"d": "math",
-"sub": "Geometry",
-"q": "In space, there are four points $A$, $B$, $C$, $D$ satisfying $AB = BC = CD$. If $\\angle ABC = \\angle BCD = \\angle CDA = 36^{\\circ}$, find the sum of all possible values of the angle formed by lines $AC$ and $BD$.",
 "u": ""
 },
 {
@@ -127,27 +358,6 @@ window.QUESTIONS = [
 "u": ""
 },
 {
-"id": "OlymMATH-HARD-25-EN",
-"d": "math",
-"sub": "Number Theory",
-"q": "For any positive integer $n$, $\\tau(n)$ represents the number of positive divisors of $n$, and $\\varphi(n)$ represents the number of positive integers that are less than $n$ and coprime to $n$. If a positive integer $n$ satisfies that one of $n$, $\\tau(n)$, $\\varphi(n)$ is the arithmetic mean of the other two, then $n$ is called a good number. Find how many good numbers exist.",
-"u": ""
-},
-{
-"id": "OlymMATH-HARD-28-EN",
-"d": "math",
-"sub": "Algebra",
-"q": "Given $\\frac{by}{z}+\\frac{cz}{y}=a$, $\\frac{cz}{x}+\\frac{ax}{z}=b$, $\\frac{ax}{y}+\\frac{by}{x}=c$, and $abc=1$, find the value of $a^{3}+b^{3}+c^{3}$.",
-"u": ""
-},
-{
-"id": "OlymMATH-HARD-50-EN",
-"d": "math",
-"sub": "Number Theory",
-"q": "Let set $A = \\{0, 1, \\cdots, 2018\\}$. If $x, y, z \\in A$, and $x^2 + y^2 - z^2 = 2019^2$, find the sum of the maximum and minimum values of $x + y + z$.",
-"u": ""
-},
-{
 "id": "imo-bench-combinatorics-097",
 "d": "math",
 "sub": "Combinatorics",
@@ -162,24 +372,10 @@ window.QUESTIONS = [
 "u": ""
 },
 {
-"id": "OlymMATH-HARD-8-EN",
-"d": "math",
-"sub": "Combinatorics",
-"q": "For $k$, $n \\in \\mathbf{Z}_{+}$, consider a finite sequence $\\{a_{k}\\}$ with $n$ terms, where $a_{k} \\leqslant m$, $a_{k}$, $m \\in \\mathbf{Z}_{+}$. If $m=2025$, determine the maximum value of $n$ such that the sequence $\\{a_{k}\\}$ satisfies: (1) for any term $a_{k}$, if $a_{k-1}$ and $a_{k+1}$ exist, then $a_{k-1} \\neq a_{k+1}$; (2) there do not exist positive integers $i_{1} < i_{2} < i_{3} < i_{4}$ such that $a_{{i_{1}}} = a_{{i_{3}}} \\neq a_{{i_{2}}} = a_{{i_{4}}}$.",
-"u": ""
-},
-{
 "id": "imo-bench-algebra-032",
 "d": "math",
 "sub": "Algebra",
 "q": "We call $g: \\mathbb{R} \\rightarrow \\mathbb{R}$ a good function if $g$ satisfies all the following conditions:\n\n(1) For any two distinct real numbers $a, b$, if $g(ab) = 0$, then $g(a) = 0$ or $g(b) = 0$.\n(2) For any two distinct real numbers $a, b$, if $g(ab) \\neq 0$, then $$\\frac{g(a)-g(b)}{a-b}=\\frac{g(a)g(b)}{g(ab)}.$$\n(3) $g(1)=1$\n\\\\\nLet $S=\\{2^a 3^b 5^c 7^d : a,b,c,d\\in \\mathbb{Z}\\}$ and we call $h:S\\rightarrow \\mathbb{R}$ an essential function if there exists a good function $g$ such that $h(x)=g(x)$ for all $x\\in S$. Find the number of essential functions.",
-"u": ""
-},
-{
-"id": "OlymMATH-HARD-67-EN",
-"d": "math",
-"sub": "Number Theory",
-"q": "Find all prime numbers $p$ such that $p^2 - 87p + 729$ is a perfect cube.",
 "u": ""
 },
 {
@@ -232,13 +428,6 @@ window.QUESTIONS = [
 "u": ""
 },
 {
-"id": "OlymMATH-HARD-96-EN",
-"d": "math",
-"sub": "Number Theory",
-"q": "Find the smallest integer $m\\ge 2017$ such that for any integers $a_1, a_2, \\cdots, a_{m}$, there exist $1 < i_1 < i_2 < \\cdots < i_{2017} \\le m$ and $\\varepsilon_1, \\varepsilon_2, \\cdots, \\varepsilon_{2017} \\in \\{-1, 1\\}$, such that $\\sum_{j=1}^{2017}\\varepsilon_j a_{i_j}$ is divisible by $2017$.",
-"u": ""
-},
-{
 "id": "imo-bench-geometry-003",
 "d": "math",
 "sub": "Geometry",
@@ -253,27 +442,6 @@ window.QUESTIONS = [
 "u": ""
 },
 {
-"id": "OlymMATH-HARD-35-EN",
-"d": "math",
-"sub": "Geometry",
-"q": "In the ellipse $\\Gamma: \\frac{x^{2}}{2019} + \\frac{y^{2}}{2018} = 1$, $F$ is the left focus. Line $l$ passing through the right focus intersects the left directrix of ellipse $\\Gamma$ and the ellipse $\\Gamma$ at points $C$, $A$, and $B$, respectively. If $\\angle FAB = 40^{\\circ}$ and $\\angle FBA = 10^{\\circ}$, find the value of $\\angle FCA$.",
-"u": ""
-},
-{
-"id": "OlymMATH-HARD-90-EN",
-"d": "math",
-"sub": "Number Theory",
-"q": "Find the remainder of $\\sum_{k=0}^{1234}\\binom{2016\\times 1234}{2016k}$ modulo $2017^2$ (provide the value in the range $[0, 2017^2)$).",
-"u": ""
-},
-{
-"id": "OlymMATH-HARD-32-EN",
-"d": "math",
-"sub": "Combinatorics",
-"q": "For a cube $ABCD-A_{1}B_{1}C_{1}D_{1}$, place the numbers $1, 2, \\cdots, 8$ at the eight vertices of the cube, with the requirement that the sum of any three numbers on each face is not less than $10$. Find the number of different ways to place the numbers.",
-"u": ""
-},
-{
 "id": "imo-bench-combinatorics-023",
 "d": "math",
 "sub": "Combinatorics",
@@ -285,20 +453,6 @@ window.QUESTIONS = [
 "d": "math",
 "sub": "Number theory",
 "q": "Find the number of ordered quadruples of positive integers $(a,b,c,d)$ such that $a^2+b^2+c^3-d^3$ is a multiple of $61$ and $1\\le a,b,c,d\\le 61$.",
-"u": ""
-},
-{
-"id": "OlymMATH-HARD-38-EN",
-"d": "math",
-"sub": "Combinatorics",
-"q": "Given a line segment $x+y=1$ ($x\\geqslant 0$, $y\\geqslant 0$) with $2020$ points on it. Find the smallest positive integer $k$, such that for any such $2020$ points, there always exists a way to divide these $2020$ points into two groups, where in one group the sum of y-coordinates is not greater than $k$, and in the other group the sum of x-coordinates is not greater than $k$ (these $2020$ points may coincide).",
-"u": ""
-},
-{
-"id": "OlymMATH-HARD-39-EN",
-"d": "math",
-"sub": "Combinatorics",
-"q": "Let set $A = \\{1, 2, \\cdots, 5\\}$, and the set consisting of all subsets of set $A$ is called the power set of $A$, denoted as $2^A$. A mapping $f: 2^A \\rightarrow A$ is called a \"perfect mapping\" if for any $X, Y \\in 2^A$, we have $f(X \\cap Y) = \\min\\{f(X), f(Y)\\}$. Find the number of perfect mappings.",
 "u": ""
 },
 {
@@ -337,20 +491,6 @@ window.QUESTIONS = [
 "u": ""
 },
 {
-"id": "OlymMATH-HARD-41-EN",
-"d": "math",
-"sub": "Number Theory",
-"q": "Define a function $f: \\mathbb{Z} \\rightarrow \\mathbb{Z}$ such that for any $x, y \\in \\mathbb{Z}$, we have $f(x^2 - 3y^2) + f(x^2 + y^2) = 2(x+y)f(x-y)$. If $n > 0$, then $f(n) > 0$, and $f(2015)f(2016)$ is a perfect square. Find the minimum value of $f(1) + f(2)$.",
-"u": ""
-},
-{
-"id": "OlymMATH-HARD-3-EN",
-"d": "math",
-"sub": "Geometry",
-"q": "Find the minimum number of cubes (which can be suspended in air) needed so that all three views (front, top, and side) are $3 \\times 3$ grids.",
-"u": ""
-},
-{
 "id": "imo-bench-geometry-058",
 "d": "math",
 "sub": "Geometry",
@@ -379,20 +519,6 @@ window.QUESTIONS = [
 "u": ""
 },
 {
-"id": "OlymMATH-HARD-93-EN",
-"d": "math",
-"sub": "Number Theory",
-"q": "Let $S\\subset \\{1, 2, \\cdots, 100\\}$ be a set. It is known that for any two distinct elements $a, b$ in $S$, there exists a positive integer $k$ and two distinct elements $c, d$ in $S$ (which may equal $a$ or $b$), such that $c < d$ and $a + b = c^k d$. Find the maximum number of elements in set $S$.",
-"u": ""
-},
-{
-"id": "OlymMATH-HARD-49-EN",
-"d": "math",
-"sub": "Combinatorics",
-"q": "Given the set of integers $A = \\{1, 2, \\cdots, 100\\}$. Let the function $f: A \\rightarrow A$ satisfy: (1) for any $1 \\leqslant i \\leqslant 99$, we have $|f(i) - f(i+1)| \\leqslant 1$; (2) for any $1 \\leqslant i \\leqslant 100$, we have $f(f(i)) = 100$. Find the minimum possible value of $\\sum_{i=1}^{100} f(i)$.",
-"u": ""
-},
-{
 "id": "amo-15",
 "d": "math",
 "sub": "number",
@@ -414,13 +540,6 @@ window.QUESTIONS = [
 "u": ""
 },
 {
-"id": "OlymMATH-HARD-11-EN",
-"d": "math",
-"sub": "Number Theory",
-"q": "Let the sum of $n$ distinct positive integers $a_1, a_2, \\dots, a_n$ be $2000$. Denote $A = \\max\\{a_1, a_2, \\dots, a_n\\}$. Find the minimum value of $A+n$. ($n$ is not given in advance)",
-"u": ""
-},
-{
 "id": "imo-bench-geometry-063",
 "d": "math",
 "sub": "Geometry",
@@ -432,27 +551,6 @@ window.QUESTIONS = [
 "d": "math",
 "sub": "Combinatorics",
 "q": "The Bank of Berlin issues coins made out of two types of metal: aluminium (denoted $A$ ) and copper (denoted $C$ ). Sophia has $255$ aluminium coins, and $255$ copper coins, and arranges her $510$ coins in a row in some arbitrary initial order.  Given a fixed positive integer $k \\leqslant 510$, she repeatedly performs the following operation: identify the largest subsequence containing the $k$-th coin from the left which consists of consecutive coins made of the same metal, and move all coins in that subsequence to the left end of the row. For example, if there are $4$ aluminum coins and $4$ copper coins and $k=4$, the process starting from the configuration $A A C C C A C A$ would be\n\n\\[\nA A C C C A C A \\rightarrow C C C A A A C A \\rightarrow A A A C C C C A \\rightarrow C C C C A A A A \\rightarrow \\cdots\n\\]\n\nIn addition to aluminium and copper coins, Sophia also has a few silver coins that she keeps separate from her aluminium and copper coins.\n\nLet $a$ and $b$ be the smallest and largest positive integer $k$ with $1 \\leqslant k \\leqslant 510$ such that for every initial configuration, at some point of the process there will be at most one aluminium coin adjacent to a copper coin. Find the product $ab$.",
-"u": ""
-},
-{
-"id": "OlymMATH-HARD-97-EN",
-"d": "math",
-"sub": "Number Theory",
-"q": "A positive integer is called a \"good number\" if it can be represented as the sum of squares of pairwise differences of $1893$ integers. Find the smallest positive integer $a$ that is not a perfect square, such that multiplying any good number by $a$ still yields a good number.",
-"u": ""
-},
-{
-"id": "OlymMATH-HARD-68-EN",
-"d": "math",
-"sub": "Algebra",
-"q": "For any positive real numbers $a_1, a_2, \\cdots, a_5$, if $\\sum_{i=1}^{5}\\frac{a_i}{\\sqrt{a_i^2+2^{i-1}a_{i+1}a_{i+2}}}\\geqslant \\lambda$, find the maximum value of $\\lambda$.",
-"u": ""
-},
-{
-"id": "OlymMATH-HARD-98-EN",
-"d": "math",
-"sub": "Combinatorics",
-"q": "Let $a_1, a_2, \\cdots, a_{20}$ be $20$ distinct positive integers, and the set $\\{a_i + a_j | 1 \\le i, j \\le 20\\}$ contains $201$ distinct elements. Find the minimum possible number of distinct elements in the set $\\{|a_i - a_j| | 1 \\le i, j \\le 20\\}$.",
 "u": ""
 },
 {
@@ -491,13 +589,6 @@ window.QUESTIONS = [
 "u": ""
 },
 {
-"id": "OlymMATH-HARD-42-EN",
-"d": "math",
-"sub": "Combinatorics",
-"q": "Let the set $X=\\{1,2,\\cdots,2022\\}$. A family of sets $\\mathcal{F}$ consists of several distinct subsets of $X$, satisfying: for any $F\\in \\mathcal{F}$, we have $|F| \\geqslant 800$; and for any $x\\in X$, there are at least $800$ sets $F\\in \\mathcal{F}$ such that $x\\in F$. Find the smallest positive integer $m$ such that there must exist $m$ sets in $\\mathcal{F}$ whose union is $X$.",
-"u": ""
-},
-{
 "id": "amo-1",
 "d": "math",
 "sub": "number",
@@ -526,20 +617,6 @@ window.QUESTIONS = [
 "u": ""
 },
 {
-"id": "OlymMATH-HARD-1-EN",
-"d": "math",
-"sub": "Geometry",
-"q": "If the distances from the eight vertices of a cube to a certain plane are $0$, $1$, $2$, $3$, $4$, $5$, $6$, $7$ respectively, consider all possible edge lengths of this cube. Assuming the possible edge lengths form a set $S$, find the sum of squares of all elements in $S$.",
-"u": ""
-},
-{
-"id": "OlymMATH-HARD-54-EN",
-"d": "math",
-"sub": "Combinatorics",
-"q": "In the plane region $M = \\{(x, y) | 0 \\le y \\le 2 - x, 0 \\le x \\le 2 \\}$, $k$ points are chosen arbitrarily. It is always possible to divide these $k$ points into two groups $A$ and $B$, such that the sum of the x-coordinates of all points in group $A$ does not exceed $6$, and the sum of the y-coordinates of all points in group $B$ does not exceed $6$. Find the maximum value of the positive integer $k$.",
-"u": ""
-},
-{
 "id": "amo-44",
 "d": "math",
 "sub": "number",
@@ -547,24 +624,10 @@ window.QUESTIONS = [
 "u": ""
 },
 {
-"id": "OlymMATH-HARD-55-EN",
-"d": "math",
-"sub": "Algebra",
-"q": "Let the three roots of the equation $4^{1-2x} + \\log_2 x = 0$ be $x_1, x_2, x_3$ ($x_1 < x_2 < x_3$). Find the value of $\\frac{\\log_2 x_2}{x_1 x_2 x_3}$.",
-"u": ""
-},
-{
 "id": "amo-50",
 "d": "math",
 "sub": "number",
 "q": "Let the polynomial $f(x)=x^6 - 11x^5 + 28x^4 + 2x^3 + 57x^2 + 13x + 30$, and let $\\alpha$ be the smallest positive real root of the equation $f(x)=0$. Set $N$ as the remainder of the closest integer to $\\alpha^{35}$ divided by 1498. \nA logistics company warehouses pallets with serial numbers $m=1,2,\\dots, M$. To simplify the ``sampling-judgment'' process, three quality inspectors use their respective ``cyclic-power residue'' rules: \nInspector A uses a ``cycle of $7$ pallets'' rule to record the remainder of serial number $m$ divided by $7$. If this remainder is a non-zero quadratic residue of modulo $7$ (there exists an $r$ coprime to $7$ such that $r^2\\equiv m\\pmod7$), it is marked as ``passed''; \nInspector B uses a ``cycle of $11$ pallets'' rule to record the remainder of serial number $m$ divided by $11$. If this remainder is a non-zero cubic residue of modulo $11$ (there exists an $r$ coprime to $11$ such that $r^3\\equiv m\\pmod{11}$), it is marked as ``passed''; \nInspector C uses a ``cycle of $13$ pallets'' rule to record the remainder of serial number $m$ divided by $13$. If this remainder is a non-zero quartic residue of modulo $13$ (there exists an $r$ coprime to $13$ such that $r^4\\equiv m\\pmod{13}$), it is marked as ``passed''. \nA serial number $m$ is marked as ``qualified'' if and only if all three inspectors mark it as ``passed''. Let the total number of qualified serial numbers be counted within the range $1 \\le m \\le M$, where the integer $M$ satisfies $M-724=N$. How many ``qualified'' serial numbers are there in total?",
-"u": ""
-},
-{
-"id": "OlymMATH-HARD-95-EN",
-"d": "math",
-"sub": "Number Theory",
-"q": "Given positive integers $x_1, x_2, \\cdots, x_{2005}$ satisfying $\\sum_{i = 1} ^ {2005} x_i = 432972$, find the maximum value of $\\sum_{i = 1} ^ {2005} \\gcd(x_i, x_{i+1}, x_{i+2})$, where the indices are taken modulo $2005$.",
 "u": ""
 },
 {
@@ -582,24 +645,10 @@ window.QUESTIONS = [
 "u": ""
 },
 {
-"id": "OlymMATH-HARD-72-EN",
-"d": "math",
-"sub": "Algebra",
-"q": "Given the function $f(x) = a(|\\sin x| + |\\cos x|) - 3\\sin 2x - 7$, where $a$ is a real parameter. Consider the ordered pairs $(a, n)$ ($n \\in \\mathbf{Z}_{+}$) such that the function $y = f(x)$ has exactly $2019$ zeros in the interval $(0, n\\pi)$. All such ordered pairs form a set $S$. Find $\\sum_{(a_0, n_0)\\in S} (a_0^2+n_0)$.",
-"u": ""
-},
-{
 "id": "imo-bench-geometry-026",
 "d": "math",
 "sub": "Geometry",
 "q": "A line intersects a segment $PQ$ at point $R$. What is the maximum number of points $Y$ on this line such that one of the angles $\\angle PYR$ and $\\angle QYR$ is equal to half of the other?",
-"u": ""
-},
-{
-"id": "OlymMATH-HARD-87-EN",
-"d": "math",
-"sub": "Number Theory",
-"q": "Given that a positive integer $n$ satisfies: in any consecutive $n$ positive integers, it is always possible to select two numbers $a$, $b$ ($a \\neq b$), and there exists a positive integer $k$, such that $210|(a^k-b^k)$. Find the minimum value of $n$ that satisfies this condition.",
 "u": ""
 },
 {
@@ -638,13 +687,6 @@ window.QUESTIONS = [
 "u": ""
 },
 {
-"id": "OlymMATH-HARD-0-EN",
-"d": "math",
-"sub": "Algebra",
-"q": "Let $a, b, c \\in \\mathbb{R}$, $a^3 b + b^3 c + c^3 a = 3$, find the minimum value of the expression $f(a, b, c) = (\\sum a^4)^4 + 1000 \\sum a^2 b^2$.",
-"u": ""
-},
-{
 "id": "amo-7",
 "d": "math",
 "sub": "set",
@@ -673,27 +715,6 @@ window.QUESTIONS = [
 "u": ""
 },
 {
-"id": "OlymMATH-HARD-16-EN",
-"d": "math",
-"sub": "Number Theory",
-"q": "Find the largest positive integer $n \\le 2025$ such that there exists a strictly increasing sequence of positive integers $a_1 < a_2 < \\cdots < a_n$, where all sums $a_i + a_j (1 \\le i < j \\le n)$ are distinct, and in modulo 4, each remainder appears the same number of times.",
-"u": ""
-},
-{
-"id": "OlymMATH-HARD-94-EN",
-"d": "math",
-"sub": "Number Theory",
-"q": "Let the sequence $\\{a_n\\}$ satisfy: (1) $a_1$ is a perfect square number (2) For any positive integer $n$, $a_{n + 1}$ is the smallest positive integer such that $2^na_1+2^{n-1}a_2+\\cdots+2a_n+a_{n+1}$ is a perfect square number. If there exists a positive integer $s$ such that $a_s = a_{s + 1} = t$, find the minimum possible value of $t$.",
-"u": ""
-},
-{
-"id": "OlymMATH-HARD-86-EN",
-"d": "math",
-"sub": "Number Theory",
-"q": "Find the number of ordered pairs of positive integers $(m,k)$ that satisfy the following conditions, where $3 \\leqslant k \\leqslant 12$ and $2 \\leqslant m \\leqslant 20$. Additionally, when $\\frac{1}{k}$ is represented as a repeating decimal in base $m$, the digits in the repeating portion are all distinct, and by deleting the first few digits of the decimal part, we can obtain the base $m$ repeating decimal representations of $\\frac{2}{k}, \\cdots, \\frac{k-1}{k}$.",
-"u": ""
-},
-{
 "id": "amo-31",
 "d": "math",
 "sub": "number",
@@ -712,13 +733,6 @@ window.QUESTIONS = [
 "d": "math",
 "sub": "number",
 "q": "Let $n$ be a positive integer such that $ 2 \\leq n \\leq 5 $. For each such $n$, let $A_nB_nC_nD_n$ be a rectangle with vertex $A_n$ at $(-n, 1 + 6 \\sqrt{2} - \\sqrt{2}n)$, and vertex $B_n$ the reflection of $A_n$ through the origin. The line segments $A_nC_n$ and $B_nD_n$ are parallel to the $x$-axis, and the line segments $A_nD_n$ and $B_nC_n$ are parallel to the $y$-axis.\nLet $P_i \\quad (1 \\leq i \\leq 36)$ be 36 distinct points on the curve $(y - |x|)^2 + x^2 = 1$. For each point $P_i$, let the distances to the 16 sides of the four rectangles be denoted by $r_{i_1}, r_{i_2}, \\ldots, r_{i_{16}}$.\nLet $d_i = \\min \\Big( r_{i_k} \\Big) , \\quad (1 \\leq k \\leq 16)$, and suppose that these values satisfy the condition $ 3 \\sum_{i=1}^{36}d_{i}^{3}  -15\\sum_{i=1}^{36} d_{i}^{2} = -1200$.\nFind the maximum value of $\\sum_{i=1}^{36} d_i$.",
-"u": ""
-},
-{
-"id": "OlymMATH-HARD-17-EN",
-"d": "math",
-"sub": "Number Theory",
-"q": "Let $[x]$ denote the greatest integer not exceeding the real number $x$. The sequence $\\{x_n\\}$ satisfies: $x_1 = 1$, $x_{n+1} = 4x_n + [\\sqrt{11}x_n]$. Find the units digit of $x_{2021}$.",
 "u": ""
 },
 {
@@ -747,13 +761,6 @@ window.QUESTIONS = [
 "d": "math",
 "sub": "number",
 "q": "Let \\(x,y,z\\) be positive real numbers such that \\({xy} + {xz} + {yz} \\neq 1\\), \\(\\frac{\\left( {{x}^{2} - 1}\\right) \\left( {{y}^{2} - 1}\\right) }{xy} + \\frac{\\left( {{x}^{2} - 1}\\right) \\left( {{z}^{2} - 1}\\right) }{xz} + \\frac{\\left( {{z}^{2} - 1}\\right) \\left( {{y}^{2} - 1}\\right) }{zy} = 4\\). Find the minimum value of \\(9{x}^{2} + {13689}{y}^{2}{z}^{2} - {27378yz} + \\frac{28561}{{\\left( y + z\\right) }^{2}}\\).",
-"u": ""
-},
-{
-"id": "OlymMATH-HARD-46-EN",
-"d": "math",
-"sub": "Combinatorics",
-"q": "In a $101 \\times 101$ grid, each cell is filled with a number from the set $\\{1, 2, \\cdots, 101^2\\}$, and each number in the set is used exactly once. The left and right boundaries of the grid are considered the same line, and the top and bottom boundaries are also considered the same line (i.e., it is a torus). If no matter how we fill the grid, there always exist two adjacent cells (cells sharing an edge) such that the difference between the two numbers filled in is not less than $M$, find the maximum value of $M$.",
 "u": ""
 },
 {
@@ -796,13 +803,6 @@ window.QUESTIONS = [
 "d": "math",
 "sub": "number",
 "q": "Let \\(x\\) and \\(y\\) be positive rational numbers that satisfy:\n\\[\n1 + \\sqrt{1 - 2y} = y + \\frac{4x - 2 + 2\\sqrt{1 - 2x}}{3 - 5x - \\sqrt{1 - 2x}} + \\sqrt[3]{\\frac{1 + x^2}{2} + \\frac{1}{6} \\cdot \\sqrt{9x^4 + \\frac{4x^6}{3} + 9 + 18x^2}}+ \\sqrt[3]{\\frac{1 + x^2}{2} - \\frac{1}{6} \\cdot \\sqrt{9x^4 + \\frac{4x^6}{3} + 9 + 18x^2}}\n\\]\nGiven that \\( kx \\) and \\( ky \\) are both positive integers, find the minimum value of the positive integer \\( k \\).",
-"u": ""
-},
-{
-"id": "OlymMATH-HARD-91-EN",
-"d": "math",
-"sub": "Number Theory",
-"q": "Write out all positive integers from $1$ to $10000$ from left to right, then delete those numbers that are divisible by $5$ or $7$, and form a new number by connecting the remaining numbers in a row. Find the remainder when this new number is divided by $11$ (give the value in the range $[0, 11)$).",
 "u": ""
 },
 {
