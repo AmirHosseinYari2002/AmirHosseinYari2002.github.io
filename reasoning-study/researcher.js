@@ -82,7 +82,7 @@
     Object.keys(order).forEach(d => order[d].forEach(u => { total++; const c = t[u] || {}; if (c.done >= D.target) full++; active += c.active || 0; }));
     const matched = D.responses.filter(r => r.check === 'match').length, auto = D.responses.filter(r => r.check !== 'manual').length;
     $('stats').innerHTML = [
-      [full + ' / ' + total, 'Questions complete (' + D.target + ' answers)'],
+      [full + ' / ' + total, 'Questions complete (' + D.target + (D.target === 1 ? ' answer)' : ' answers)')],
       [D.responses.length, 'Answers collected'],
       [D.participants.length, 'Participants'],
       [active, 'Working right now'],
@@ -90,6 +90,7 @@
     ].map(([v, k]) => '<div class="stat"><b>' + esc(v) + '</b><span>' + esc(k) + '</span></div>').join('');
     document.querySelectorAll('.legend-target').forEach(el => { el.textContent = D.target; });
     document.querySelectorAll('.legend .cell[data-n="2"]').forEach(c => { c.parentElement.hidden = D.target <= 2; });
+    document.querySelectorAll('.legend .cell[data-n="1"]').forEach(c => { c.parentElement.hidden = D.target <= 1; });
     renderProgress(); renderResponses(); renderActivity(); renderParticipants();
     if ($('shareLink') && window.STUDY_SITE_URL) $('shareLink').textContent = window.STUDY_SITE_URL;
   }
