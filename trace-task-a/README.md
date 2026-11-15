@@ -1,81 +1,60 @@
-# TRACE · Task A: annotation platform
+# TRACE · Task A: annotation platform (window design)
 
-Annotators read the reasoning traces and insert their own `<CUT>` boundaries from scratch (no LLM
-suggestions are shown). Each trace is shown up to and including `</think>`, so it ends with the model's
-`**Final Answer**` box; the summary the model writes after `</think>` is not shown. Hosted by GitHub Pages at `https://<your-site>/trace-task-a/`.
+The annotator site for **Part A → Part B** of `taskA_human_validation.ipynb`. Annotators segment short
+**windows** (about 2,600 characters) of model reasoning from scratch, in their own random order, and the
+researcher page exports one file per annotator in exactly the format Part B reads.
 
 | File | Purpose |
 |---|---|
-| `index.html`, `app.js`, `styles.css` | Annotator site: sign in with email → guidelines → practice → 4 traces |
-| `admin.html` | Researcher page: add annotators by email, track progress, reopen a trace, export all annotations |
-| `config.js` | Backend URL and contact email |
-| `traces.js` | The 4 traces and problem statements (generated, text only, **no** LLM boundaries) |
-| `backend/Code.gs` | Google Apps Script backend (stores everything in a Google Sheet) |
-| `tools/build_traces.py` | Regenerates `traces.js` from the frozen pilot bundle |
-| `analysis/task_a_agreement.py` | Inter-annotator and AI–human agreement |
+| `index.html`, `app.js`, `styles.css` | Annotator site: email sign-in → guidelines → warm-up (2 passages with feedback) → 3 practice windows → study windows |
+| `admin.html` | Researcher page: add annotators and their slot, progress and active time, reopen a window, export `A1.json`, `A2.json`, … |
+| `data/items.json`, `data/assignments.json` | Copied **unchanged** from `TaskA/platform/` (written by Part A). Nothing that un-blinds an item is here |
+| `config.js` | Backend URL, contact email, dry-run banner |
+| `backend/Code.gs` | Google Apps Script backend (Google Sheet: Annotators, Windows, Events) |
 
-## 1. Set up the backend (about 10 minutes)
+## What the annotator sees
 
-1. Create a new Google Sheet, for example "TRACE Task A".
-2. **Extensions → Apps Script**. Replace the editor contents with `backend/Code.gs` and save.
-3. Select the `setup` function and click **Run**, then authorize it. The execution log prints the
-   **ADMIN KEY** (it's also stored under Project Settings → Script Properties → `ADMIN_KEY`).
-4. **Deploy → New deployment → Web app**. Set *Execute as*: **Me** and *Who has access*: **Anyone**.
-   Copy the URL that ends in `/exec`.
-5. Paste that URL into `config.js` (`apiUrl: 'https://script.google.com/macros/s/…/exec'`), then commit and push.
-6. Open `/trace-task-a/admin.html`, enter the admin key, and **add each annotator's email address**.
-   Send them the site link; they sign in with that email (case does not matter). Only registered emails can sign in.
+* The problem (sidebar), the preceding text **greyed out** (context only) and the window to segment.
+* A CUT can be placed before any **unit**: a word or a punctuation mark (`\w+|[^\w\s]`, the notebook's
+  `UNIT_RE`). The positions come from `unit_starts` in `items.json`, so every CUT is already snapped.
+* Windows open **one at a time, in the order of `assignments.json` for the annotator's slot**:
+  practice first, then the study windows. A submitted window is locked and the next one opens.
+* No model, outcome, answer, judge CUTs or active time are ever shown. Item IDs are the random IDs from Part A.
 
-If you edit `Code.gs` later, use **Deploy → Manage deployments → Edit → New version** so the URL stays the same.
-If `apiUrl` is left empty, the site runs in *local mode* (testing only): work is saved only in the browser.
+## Moving from the dry run to the final sample
 
-## 2. What gets recorded
+`data/` currently holds the **dry run** (`TaskA/dryrun/platform`, 4 of 6 models, 24 windows), and `config.js`
+has `dryRun: true`, which shows a "Test data" banner. When all six models are in `Outputs/`:
 
-For every annotator × trace: the CUT positions (character offsets into `completion_text` of
-`deepseek-pilot/results/trajectories.jsonl`, always at the start of a word), the uncertainty flags
-(position plus note), status (`draft` / `submitted` / `reopened`), active working time, how much of the trace
-was scrolled through, and the SHA-256 of the text. Each submission is also written in full to the append-only
-`Log` sheet. A trace can be submitted only after the annotator has scrolled through all of it and ticked
-the four checklist items. Submitted traces are locked; reopen one from `admin.html` if needed.
+1. Run Part A with `ALLOW_PARTIAL = False`. It writes `TaskA/platform/items.json` and `assignments.json`.
+2. Replace `trace-task-a/data/items.json` and `trace-task-a/data/assignments.json` with those two files.
+   Never copy anything from `TaskA/private/`.
+3. Set `dryRun: false` in `config.js` and push.
 
-## 3. Compute agreement
+The site fingerprints the two data files (the *dataset id* shown on the researcher page) and stores every record
+under it, so test annotations from the dry run can never be loaded into, or exported with, the final sample,
+even when an item ID repeats.
 
-Download the export from `admin.html` ("Download all annotations (JSON)"), then:
+## Backend
 
-```bash
-python3 trace-task-a/analysis/task_a_agreement.py \
-    --bundle /path/to/frozen-pilot-v2 \
-    --annotations task-a_annotations_YYYY-MM-DD.json \
-    --out task_a_results
-```
+1. Open the Google Sheet behind the web app → Extensions → Apps Script. Replace the code with `backend/Code.gs`.
+2. Deploy → Manage deployments → Edit (pencil) → Version: **New version** → Deploy. The URL stays the same.
+   (First-time setup: run `setup` once to print the admin key, then Deploy → New deployment → Web app,
+   Execute as **Me**, access **Anyone**, and put the `/exec` URL in `config.js`.)
+3. The sheets migrate themselves on the next request: `Windows` and `Events` are created and a `slot` column is
+   added to `Annotators`. Existing rows are kept; the old `Annotations`/`Log` sheets are no longer used.
 
-The LLM (Gemini) segmentation is read from `--bundle` (`segments.jsonl`). It is never published on the site,
-so annotators can't see it. Outputs:
+## Researcher page
 
-- `report.md`: all tables (below)
-- `pairwise.csv`: every pair × (pooled, each trace): κ, F1 exact/±1/±2 words, Pk, WindowDiff, 2×2 counts
-- `multicoder.csv`: Krippendorff's α and Fleiss' κ, humans only and humans + AI
-- `gap_matrix.csv`: one row per candidate boundary, one 0/1 column per coder (ready for R or `irr`)
-- `coders.csv`, `flags.csv`: boundary counts per coder; every uncertainty note, with whether the AI and the
-  other humans cut at that spot
+* **Annotators:** add each annotator's email and **slot** (`A1`, `A2`, … = the keys of `assignments.json`).
+  The slot fixes their window order and the name of their export file. One active annotator per slot.
+* **Progress:** warm-up, practice and study windows submitted, flags, total active time and median active
+  minutes per window. Per-window details (CUTs, flags, active time, % read) and **Reopen**.
+* **Export for Part B:** *Download A1.json*, *A2.json*:
+  `[{"item_id": "W123", "cuts": [412, 980], "flags": [{"offset": 980, "note": "…"}], "seconds": 431}, …]`
+  (study windows only, submitted only, CUTs as character offsets in `window_text`). Save them in
+  `TaskA/annotations/` and run Part B. The page warns when a file is incomplete.
+* *Download every record* gives an archive of the dataset (drafts, practice, timestamps, window SHA-1s that
+  match `key.csv`'s `window_sha1`).
 
-**Unit:** each word start except the first word of a trace is a candidate boundary. The site only allows CUTs at
-word starts, and every LLM boundary also falls on a word start, so humans and the AI are compared on the same units.
-
-**Human–human:** Krippendorff's α, Fleiss' κ, pairwise Cohen's κ, boundary F1 (exact and ±1/±2 words), Pk, WindowDiff.
-
-**AI–human:** AI against each human, AI against the human majority vote, mean AI–human κ vs mean human–human κ
-with a block-bootstrap 95% CI of the difference, α with and without the AI, and a leave-one-out test:
-κ(AI, majority of the other humans) vs κ(held-out human, the same majority).
-
-By default only the text annotators saw is scored (`--section shown`, up to and including `</think>`).
-Useful options: `--section reasoning` (only the text before `</think>`), `--include-drafts`,
-`--exclude someone@example.com`, and `pip install segeval` to add Boundary Similarity.
-
-## Regenerating `traces.js`
-
-```bash
-python3 trace-task-a/tools/build_traces.py /path/to/frozen-pilot-v2 trace-task-a/traces.js
-```
-
-Trace order is fixed (shortest first) and identical for every annotator.
+Active time counts only while a window is open in the foreground and the annotator was active in the last minute.

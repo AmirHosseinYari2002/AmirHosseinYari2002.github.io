@@ -20,13 +20,14 @@ window.MathJax = {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg-full.js" async></script>
 </head>
 <body data-view="signin">
+<div class="dry-banner" id="dryBanner" hidden></div>
 
 <header class="top">
   <div class="wrap top-in">
     <button class="brand" type="button" data-go="home">TRACE <span>/ Task A</span></button>
     <nav class="toplinks" id="topnav" hidden>
       <button type="button" data-go="guide">Guidelines</button>
-      <button type="button" data-go="traces">Traces</button>
+      <button type="button" data-go="queue">My windows</button>
       <span class="who" id="whoChip"></span>
       <button type="button" id="signOutBtn" class="quiet">Sign out</button>
     </nav>
@@ -57,7 +58,7 @@ window.MathJax = {
   <h1 class="display">One operation.<br><em>One segment.</em></h1>
   <p class="lede">Read the reasoning. Find where each new operation begins.<br>Insert your own CUT markers, using the rules below.</p>
   <ul class="meta">
-    <li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 2.5h6l4 4v11H6z M12 2.5v4h4 M8.5 10.5h5 M8.5 13.5h5"/></svg><span id="metaTraces">4 shared traces</span></li>
+    <li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 2.5h6l4 4v11H6z M12 2.5v4h4 M8.5 10.5h5 M8.5 13.5h5"/></svg><span id="metaTraces">Short excerpts of reasoning</span></li>
     <li><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><path d="M10 5.5V10l3 2"/></svg>Work at your own pace</li>
     <li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.5l6 2.5v4.5c0 4-2.6 6.6-6 8-3.4-1.4-6-4-6-8V5z M7.3 10l2 2 3.6-3.8"/></svg>Independent decisions</li>
   </ul>
@@ -116,11 +117,12 @@ window.MathJax = {
     <div class="num">02</div>
     <div class="step-body">
       <h2>Insert boundaries from scratch</h2>
-      <p class="body">Each trace starts without suggested boundaries. Read the entire trace and insert <code>&lt;CUT&gt;</code> wherever a new local operation begins. The first segment begins automatically; no marker is needed at the start or end.</p>
+      <p class="body">You will annotate short <b>windows</b> of model reasoning (about half a page each). Each window starts without suggested boundaries. Read the entire window and insert <code>&lt;CUT&gt;</code> wherever a new local operation begins. The first segment begins automatically; no marker is needed at the start or end of the window.</p>
+      <p class="body">Above each window you will see the <b>problem</b> and, when the window is not the start of the reasoning, the <b>preceding text in grey</b>. The grey text is there only so you know what came before: do not annotate it. A CUT can go before any word or punctuation mark.</p>
       <ol class="howto">
         <li><span class="sq">1</span><h3>Click once to insert</h3><p>Click directly before the new operation. A colored CUT appears immediately.</p></li>
         <li><span class="sq">2</span><h3>Adjust your own markers</h3><p>Click a colored CUT to remove it. Undo restores your last change.</p></li>
-        <li><span class="sq">3</span><h3>Review &amp; submit</h3><p>Check the whole trace and flag uncertainty.</p></li>
+        <li><span class="sq">3</span><h3>Review &amp; submit</h3><p>Check the whole window and flag uncertainty.</p></li>
       </ol>
       <p class="body">Source text is locked. You may insert, remove, or undo your own markers. Do not correct, omit, reorder, or rewrite the reasoning. Do not invent operations that are not explicitly expressed.</p>
     </div>
@@ -146,13 +148,13 @@ window.MathJax = {
     <div class="step-body">
       <h2>Before you submit</h2>
       <ul class="checks">
-        <li>Read the full trace, including long passages.</li>
+        <li>Read the full window, including long passages.</li>
         <li>Check that each segment expresses one operation with its necessary context.</li>
         <li>Use an uncertainty note to identify ambiguous locations and explain the alternatives.</li>
       </ul>
       <div class="consent">
         <label class="check"><input type="checkbox" id="agree"> <span>I have read the guidelines and will make my own annotation decisions without AI assistance.</span></label>
-        <button class="btn primary" type="button" id="guideNext" disabled><span id="guideNextLabel">Continue to practice</span> <svg class="arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg></button>
+        <button class="btn primary" type="button" id="guideNext" disabled><span id="guideNextLabel">Continue to the warm-up</span> <svg class="arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg></button>
         <p class="muted small">Your progress is saved to your signed-in account. You can leave and return later.</p>
       </div>
     </div>
@@ -161,22 +163,23 @@ window.MathJax = {
 
 <!-- ============ PRACTICE ============ -->
 <section id="v-practice" class="wrap view" hidden>
-  <p class="eyebrow">Practice · Not scored</p>
+  <p class="eyebrow">Warm-up · Not scored</p>
   <h1 class="h1">Try two short passages first.</h1>
-  <p class="lede">Insert CUT markers, then check them against a reference. Practice answers are not part of the study; they only help you calibrate.</p>
+  <p class="lede">Insert CUT markers, then check them against a reference. These passages are not part of the study; they only help you calibrate. After the warm-up you start with three practice windows of real reasoning.</p>
   <div id="practiceList" class="stack"></div>
   <div class="row end">
-    <button class="btn primary" type="button" id="practiceDone" disabled>Continue to the traces <svg class="arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg></button>
+    <button class="btn primary" type="button" id="practiceDone" disabled>Continue to my windows <svg class="arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg></button>
   </div>
 </section>
 
-<!-- ============ TRACE LIST ============ -->
-<section id="v-traces" class="wrap view" hidden>
-  <p class="eyebrow">Your traces</p>
-  <h1 class="h1">Four shared traces.</h1>
-  <p class="lede">Every annotator segments the same traces, independently. Work in any order and at your own pace; drafts are saved automatically. Once you submit a trace it is locked.</p>
+<!-- ============ WINDOW QUEUE ============ -->
+<section id="v-queue" class="wrap view" hidden>
+  <p class="eyebrow">Your windows</p>
+  <h1 class="h1" id="queueTitle">Your windows.</h1>
+  <p class="lede">Work through the windows in the order shown: three practice windows first, then the study windows. Drafts are saved automatically, so you can stop and come back at any time. Once you submit a window it is locked and the next one opens.</p>
   <div class="note" id="syncNote" hidden></div>
-  <div id="traceList" class="trace-list"></div>
+  <div id="queueSummary" class="queue-summary"></div>
+  <div id="queueList" class="queue-list"></div>
   <p class="small muted contact-line"></p>
 </section>
 
@@ -184,8 +187,8 @@ window.MathJax = {
 <section id="v-work" class="view" hidden>
   <div class="toolbar">
     <div class="wrap tb-in">
-      <button type="button" class="quiet back" data-go="traces" aria-label="Back to traces"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 10H4M9 5l-5 5 5 5"/></svg></button>
-      <div class="tb-title"><b id="wTitle">Trace</b><span id="wSub" class="muted"></span></div>
+      <button type="button" class="quiet back" data-go="queue" aria-label="Back to my windows"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 10H4M9 5l-5 5 5 5"/></svg></button>
+      <div class="tb-title"><b id="wTitle">Window</b><span id="wSub" class="muted"></span></div>
       <div class="seg-mode" role="group" aria-label="Tool">
         <button type="button" id="toolCut" class="on" aria-pressed="true" title="Cut tool (C)">CUT</button>
         <button type="button" id="toolFlag" aria-pressed="false" title="Uncertainty flag tool (F)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 17.5V3 M5 3.5h9l-2 3.5 2 3.5H5"/></svg>Flag</button>
@@ -199,9 +202,15 @@ window.MathJax = {
 
   <div class="wrap work-grid">
     <article class="paper">
-      <div class="locked-note" id="lockedNote" hidden>This trace has been submitted and is locked. Contact the researcher if you need to change it.</div>
-      <div id="trace" class="trace" aria-label="Reasoning trace. Click before a word to insert a CUT."></div>
-      <p class="end-mark">— End of trace —</p>
+      <div class="practice-note" id="practiceNote" hidden><b>Practice window.</b> Annotate it exactly like a study window. It is not scored.</div>
+      <div class="locked-note" id="lockedNote" hidden>This window has been submitted and is locked. Contact the researcher if you need to change it.</div>
+      <div class="context" id="contextBox" hidden>
+        <p class="cap">Preceding text · context only, do not annotate</p>
+        <div id="contextText" class="context-text"></div>
+      </div>
+      <p class="cap window-cap" id="windowCap">Window · annotate this text</p>
+      <div id="trace" class="trace" aria-label="Reasoning window. Click before a word or punctuation mark to insert a CUT."></div>
+      <p class="end-mark">— End of window —</p>
     </article>
     <aside class="side">
       <div class="card side-card">
@@ -229,7 +238,7 @@ window.MathJax = {
       </details>
       <div class="card side-card">
         <h3 class="side-h">Uncertainty flags</h3>
-        <p class="muted small" id="flagEmpty">Switch to <b>Flag</b>, then click before a word to note an ambiguous boundary.</p>
+        <p class="muted small" id="flagEmpty">Switch to <b>Flag</b>, then click before a word or mark to note an ambiguous boundary.</p>
         <ol id="flagList" class="flag-list"></ol>
       </div>
       <p class="small ai-reminder">No AI assistance. Every decision is yours.</p>
@@ -239,9 +248,9 @@ window.MathJax = {
 
 <!-- ============ DONE ============ -->
 <section id="v-done" class="wrap view" hidden>
-  <p class="eyebrow">All traces submitted</p>
+  <p class="eyebrow">All windows submitted</p>
   <h1 class="display">Thank you.<br><em>Every boundary counts.</em></h1>
-  <p class="lede">Your segmentation of all four traces has been received. You can close this page.</p>
+  <p class="lede">Your segmentation of every window has been received. You can close this page.</p>
   <p class="contact-line muted"></p>
 </section>
 
@@ -271,16 +280,16 @@ window.MathJax = {
     <h3>Submit <span id="subTitle"></span>?</h3>
     <p class="muted small" id="subSummary"></p>
     <ul class="checks tight">
-      <li><label class="check"><input type="checkbox" class="subchk"> <span>I read the full trace, including long passages.</span></label></li>
+      <li><label class="check"><input type="checkbox" class="subchk"> <span>I read the full window, including long passages.</span></label></li>
       <li><label class="check"><input type="checkbox" class="subchk"> <span>Each segment expresses one operation with its necessary context.</span></label></li>
       <li><label class="check"><input type="checkbox" class="subchk"> <span>I flagged genuinely ambiguous locations and explained the alternatives.</span></label></li>
       <li><label class="check"><input type="checkbox" class="subchk"> <span>I made every decision myself, without AI assistance.</span></label></li>
     </ul>
     <div class="note" id="subNote" hidden></div>
-    <p class="muted small">After submission this trace is locked.</p>
+    <p class="muted small">After submission this window is locked and the next one opens.</p>
     <div class="row end">
       <button value="cancel" class="btn" formnovalidate>Keep working</button>
-      <button value="ok" class="btn primary" id="subConfirm" disabled>Submit trace</button>
+      <button value="ok" class="btn primary" id="subConfirm" disabled>Submit window</button>
     </div>
   </form>
 </dialog>
@@ -288,7 +297,6 @@ window.MathJax = {
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <script src="config.js"></script>
-<script src="traces.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

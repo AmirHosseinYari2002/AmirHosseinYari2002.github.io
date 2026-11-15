@@ -191,8 +191,6 @@ exclude:
   - vendor
   - trace-task-a/README.md
   - trace-task-a/backend
-  - trace-task-a/analysis
-  - trace-task-a/tools
   - trace-task-b/README.md
   - trace-task-b/backend
   - trace-task-b/analysis
