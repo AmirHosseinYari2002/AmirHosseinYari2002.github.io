@@ -4,5 +4,5 @@
 // 2. contactEmail: shown to annotators for questions.
 window.TASK_CONFIG = {
   apiUrl: 'https://script.google.com/macros/s/AKfycbx5PXplmiTTHs2PgQqdOxnfOpdElCEkbfKcIenI4hZ4FN84nnOnebMNCFFanxyq6qg/exec',
-  contactEmail: 'a.hossein@newuu.uz'
+  contactEmail: 'ahyari2002@gmail.com'
 };

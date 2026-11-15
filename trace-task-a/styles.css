@@ -256,3 +256,28 @@ body[data-view="work"] .foot { display: none; }
   .trace { font-size: 16.5px; }
   .tcard { grid-template-columns: 1fr; }
 }
+
+/* ---- window design (taskA_human_validation) ---- */
+.dry-banner { background: #3a3a36; color: #fff; text-align: center; font-size: 13px; padding: 7px 16px; letter-spacing: .02em; }
+.dry-banner b { color: #fff; }
+.context { background: #f3f4ef; border: 1px dashed var(--line-2); border-radius: 8px; padding: 14px 18px 4px; margin-bottom: 22px; }
+.context-text { font-family: var(--serif); color: #8b968f; font-size: 15.5px; line-height: 1.85; white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; max-height: 260px; overflow: auto; margin-bottom: 10px; }
+.window-cap { margin-top: 0; }
+.practice-note { background: #fff6e8; border: 1px solid #efd3a8; color: #7a4e12; border-radius: 8px; padding: 10px 14px; font-size: 14px; margin-bottom: 18px; }
+.trace .u { border-radius: 0; padding: .18em 0; }
+.trace.shade .u.s1 { background: var(--shade); }
+.trace.edit.mode-cut .u:not(.u0):not(.hc):hover { box-shadow: inset 2px 0 0 var(--green); background: #e1ece0; cursor: pointer; }
+.trace.edit.mode-flag .u:not(.u0):hover { box-shadow: inset 2px 0 0 var(--flag); background: var(--flag-bg); cursor: pointer; }
+.trace .u.pulse { animation: pulse 1.4s ease-out; }
+.queue-summary { display: flex; flex-wrap: wrap; gap: 10px 28px; margin: 4px 0 18px; font-size: 14.5px; }
+.queue-summary b { color: var(--ink); font-size: 18px; margin-right: 4px; }
+.queue-list { display: grid; gap: 8px; margin: 0 0 28px; }
+.qrow { display: grid; grid-template-columns: 54px 1fr auto; gap: 14px; align-items: center; padding: 12px 18px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; }
+.qrow.locked { opacity: .55; }
+.qrow.current { border-color: var(--green); box-shadow: 0 0 0 1px var(--green) inset; }
+.qrow .qn { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.qrow h3 { margin: 0; font-size: 15.5px; }
+.qrow p { margin: 2px 0 0; font-size: 13px; }
+.qsection { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--green); margin: 16px 0 2px; }
+.pill.practice { background: #fff3e0; color: #9a5a12; }
+.pill.next { background: var(--mint); color: var(--green); }
