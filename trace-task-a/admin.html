@@ -13,7 +13,7 @@
   .grid-tbl { width: 100%; border-collapse: collapse; font-size: 14px; background: var(--paper); }
   .grid-tbl th, .grid-tbl td { border-bottom: 1px solid var(--line); padding: 9px 12px; text-align: left; vertical-align: top; }
   .grid-tbl th { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; }
-  .grid-tbl td.num { font-variant-numeric: tabular-nums; }
+  .grid-tbl td.nm { font-variant-numeric: tabular-nums; }
   .tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin: 12px 0 28px; }
   .adm-form { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin: 8px 0 12px; }
   .adm-form label { display: grid; gap: 4px; font-size: 13px; font-weight: 600; color: var(--ink-2); }
@@ -25,6 +25,18 @@
   details.win { margin: 4px 0 0; } details.win summary { cursor: pointer; color: var(--green); font-size: 13px; }
   .export-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 6px 0 8px; }
   h2 { margin-top: 30px; }
+  .bar { height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; min-width: 120px; margin-top: 6px; }
+  .bar span { display: block; height: 100%; background: var(--green); }
+  .bar span.p { background: var(--sage); }
+  .est-form { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; margin: 10px 0 14px; }
+  .est-form label { display: grid; gap: 4px; font-size: 13px; font-weight: 600; color: var(--ink-2); }
+  .est-form label span { font-weight: 400; color: var(--muted); font-size: 12px; }
+  .est-form input { font: inherit; border: 1px solid var(--line-2); border-radius: 8px; padding: 8px 10px; background: #fff; width: 100%; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; margin: 6px 0 14px; }
+  .kpi { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .kpi b { display: block; font-size: 22px; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .kpi span { font-size: 12.5px; color: var(--muted); }
+  tr.tot td { font-weight: 600; color: var(--ink); background: #f7f8f4; }
 </style>
 </head>
 <body>
@@ -46,14 +58,33 @@
     <div class="note warn" id="otherDs" hidden></div>
 
     <h2>Progress</h2>
-    <p class="muted small">Active time counts only while the window is open in the foreground and the annotator was active in the last minute. Annotators never see it.</p>
+    <p class="muted small">Active time counts only while the window is open in the foreground and the annotator was active in the last minute. Annotators never see it. <button type="button" class="link small" id="refreshBtn">Refresh</button></p>
+    <div class="kpis" id="progKpis"></div>
     <div class="tbl-wrap"><table class="grid-tbl" id="progTbl"></table></div>
+
+    <h2>Workload &amp; cost estimate</h2>
+    <p class="muted small">Planning figures from the windows in <code>data/</code>. Each window's time = words to segment ÷ annotation speed + words to read only (problem and grey context) ÷ reading speed + a fixed overhead for review and submit. Change any assumption; values are remembered in this browser. Once annotators have submitted windows, their observed speed appears below and can replace the assumption.</p>
+    <div class="est-form">
+      <label>Annotation speed <span>words of window text per minute</span><input type="number" id="eAnn" min="5" step="1"></label>
+      <label>Reading speed <span>words per minute, problem + grey context</span><input type="number" id="eRead" min="20" step="10"></label>
+      <label>Overhead per window <span>minutes (checklist, flags, submit)</span><input type="number" id="eOver" min="0" step="0.5"></label>
+      <label>Onboarding <span>minutes (guidelines + warm-up)</span><input type="number" id="eOnb" min="0" step="5"></label>
+      <label>Hourly rate <span>paid per annotator hour</span><input type="number" id="eRate" min="0" step="0.5"></label>
+      <label>Currency <span>label only</span><input type="text" id="eCur" maxlength="8"></label>
+      <label>Annotators <span>number of people paid</span><input type="number" id="eN" min="1" step="1"></label>
+      <label>Buffer <span>% added for breaks and re-reading</span><input type="number" id="eBuf" min="0" step="5"></label>
+    </div>
+    <div class="note" id="obsNote" hidden></div>
+    <div class="kpis" id="estKpis"></div>
+    <details><summary class="small" style="cursor:pointer;color:var(--green)">Per-window breakdown</summary>
+      <div class="tbl-wrap"><table class="grid-tbl" id="estTbl"></table></div>
+    </details>
 
     <h2>Export for Part B</h2>
     <p class="muted small">One file per annotator slot, in the format of <code>platform/export_format.md</code>: study windows only, submitted only, CUTs as character offsets in <code>window_text</code>, flags as <code>{offset, note}</code>, active <code>seconds</code>. Save the files as <code>TaskA/annotations/A1.json</code>, <code>A2.json</code>, … and run Part B.</p>
     <div class="export-row" id="exportRow"></div>
     <div class="note warn" id="exportNote" hidden></div>
-    <p class="small"><button type="button" class="link" id="rawBtn">Download every record of this dataset (archive JSON, includes drafts and practice)</button></p>
+    <p class="small"><button type="button" class="link" id="rawBtn">Download every record of this dataset (archive JSON, includes drafts)</button></p>
 
     <h2>Annotators</h2>
     <form class="adm-form" id="addForm">
@@ -99,13 +130,74 @@
   const median = a => { if (!a.length) return 0; const s = a.slice().sort((x, y) => x - y), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
   const slotOptions = (cur) => '<option value="">— none —</option>' + slots().map(s => '<option' + (s === cur ? ' selected' : '') + '>' + esc(s) + '</option>').join('');
 
+  // ---------------- workload & cost estimate ----------------
+  const words = t => (String(t || '').match(/\S+/g) || []).length;
+  const EST_DEFAULT = { ann: 40, read: 200, over: 1.5, onb: 25, rate: 10, cur: 'USD', n: 2, buf: 10 };
+  const EST_FIELDS = { ann: 'eAnn', read: 'eRead', over: 'eOver', onb: 'eOnb', rate: 'eRate', cur: 'eCur', n: 'eN', buf: 'eBuf' };
+  let E = Object.assign({}, EST_DEFAULT);
+  try { Object.assign(E, JSON.parse(localStorage.getItem('tta:est') || '{}')); } catch (e) {}
+  const segW = it => words(it.window_text), readW = it => words(it.problem) + words(it.context_before);
+  const readPart = it => readW(it) / Math.max(1, E.read) + E.over;                   // minutes not spent segmenting
+  const estMin = it => segW(it) / Math.max(1, E.ann) + readPart(it);                  // minutes for one window
+  const fmtH = m => { const h = Math.floor(m / 60), mm = Math.round(m % 60); return h ? h + ' h ' + String(mm).padStart(2, '0') + ' min' : mm + ' min'; };
+  const money = v => (Math.round(v * 100) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ' + (E.cur || '');
+  const study = () => D.items.filter(i => !i.practice);   // practice items from Part A are not shown to annotators
+  function perAnnotatorMin() { return (E.onb + study().reduce((t, it) => t + estMin(it), 0)) * (1 + E.buf / 100); }
+
+  function observed() { // submitted study windows with recorded active time, all annotators
+    if (!last) return null;
+    const ws = last.windows.filter(w => !w.practice && w.status === 'submitted' && w.active_ms > 0 && D.byId[w.item_id]);
+    if (!ws.length) return null;
+    const act = ws.reduce((t, w) => t + w.active_ms / 60000, 0);
+    const sw = ws.reduce((t, w) => t + segW(D.byId[w.item_id]), 0);
+    const rest = ws.reduce((t, w) => t + readPart(D.byId[w.item_id]), 0);
+    const pred = ws.reduce((t, w) => t + estMin(D.byId[w.item_id]), 0);
+    return { n: ws.length, act: act, pred: pred, ann: act - rest > 0.5 ? sw / (act - rest) : null, med: median(ws.map(w => w.active_ms / 60000)) };
+  }
+
+  function renderEstimate() {
+    Object.keys(EST_FIELDS).forEach(k => { const el = $(EST_FIELDS[k]); if (document.activeElement !== el) el.value = E[k]; });
+    const M = study();
+    const sum = (arr, f) => arr.reduce((t, x) => t + f(x), 0);
+    const per = perAnnotatorMin(), cost = per / 60 * E.rate;
+    $('estKpis').innerHTML = [
+      [M.length + '', 'windows per annotator'],
+      [sum(M, segW).toLocaleString(), 'words to segment (study)'],
+      [(sum(M, readW)).toLocaleString(), 'words to read only (problem + context)'],
+      [fmtH(sum(M, estMin) / M.length), 'per study window (avg)'],
+      [fmtH(per), 'per annotator, incl. onboarding + ' + E.buf + '%'],
+      [money(cost), 'per annotator'],
+      [money(cost * E.n), 'total for ' + E.n + ' annotator' + (E.n > 1 ? 's' : '')]
+    ].map(k => '<div class="kpi"><b>' + esc(k[0]) + '</b><span>' + esc(k[1]) + '</span></div>').join('');
+    const rows = M.slice().sort((a, b) => a.item_id.localeCompare(b.item_id));
+    $('estTbl').innerHTML = '<thead><tr><th>Item</th><th>Words to segment</th><th>Words to read</th><th>Units</th><th>Characters</th><th>Est. time</th></tr></thead><tbody>' +
+      rows.map(it => '<tr><td>' + esc(it.item_id) + '</td><td class="nm">' + segW(it) + '</td><td class="nm">' + readW(it) + '</td><td class="nm">' + it.n_units + '</td><td class="nm">' + it.window_text.length.toLocaleString() + '</td><td class="nm">' + estMin(it).toFixed(1) + ' min</td></tr>').join('') +
+      '<tr class="tot"><td>Total (one annotator, before onboarding and buffer)</td><td class="nm">' + sum(M, segW).toLocaleString() + '</td><td class="nm">' + sum(M, readW).toLocaleString() + '</td><td class="nm">' + sum(M, i => i.n_units).toLocaleString() + '</td><td class="nm">' + sum(M, i => i.window_text.length).toLocaleString() + '</td><td class="nm">' + fmtH(sum(M, estMin)) + '</td></tr></tbody>';
+    const o = observed();
+    $('obsNote').hidden = !o;
+    if (o) $('obsNote').innerHTML = '<b>Observed so far</b> (' + o.n + ' submitted study window' + (o.n > 1 ? 's' : '') + '): median ' + o.med.toFixed(1) + ' active min per window; actual time is <b>' + Math.round(o.act / o.pred * 100) + '%</b> of the estimate for the same windows' +
+      (o.ann ? ', which corresponds to an annotation speed of about <b>' + Math.round(o.ann) + ' words/min</b>. <button type="button" class="link" id="useObs">Use observed speed</button>' : '.');
+  }
+  Object.keys(EST_FIELDS).forEach(k => $(EST_FIELDS[k]).addEventListener('input', e => {
+    const v = k === 'cur' ? e.target.value.trim() : Number(e.target.value);
+    if (k !== 'cur' && !(v >= 0)) return;
+    E[k] = v; try { localStorage.setItem('tta:est', JSON.stringify(E)); } catch (x) {}
+    renderEstimate(); if (last) renderProgress(last);
+  }));
+  document.addEventListener('click', e => {
+    if (e.target.id === 'useObs') { const o = observed(); if (o && o.ann) { E.ann = Math.round(o.ann); try { localStorage.setItem('tta:est', JSON.stringify(E)); } catch (x) {} renderEstimate(); if (last) renderProgress(last); } }
+    if (e.target.id === 'refreshBtn') load();
+  });
+
   async function loadData() {
     const [items, assign] = await Promise.all([fetch('data/items.json', { cache: 'no-cache' }).then(r => r.json()), fetch('data/assignments.json', { cache: 'no-cache' }).then(r => r.json())]);
     D.items = items; D.assign = assign; items.forEach(i => { D.byId[i.item_id] = i; });
     D.id = (await digest('SHA-256', JSON.stringify([items.map(i => [i.item_id, i.window_text]), assign]))).slice(0, 16);
     const nP = items.filter(i => i.practice).length;
-    $('dataFacts').innerHTML = '<span>Dataset <code class="k">' + esc(D.id) + '</code></span><span><b>' + (items.length - nP) + '</b> study windows</span><span><b>' + nP + '</b> practice</span><span>Slots: <b>' + esc(slots().join(', ')) + '</b></span>' + (CFG.dryRun ? '<span><b>dry run</b></span>' : '');
+    $('dataFacts').innerHTML = '<span>Dataset <code class="k">' + esc(D.id) + '</code></span><span><b>' + (items.length - nP) + '</b> windows per annotator</span>' + (nP ? '<span class="muted">' + nP + ' practice items in the files are not shown (the warm-up replaces them)</span>' : '') + '<span>Slots: <b>' + esc(slots().join(', ')) + '</b></span>' + (CFG.dryRun ? '<span><b>dry run</b></span>' : '');
     $('newSlot').innerHTML = slotOptions('');
+    let saved = {}; try { saved = JSON.parse(localStorage.getItem('tta:est') || '{}'); } catch (e) {}
+    if (saved.n == null) E.n = Math.max(1, slots().length);
   }
 
   async function load() {
@@ -125,33 +217,67 @@
     r.windows.forEach(w => { (bySlotEmail[w.annotator_id] = bySlotEmail[w.annotator_id] || []).push(w); });
     const M = mainIds(), nP = D.items.length - M.length;
 
-    // progress
-    let h = '<thead><tr><th>Annotator</th><th>Slot</th><th>Warm-up</th><th>Practice</th><th>Study windows</th><th>Flags</th><th>Active time</th><th>Median / window</th></tr></thead><tbody>';
-    r.annotators.forEach(a => {
-      const ws = bySlotEmail[a.annotator_id] || [];
-      const sub = ws.filter(w => w.status === 'submitted');
-      const subM = sub.filter(w => !w.practice), subP = sub.filter(w => w.practice);
-      const tot = ws.reduce((s, w) => s + (w.active_ms || 0), 0);
-      const med = median(subM.map(w => w.active_ms || 0));
-      const order = D.assign[a.slot] || [];
-      const detail = ws.slice().sort((x, y) => order.indexOf(x.item_id) - order.indexOf(y.item_id)).map(w =>
-        '<tr><td>' + esc(w.item_id) + (w.practice ? ' <span class="muted">(practice)</span>' : '') + '</td><td><span class="pill ' + esc(w.status) + '" style="margin:0">' + esc(w.status) + '</span></td><td class="num">' + w.n_cuts + '</td><td class="num">' + w.n_flags + '</td><td class="num">' + min(w.active_ms) + ' min</td><td class="num">' + Math.round((w.read_pct || 0) * 100) + '%</td><td>' +
-        (w.status === 'submitted' ? '<button class="link small" data-reopen="' + esc(a.annotator_id) + '|' + esc(w.item_id) + '">Reopen</button>' : '') + '</td></tr>').join('');
-      h += '<tr><td><b>' + esc(a.annotator_id) + '</b>' + (a.name ? '<span class="muted small" style="display:block">' + esc(a.name) + '</span>' : '') + (a.active ? '' : '<span class="muted small" style="display:block">inactive</span>') +
-        (ws.length ? '<details class="win"><summary>Windows (' + ws.length + ')</summary><table class="grid-tbl"><thead><tr><th>Item</th><th>Status</th><th>CUTs</th><th>Flags</th><th>Active</th><th>Read</th><th></th></tr></thead><tbody>' + detail + '</tbody></table></details>' : '') + '</td>' +
-        '<td>' + (esc(a.slot) || '<span class="muted">—</span>') + '</td><td>' + (a.warmup_done ? 'done' : '—') + '</td><td class="num">' + subP.length + '/' + nP + '</td><td class="num"><b>' + subM.length + '/' + M.length + '</b></td>' +
-        '<td class="num">' + sub.reduce((s, w) => s + (Number(w.n_flags) || 0), 0) + '</td><td class="num">' + min(tot) + ' min</td><td class="num">' + (subM.length ? min(med) + ' min' : '—') + '</td></tr>';
-    });
-    $('progTbl').innerHTML = h + '</tbody>';
-
+    renderProgress(r);
+    renderEstimate();
     // export buttons
     $('exportRow').innerHTML = slots().map(s => {
       const a = r.annotators.find(x => x.slot === s && x.active);
       const n = a ? (bySlotEmail[a.annotator_id] || []).filter(w => !w.practice && w.status === 'submitted').length : 0;
       return '<button class="btn sm" type="button" data-export="' + esc(s) + '"' + (a ? '' : ' disabled') + '>Download ' + esc(s) + '.json · ' + n + '/' + M.length + '</button>';
     }).join('');
+    renderAnnotators(r);
+  }
 
-    // annotators
+  const ago = iso => { if (!iso) return '—'; const m = (Date.now() - new Date(iso).getTime()) / 60000; if (!(m >= 0)) return '—'; return m < 2 ? 'just now' : m < 90 ? Math.round(m) + ' min ago' : m < 2880 ? Math.round(m / 60) + ' h ago' : Math.round(m / 1440) + ' days ago'; };
+  function renderProgress(r) {
+    const bySlotEmail = {};
+    r.windows.forEach(w => { (bySlotEmail[w.annotator_id] = bySlotEmail[w.annotator_id] || []).push(w); });
+    const M = mainIds(), nP = D.items.length - M.length;
+    const people = r.annotators.filter(a => a.active && a.slot);
+    let totSubM = 0, totAct = 0, totRemain = 0;
+    let h = '<thead><tr><th>Annotator</th><th>Slot</th><th>Progress</th><th>Warm-up</th><th>Windows</th><th>Flags</th><th>Active time</th><th>Median / window</th><th>Last activity</th><th>Est. remaining</th><th>Cost so far</th></tr></thead><tbody>';
+    r.annotators.forEach(a => {
+      const ws = bySlotEmail[a.annotator_id] || [];
+      const sub = ws.filter(w => w.status === 'submitted');
+      const subM = sub.filter(w => !w.practice);
+      const tot = ws.reduce((s, w) => s + (w.active_ms || 0), 0);
+      const med = median(subM.map(w => w.active_ms || 0));
+      const order = (D.assign[a.slot] || []).filter(id => D.byId[id] && !D.byId[id].practice);
+      const doneIds = new Set(subM.map(w => w.item_id));
+      const remainIds = order.filter(id => !doneIds.has(id));
+      // the annotator's own pace once 3+ study windows are in, otherwise the assumption
+      const mine = subM.filter(w => w.active_ms > 0 && D.byId[w.item_id]);
+      const ratio = mine.length >= 3 ? mine.reduce((t, w) => t + w.active_ms / 60000, 0) / mine.reduce((t, w) => t + estMin(D.byId[w.item_id]), 0) : 1 + E.buf / 100; // own pace, else assumption + buffer
+      const remain = remainIds.reduce((t, id) => t + estMin(D.byId[id]), 0) * ratio + (a.warmup_done || ws.length ? 0 : E.onb);
+      const pct = order.length ? Math.round(subM.length / order.length * 100) : 0;
+      const lastAct = ws.reduce((m, w) => (w.server_updated > m ? w.server_updated : m), '');
+      if (a.active && a.slot) { totSubM += subM.length; totAct += tot; totRemain += remain; }
+      const detail = ws.slice().sort((x, y) => order.indexOf(x.item_id) - order.indexOf(y.item_id)).map(w =>
+        '<tr><td>' + esc(w.item_id) + (w.practice ? ' <span class="muted">(practice)</span>' : '') + '</td><td><span class="pill ' + esc(w.status) + '" style="margin:0">' + esc(w.status) + '</span></td><td class="nm">' + w.n_cuts + '</td><td class="nm">' + w.n_flags + '</td><td class="nm">' + min(w.active_ms) + ' min</td><td class="nm">' + Math.round((w.read_pct || 0) * 100) + '%</td><td>' +
+        (w.status === 'submitted' ? '<button class="link small" data-reopen="' + esc(a.annotator_id) + '|' + esc(w.item_id) + '">Reopen</button>' : '') + '</td></tr>').join('');
+      h += '<tr><td><b>' + esc(a.annotator_id) + '</b>' + (a.name ? '<span class="muted small" style="display:block">' + esc(a.name) + '</span>' : '') + (a.active ? '' : '<span class="muted small" style="display:block">inactive</span>') +
+        (ws.length ? '<details class="win"><summary>Windows (' + ws.length + ')</summary><table class="grid-tbl"><thead><tr><th>Item</th><th>Status</th><th>CUTs</th><th>Flags</th><th>Active</th><th>Read</th><th></th></tr></thead><tbody>' + detail + '</tbody></table></details>' : '') + '</td>' +
+        '<td>' + (esc(a.slot) || '<span class="muted">—</span>') + '</td>' +
+        '<td>' + (order.length ? pct + '%<div class="bar"><span style="width:' + pct + '%"></span></div>' : '<span class="muted">no slot</span>') + '</td>' +
+        '<td>' + (a.warmup_done ? 'done' : '—') + '</td><td class="nm"><b>' + subM.length + '/' + M.length + '</b></td>' +
+        '<td class="nm">' + sub.reduce((s, w) => s + (Number(w.n_flags) || 0), 0) + '</td><td class="nm">' + min(tot) + ' min</td><td class="nm">' + (subM.length ? min(med) + ' min' : '—') + '</td>' +
+        '<td class="small">' + ago(lastAct) + '</td><td class="nm">' + (order.length ? (remainIds.length ? fmtH(remain) + (mine.length >= 3 ? '<span class="muted small" style="display:block">at own pace</span>' : '') : 'done') : '—') + '</td>' +
+        '<td class="nm">' + money(tot / 3600000 * E.rate) + '</td></tr>';
+    });
+    $('progTbl').innerHTML = h + '</tbody>';
+    const target = people.length * M.length;
+    $('progKpis').innerHTML = [
+      [people.length + '', 'active annotators with a slot'],
+      [totSubM + ' / ' + target, 'study windows submitted (all annotators)'],
+      [target ? Math.round(totSubM / target * 100) + '%' : '—', 'of the study annotation done'],
+      [fmtH(totAct / 60000), 'active time so far'],
+      [money(totAct / 3600000 * E.rate), 'cost so far (active time × rate)'],
+      [fmtH(totRemain), 'estimated time remaining'],
+      [money(totRemain / 60 * E.rate), 'estimated cost remaining']
+    ].map(k => '<div class="kpi"><b>' + esc(k[0]) + '</b><span>' + esc(k[1]) + '</span></div>').join('');
+  }
+
+  function renderAnnotators(r) {
     $('annTbl').innerHTML = '<thead><tr><th>Email</th><th>Name</th><th>Slot</th><th>Active</th><th>Created</th><th></th></tr></thead><tbody>' +
       r.annotators.map(a => '<tr><td><b>' + esc(a.annotator_id) + '</b></td><td>' + esc(a.name) + '</td><td><select data-slot="' + esc(a.annotator_id) + '">' + slotOptions(a.slot) + '</select></td><td>' + (a.active ? 'yes' : 'no') + '</td><td class="small muted">' + esc(String(a.created_at).slice(0, 10)) + '</td>' +
         '<td><button class="link small" data-active="' + esc(a.annotator_id) + '" data-to="' + (a.active ? '' : '1') + '">' + (a.active ? 'Deactivate' : 'Activate') + '</button></td></tr>').join('') + '</tbody>';
