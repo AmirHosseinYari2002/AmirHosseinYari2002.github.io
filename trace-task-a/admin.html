@@ -84,7 +84,7 @@
     <p class="muted small">One file per annotator slot, in the format of <code>platform/export_format.md</code>: study windows only, submitted only, CUTs as character offsets in <code>window_text</code>, flags as <code>{offset, note}</code>, active <code>seconds</code>. Save the files as <code>TaskA/annotations/A1.json</code>, <code>A2.json</code>, … and run Part B.</p>
     <div class="export-row" id="exportRow"></div>
     <div class="note warn" id="exportNote" hidden></div>
-    <p class="small"><button type="button" class="link" id="rawBtn">Download every record of this dataset (archive JSON, includes drafts and practice)</button></p>
+    <p class="small"><button type="button" class="link" id="rawBtn">Download every record of this dataset (archive JSON, includes drafts)</button></p>
 
     <h2>Annotators</h2>
     <form class="adm-form" id="addForm">
@@ -141,7 +141,8 @@
   const estMin = it => segW(it) / Math.max(1, E.ann) + readPart(it);                  // minutes for one window
   const fmtH = m => { const h = Math.floor(m / 60), mm = Math.round(m % 60); return h ? h + ' h ' + String(mm).padStart(2, '0') + ' min' : mm + ' min'; };
   const money = v => (Math.round(v * 100) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ' + (E.cur || '');
-  function perAnnotatorMin() { return (E.onb + D.items.reduce((t, it) => t + estMin(it), 0)) * (1 + E.buf / 100); }
+  const study = () => D.items.filter(i => !i.practice);   // practice items from Part A are not shown to annotators
+  function perAnnotatorMin() { return (E.onb + study().reduce((t, it) => t + estMin(it), 0)) * (1 + E.buf / 100); }
 
   function observed() { // submitted study windows with recorded active time, all annotators
     if (!last) return null;
@@ -156,23 +157,22 @@
 
   function renderEstimate() {
     Object.keys(EST_FIELDS).forEach(k => { const el = $(EST_FIELDS[k]); if (document.activeElement !== el) el.value = E[k]; });
-    const P = D.items.filter(i => i.practice), M = D.items.filter(i => !i.practice);
+    const M = study();
     const sum = (arr, f) => arr.reduce((t, x) => t + f(x), 0);
     const per = perAnnotatorMin(), cost = per / 60 * E.rate;
     $('estKpis').innerHTML = [
-      [M.length + ' + ' + P.length, 'study + practice windows'],
+      [M.length + '', 'windows per annotator'],
       [sum(M, segW).toLocaleString(), 'words to segment (study)'],
-      [(sum(M, segW) + sum(P, segW)).toLocaleString(), 'words to segment incl. practice'],
-      [(sum(D.items, readW)).toLocaleString(), 'words to read only (problem + context)'],
+      [(sum(M, readW)).toLocaleString(), 'words to read only (problem + context)'],
       [fmtH(sum(M, estMin) / M.length), 'per study window (avg)'],
       [fmtH(per), 'per annotator, incl. onboarding + ' + E.buf + '%'],
       [money(cost), 'per annotator'],
       [money(cost * E.n), 'total for ' + E.n + ' annotator' + (E.n > 1 ? 's' : '')]
     ].map(k => '<div class="kpi"><b>' + esc(k[0]) + '</b><span>' + esc(k[1]) + '</span></div>').join('');
-    const rows = D.items.slice().sort((a, b) => (b.practice - a.practice) || a.item_id.localeCompare(b.item_id));
-    $('estTbl').innerHTML = '<thead><tr><th>Item</th><th>Type</th><th>Words to segment</th><th>Words to read</th><th>Units</th><th>Characters</th><th>Est. time</th></tr></thead><tbody>' +
-      rows.map(it => '<tr><td>' + esc(it.item_id) + '</td><td>' + (it.practice ? 'practice' : 'study') + '</td><td class="nm">' + segW(it) + '</td><td class="nm">' + readW(it) + '</td><td class="nm">' + it.n_units + '</td><td class="nm">' + it.window_text.length.toLocaleString() + '</td><td class="nm">' + estMin(it).toFixed(1) + ' min</td></tr>').join('') +
-      '<tr class="tot"><td colspan="2">Total (one annotator, before onboarding and buffer)</td><td class="nm">' + sum(D.items, segW).toLocaleString() + '</td><td class="nm">' + sum(D.items, readW).toLocaleString() + '</td><td class="nm">' + sum(D.items, i => i.n_units).toLocaleString() + '</td><td class="nm">' + sum(D.items, i => i.window_text.length).toLocaleString() + '</td><td class="nm">' + fmtH(sum(D.items, estMin)) + '</td></tr></tbody>';
+    const rows = M.slice().sort((a, b) => a.item_id.localeCompare(b.item_id));
+    $('estTbl').innerHTML = '<thead><tr><th>Item</th><th>Words to segment</th><th>Words to read</th><th>Units</th><th>Characters</th><th>Est. time</th></tr></thead><tbody>' +
+      rows.map(it => '<tr><td>' + esc(it.item_id) + '</td><td class="nm">' + segW(it) + '</td><td class="nm">' + readW(it) + '</td><td class="nm">' + it.n_units + '</td><td class="nm">' + it.window_text.length.toLocaleString() + '</td><td class="nm">' + estMin(it).toFixed(1) + ' min</td></tr>').join('') +
+      '<tr class="tot"><td>Total (one annotator, before onboarding and buffer)</td><td class="nm">' + sum(M, segW).toLocaleString() + '</td><td class="nm">' + sum(M, readW).toLocaleString() + '</td><td class="nm">' + sum(M, i => i.n_units).toLocaleString() + '</td><td class="nm">' + sum(M, i => i.window_text.length).toLocaleString() + '</td><td class="nm">' + fmtH(sum(M, estMin)) + '</td></tr></tbody>';
     const o = observed();
     $('obsNote').hidden = !o;
     if (o) $('obsNote').innerHTML = '<b>Observed so far</b> (' + o.n + ' submitted study window' + (o.n > 1 ? 's' : '') + '): median ' + o.med.toFixed(1) + ' active min per window; actual time is <b>' + Math.round(o.act / o.pred * 100) + '%</b> of the estimate for the same windows' +
@@ -194,7 +194,7 @@
     D.items = items; D.assign = assign; items.forEach(i => { D.byId[i.item_id] = i; });
     D.id = (await digest('SHA-256', JSON.stringify([items.map(i => [i.item_id, i.window_text]), assign]))).slice(0, 16);
     const nP = items.filter(i => i.practice).length;
-    $('dataFacts').innerHTML = '<span>Dataset <code class="k">' + esc(D.id) + '</code></span><span><b>' + (items.length - nP) + '</b> study windows</span><span><b>' + nP + '</b> practice</span><span>Slots: <b>' + esc(slots().join(', ')) + '</b></span>' + (CFG.dryRun ? '<span><b>dry run</b></span>' : '');
+    $('dataFacts').innerHTML = '<span>Dataset <code class="k">' + esc(D.id) + '</code></span><span><b>' + (items.length - nP) + '</b> windows per annotator</span>' + (nP ? '<span class="muted">' + nP + ' practice items in the files are not shown (the warm-up replaces them)</span>' : '') + '<span>Slots: <b>' + esc(slots().join(', ')) + '</b></span>' + (CFG.dryRun ? '<span><b>dry run</b></span>' : '');
     $('newSlot').innerHTML = slotOptions('');
     let saved = {}; try { saved = JSON.parse(localStorage.getItem('tta:est') || '{}'); } catch (e) {}
     if (saved.n == null) E.n = Math.max(1, slots().length);
@@ -235,21 +235,21 @@
     const M = mainIds(), nP = D.items.length - M.length;
     const people = r.annotators.filter(a => a.active && a.slot);
     let totSubM = 0, totAct = 0, totRemain = 0;
-    let h = '<thead><tr><th>Annotator</th><th>Slot</th><th>Progress</th><th>Warm-up</th><th>Practice</th><th>Study windows</th><th>Flags</th><th>Active time</th><th>Median / window</th><th>Last activity</th><th>Est. remaining</th><th>Cost so far</th></tr></thead><tbody>';
+    let h = '<thead><tr><th>Annotator</th><th>Slot</th><th>Progress</th><th>Warm-up</th><th>Windows</th><th>Flags</th><th>Active time</th><th>Median / window</th><th>Last activity</th><th>Est. remaining</th><th>Cost so far</th></tr></thead><tbody>';
     r.annotators.forEach(a => {
       const ws = bySlotEmail[a.annotator_id] || [];
       const sub = ws.filter(w => w.status === 'submitted');
-      const subM = sub.filter(w => !w.practice), subP = sub.filter(w => w.practice);
+      const subM = sub.filter(w => !w.practice);
       const tot = ws.reduce((s, w) => s + (w.active_ms || 0), 0);
       const med = median(subM.map(w => w.active_ms || 0));
-      const order = (D.assign[a.slot] || []).filter(id => D.byId[id]);
-      const doneIds = new Set(sub.map(w => w.item_id));
+      const order = (D.assign[a.slot] || []).filter(id => D.byId[id] && !D.byId[id].practice);
+      const doneIds = new Set(subM.map(w => w.item_id));
       const remainIds = order.filter(id => !doneIds.has(id));
       // the annotator's own pace once 3+ study windows are in, otherwise the assumption
       const mine = subM.filter(w => w.active_ms > 0 && D.byId[w.item_id]);
       const ratio = mine.length >= 3 ? mine.reduce((t, w) => t + w.active_ms / 60000, 0) / mine.reduce((t, w) => t + estMin(D.byId[w.item_id]), 0) : 1 + E.buf / 100; // own pace, else assumption + buffer
       const remain = remainIds.reduce((t, id) => t + estMin(D.byId[id]), 0) * ratio + (a.warmup_done || ws.length ? 0 : E.onb);
-      const pct = order.length ? Math.round(sub.length / order.length * 100) : 0;
+      const pct = order.length ? Math.round(subM.length / order.length * 100) : 0;
       const lastAct = ws.reduce((m, w) => (w.server_updated > m ? w.server_updated : m), '');
       if (a.active && a.slot) { totSubM += subM.length; totAct += tot; totRemain += remain; }
       const detail = ws.slice().sort((x, y) => order.indexOf(x.item_id) - order.indexOf(y.item_id)).map(w =>
@@ -259,7 +259,7 @@
         (ws.length ? '<details class="win"><summary>Windows (' + ws.length + ')</summary><table class="grid-tbl"><thead><tr><th>Item</th><th>Status</th><th>CUTs</th><th>Flags</th><th>Active</th><th>Read</th><th></th></tr></thead><tbody>' + detail + '</tbody></table></details>' : '') + '</td>' +
         '<td>' + (esc(a.slot) || '<span class="muted">—</span>') + '</td>' +
         '<td>' + (order.length ? pct + '%<div class="bar"><span style="width:' + pct + '%"></span></div>' : '<span class="muted">no slot</span>') + '</td>' +
-        '<td>' + (a.warmup_done ? 'done' : '—') + '</td><td class="nm">' + subP.length + '/' + nP + '</td><td class="nm"><b>' + subM.length + '/' + M.length + '</b></td>' +
+        '<td>' + (a.warmup_done ? 'done' : '—') + '</td><td class="nm"><b>' + subM.length + '/' + M.length + '</b></td>' +
         '<td class="nm">' + sub.reduce((s, w) => s + (Number(w.n_flags) || 0), 0) + '</td><td class="nm">' + min(tot) + ' min</td><td class="nm">' + (subM.length ? min(med) + ' min' : '—') + '</td>' +
         '<td class="small">' + ago(lastAct) + '</td><td class="nm">' + (order.length ? (remainIds.length ? fmtH(remain) + (mine.length >= 3 ? '<span class="muted small" style="display:block">at own pace</span>' : '') : 'done') : '—') + '</td>' +
         '<td class="nm">' + money(tot / 3600000 * E.rate) + '</td></tr>';

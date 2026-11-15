@@ -1,6 +1,7 @@
 /* TRACE · Task A — annotator app for the window design of taskA_human_validation.ipynb.
-   Flow: sign in → guidelines → warm-up (2 passages with feedback) → the annotator's queue
-   (3 practice windows, then the study windows, in the order of data/assignments.json).
+   Flow: sign in → guidelines → warm-up (2 passages with feedback) → the annotator's study windows,
+   in the order of data/assignments.json. Practice items that Part A writes are skipped: the
+   warm-up replaces them (Part B never reads practice items).
    Data: data/items.json + data/assignments.json, copied unchanged from TaskA/platform/ (Part A).
    Every CUT is a code-point offset in window_text at the start of a unit (regex \w+|[^\w\s]),
    which is exactly what Part B's snap_units() reads back. */
@@ -61,9 +62,9 @@
     D.id = (await digest('SHA-256', JSON.stringify([items.map(i => [i.item_id, i.window_text]), assign]))).slice(0, 16);
     await Promise.all(items.map(async it => { D.sha1[it.item_id] = await digest('SHA-1', it.window_text); })); // = key.csv window_sha1
   }
-  const nPractice = () => D.items.filter(i => i.practice).length;
   const nMain = () => D.items.filter(i => !i.practice).length;
-  function queue() { return (S && S.slot && D.assign[S.slot]) ? D.assign[S.slot].filter(id => D.byId[id]) : []; }
+  // The annotator's study windows in their assigned order (practice items are not shown).
+  function queue() { return (S && S.slot && D.assign[S.slot]) ? D.assign[S.slot].filter(id => D.byId[id] && !D.byId[id].practice) : []; }
 
   // ---------------- session + API ----------------
   let S = jget('tta2:session', null); // {id (email), name, slot}
@@ -350,10 +351,7 @@
   // The first window in the annotator's order that is not submitted; everything after it stays locked.
   function nextOpen() { return queue().find(id => statusOf(id) !== 'submitted') || null; }
   function isOpen(id) { const q = queue(), k = q.indexOf(id); return k >= 0 && q.slice(0, k).every(x => statusOf(x) === 'submitted'); }
-  function labelOf(id) {
-    const q = queue(), it = D.byId[id], k = q.filter(x => D.byId[x].practice === it.practice).indexOf(id) + 1;
-    return it.practice ? 'Practice ' + k + ' of ' + nPractice() : 'Window ' + k + ' of ' + nMain();
-  }
+  function labelOf(id) { return 'Window ' + (queue().indexOf(id) + 1) + ' of ' + queue().length; }
 
   async function showQueue() {
     show('queue');
@@ -371,15 +369,11 @@
       return;
     }
     if (LOCAL_ONLY) note($('syncNote'), 'warn', '<b>Local mode.</b> No server is configured, so your work is saved only in this browser.');
-    const doneP = q.filter(id => D.byId[id].practice && statusOf(id) === 'submitted').length;
-    const doneM = q.filter(id => !D.byId[id].practice && statusOf(id) === 'submitted').length;
-    $('queueTitle').textContent = nMain() + ' windows to segment.';
-    $('queueSummary').innerHTML = '<span><b>' + doneP + '/' + nPractice() + '</b>practice done</span><span><b>' + doneM + '/' + nMain() + '</b>study windows submitted</span>';
+    const doneM = q.filter(id => statusOf(id) === 'submitted').length;
+    $('queueTitle').textContent = q.length + ' windows to segment.';
+    $('queueSummary').innerHTML = '<span><b>' + doneM + '/' + q.length + '</b>windows submitted</span>';
     const nxt = nextOpen();
-    let lastPractice = null;
     q.forEach((id, k) => {
-      const it = D.byId[id];
-      if (it.practice !== lastPractice) { const h = document.createElement('p'); h.className = 'qsection'; h.textContent = it.practice ? 'Practice · not scored' : 'Study windows'; list.appendChild(h); lastPractice = it.practice; }
       const st = statusOf(id), open = isOpen(id), cur = id === nxt;
       const l = localDraft(id), s = serverProgress[id] || {};
       const nCuts = l ? l.cuts.length : (s.n_cuts || 0);
@@ -503,7 +497,6 @@
     clearInterval(W.tick); clearTimeout(W.syncT);
     $('wTitle').textContent = labelOf(id);
     $('wSub').textContent = 'Item ' + id + ' · click before a word or mark to insert CUT';
-    $('practiceNote').hidden = !it.practice;
     $('problem').textContent = it.problem; typeset($('problem'));
     $('contextBox').hidden = !it.context_before;
     $('contextText').textContent = it.context_before || '';
