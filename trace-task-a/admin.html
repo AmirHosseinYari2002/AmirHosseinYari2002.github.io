@@ -192,7 +192,7 @@
   async function loadData() {
     const [items, assign] = await Promise.all([fetch('data/items.json', { cache: 'no-cache' }).then(r => r.json()), fetch('data/assignments.json', { cache: 'no-cache' }).then(r => r.json())]);
     D.items = items; D.assign = assign; items.forEach(i => { D.byId[i.item_id] = i; });
-    D.id = (await digest('SHA-256', JSON.stringify([items.map(i => [i.item_id, i.window_text]), assign]))).slice(0, 16);
+    D.id = CFG.datasetId || (await digest('SHA-256', JSON.stringify([items.map(i => [i.item_id, i.window_text]), assign]))).slice(0, 16);
     const nP = items.filter(i => i.practice).length;
     $('dataFacts').innerHTML = '<span>Dataset <code class="k">' + esc(D.id) + '</code></span><span><b>' + (items.length - nP) + '</b> windows per annotator</span>' + (nP ? '<span class="muted">' + nP + ' practice items in the files are not shown (the warm-up replaces them)</span>' : '') + '<span>Slots: <b>' + esc(slots().join(', ')) + '</b></span>' + (CFG.dryRun ? '<span><b>dry run</b></span>' : '');
     $('newSlot').innerHTML = slotOptions('');

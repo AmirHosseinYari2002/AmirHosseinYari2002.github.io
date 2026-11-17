@@ -57,9 +57,10 @@
     ]);
     D.items = items; D.assign = assign;
     items.forEach(it => { D.byId[it.item_id] = it; });
-    // Fingerprint of this set of platform files: records are stored per dataset, so annotations of a
-    // dry run can never be mixed with (or loaded into) the final sample, even if item IDs repeat.
-    D.id = (await digest('SHA-256', JSON.stringify([items.map(i => [i.item_id, i.window_text]), assign]))).slice(0, 16);
+    // Records are stored per dataset. The study sets a fixed datasetId in config.js, so windows appended
+    // later (A5) keep every saved annotation; without one (dry runs) a fingerprint of the files is used,
+    // so test annotations never mix with the study.
+    D.id = CFG.datasetId || (await digest('SHA-256', JSON.stringify([items.map(i => [i.item_id, i.window_text]), assign]))).slice(0, 16);
     await Promise.all(items.map(async it => { D.sha1[it.item_id] = await digest('SHA-1', it.window_text); })); // = key.csv window_sha1
   }
   const nMain = () => D.items.filter(i => !i.practice).length;
