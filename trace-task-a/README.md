@@ -24,19 +24,24 @@ researcher page exports one file per annotator in exactly the format Part B read
   `"practice": true` and Part B never reads them, so the notebook needs no change.
 * No model, outcome, answer, judge CUTs or active time are ever shown. Item IDs are the random IDs from Part A.
 
-## Moving from the dry run to the final sample
+## The study sample (two stages)
 
-`data/` currently holds the **dry run** (`TaskA/dryrun/platform`, 4 of 6 models, 24 study windows), and `config.js`
-has `dryRun: true`, which shows a "Test data" banner. When all six models are in `Outputs/`:
+`data/` holds the **frozen stage-1 sample**: Part A of the notebook with `EXPECTED_MODELS = 5`
+(GEM, GPT, NEM, PHI, QWN): 30 study windows, one per model × domain × outcome, on 30 distinct problems.
+Annotation runs on these windows; they never change.
 
-1. Run Part A with `ALLOW_PARTIAL = False`. It writes `TaskA/platform/items.json` and `assignments.json`.
-2. Replace `trace-task-a/data/items.json` and `trace-task-a/data/assignments.json` with those two files.
-   Never copy anything from `TaskA/private/`.
-3. Set `dryRun: false` in `config.js` and push.
+**Adding DeepSeek later (stage 2).** Run sections 0 and A1 and then cell **A5** of the notebook with
+`APPEND_MODEL` = DeepSeek's code. A5 verifies the frozen files, draws DeepSeek's 6 windows by a rule fixed in
+advance (one per domain × outcome, problems not yet used, positions 2/2/2, seed `"20261115-append-<code>"`),
+and appends them to `items.json`, `key.csv` and to the end of each annotator's order. Then copy
+`TaskA/platform/items.json` and `assignments.json` here. Nothing else changes:
 
-The site fingerprints the two data files (the *dataset id* shown on the researcher page) and stores every record
-under it, so test annotations from the dry run can never be loaded into, or exported with, the final sample,
-even when an item ID repeats.
+* `config.js` has a fixed `datasetId` (`taskA-study-1`), so every saved annotation stays attached when windows
+  are added. Never change it during the study.
+* Annotators who already finished see the new windows open at the end of their list; the researcher page and
+  exports count them automatically.
+
+Never copy anything from `TaskA/private/`.
 
 ## Backend
 
