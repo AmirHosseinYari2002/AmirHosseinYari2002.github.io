@@ -26,7 +26,7 @@ researcher page exports one file per annotator in exactly the format Part B read
 
 ## Moving from the dry run to the final sample
 
-`data/` currently holds the **dry run** (`TaskA/dryrun/platform`, 4 of 6 models, 24 study windows), and `config.js`
+`data/` currently holds the **dry run with 5 models** (GEM, GPT, NEM, PHI, QWN: 30 study windows; regenerated with the notebook's Part A after Qwen was added), and `config.js`
 has `dryRun: true`, which shows a "Test data" banner. When all six models are in `Outputs/`:
 
 1. Run Part A with `ALLOW_PARTIAL = False`. It writes `TaskA/platform/items.json` and `assignments.json`.

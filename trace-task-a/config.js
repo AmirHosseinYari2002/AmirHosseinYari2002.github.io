@@ -8,5 +8,5 @@ window.TASK_CONFIG = {
   apiUrl: 'https://script.google.com/macros/s/AKfycbxG1XYCkBJiVEaqBVO6yJTsIJKb7vM42wdbbHI0ze5jpELj05q_Ui6trWxgf_erqk3myw/exec',
   contactEmail: 'ahyari2002@gmail.com',
   dryRun: true,
-  datasetLabel: 'Dry-run sample (4 of 6 models). Annotations made now are for testing only and will not be used.'
+  datasetLabel: 'Dry-run sample (5 of 6 models). Annotations made now are for testing only and will not be used.'
 };
