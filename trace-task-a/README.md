@@ -43,6 +43,10 @@ and appends them to `items.json`, `key.csv` and to the end of each annotator's o
 
 Never copy anything from `TaskA/private/`.
 
+**Stage 2 done (2026-11-19):** DeepSeek-R1-Distill-Qwen-32B (`DSR`) was appended with A5: 6 windows (W418, W779,
+W355, W883, W316, W176), one per domain × outcome, on problems not used before, at the end of every annotator's
+order. The study now has 36 windows per annotator; the first 30 and their order are unchanged.
+
 ## Backend
 
 1. Open the Google Sheet behind the web app → Extensions → Apps Script. Replace the code with `backend/Code.gs`.
