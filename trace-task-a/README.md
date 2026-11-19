@@ -67,5 +67,14 @@ Never copy anything from `TaskA/private/`.
   `TaskA/annotations/` and run Part B. The page warns when a file is incomplete.
 * *Download every record* gives an archive of the dataset (drafts, timestamps, window SHA-1s that
   match `key.csv`'s `window_sha1`).
+* **Agreement (live):** inter-annotator and human–LLM agreement, recomputed from the submitted windows on every
+  load or refresh (optionally every 2 minutes). `metrics.js` is a line-by-line port of Part B of the notebook
+  (segeval Boundary Similarity with n_t = 3, κ_B, π_B, α, F1 exact / within 3 units, Pk, WindowDiff, bootstrap CIs,
+  chance floor, preregistered verdicts, judge non-inferiority J1 and per-model check J2, Alternative Annotator Test,
+  strata, model-ranking Spearman ρ); it reproduces the notebook's values to floating-point precision, except that
+  bootstrap CIs and the chance floor use a different random-number generator (third-decimal differences).
+  Report the numbers Part B prints. For human–LLM agreement, load `TaskA/private/key.csv` and
+  `TaskA/judges/*.jsonl` with the file picker: they are read and kept only in that browser (checked against the
+  window SHA-1s), never uploaded and never part of this site.
 
 Active time counts only while a window is open in the foreground and the annotator was active in the last minute.
