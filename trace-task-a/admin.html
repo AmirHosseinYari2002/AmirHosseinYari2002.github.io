@@ -374,7 +374,7 @@
   function renderRefInfo() {
     const j = REF ? Object.keys(REF.judges || {}) : [];
     $('refInfo').innerHTML = REF ? 'Loaded ' + esc(String(REF.loaded_at).slice(0, 16).replace('T', ' ')) + ': key (' + Object.keys(REF.meta || {}).length + ' windows)' +
-      (j.length ? ', judges: <b>' + j.map(esc).join(', ') + '</b>' : ', no judge file yet') : '<span class="muted">No key or judge files loaded: inter-annotator agreement only.</span>';
+      (j.length ? ', judges: ' + j.map(n => '<b>' + esc(n) + '</b> (' + Object.keys(REF.judges[n]).length + '/' + Object.keys(REF.meta || {}).length + ' windows)').join(', ') : ', no judge file yet') : '<span class="muted">No key or judge files loaded: inter-annotator agreement only.</span>';
     $('agrJudges').innerHTML = j.length ? '<b class="small">Judges to compare:</b> ' + j.map(n => '<label class="small"><input type="checkbox" data-agrj="' + esc(n) + '" checked> ' + esc(n) + '</label>').join('') : '';
   }
   function parseCsv(text) {
@@ -415,8 +415,9 @@
         const k = next.codes[rec.code]; if (!k || !Array.isArray(rec.cuts)) return;
         units[k.item_id] = MX.snapUnits(D.byId[k.item_id], rec.cuts.map(Number).filter(c => k.start < c && c < k.end).map(c => c - k.start));
       });
-      const missing = Object.keys(next.meta).filter(id => !units[id]);
-      if (missing.length) problems.push(name + ': no segmentation for ' + missing.length + ' window(s)');
+      // a judge may cover only part of the key (e.g. before a later model was judged): human–LLM agreement then
+      // runs on the windows every selected judge covers, and the page says so
+      if (!Object.keys(units).length) problems.push(name + ': no window of the key found in this file');
       else next.judges[name] = units;
     });
     if (problems.length) { msg('err', 'Not loaded: ' + problems.slice(0, 8).map(esc).join('; ') + (problems.length > 8 ? ' …' : '')); return; }
@@ -476,13 +477,20 @@
       pairs.push({ pair: [names[m], names[k]], table: hr.table, verdict: hr.verdict, lower: hr.lower, gran: hr.gran, flags: hr.flags, hh: hr.hh, hr: hr });
     }
     const all = names.length > 2 ? Object.assign(MX.multiAgreement(H, ids, IT), { alpha_exact: MX.alphaNominal(H, ids, IT) }) : null;
-    const primary = pairs[0].hr;     // Part B: annotators A1, A2 (the first two selected)
-    const jv = Object.keys(J).length ? MX.judgesVsHumans(H, J, ids, IT, BI, primary, meta) : null;
+    // human–LLM: windows every selected judge covers (all windows once every model has been judged)
+    const idsJ = ids.filter(id => Object.keys(J).every(j => J[j][id]));
+    let jv = null, primaryJ = pairs[0].hr;     // Part B: annotators A1, A2 (the first two selected)
+    if (Object.keys(J).length && idsJ.length >= 2) {
+      const BIJ = idsJ.length === ids.length ? BI : MX.bootIdx(idsJ.length, MX.N_BOOT, MX.SEED);
+      if (idsJ.length !== ids.length) primaryJ = MX.humanReliability({ [names[0]]: H[names[0]], [names[1]]: H[names[1]] }, [names[0], names[1]], idsJ, IT, BIJ);
+      jv = MX.judgesVsHumans(H, J, idsJ, IT, BIJ, primaryJ, meta);
+    }
     let strata = null, ranking = null;
     if (meta) {
-      strata = MX.stratumTable(H[names[0]], H[names[1]], ids, IT, meta, 'annotators');
-      Object.keys(J).forEach(j => names.forEach(a => { strata = strata.concat(MX.stratumTable(J[j], H[a], ids, IT, meta, j + '|' + a)); }));
-      ranking = Object.keys(J).length ? MX.modelRanking(H, J, ids, IT, meta) : null;
+      const idsM = ids.filter(id => meta[id]);
+      strata = MX.stratumTable(H[names[0]], H[names[1]], idsM, IT, meta, 'annotators');
+      if (jv) Object.keys(J).forEach(j => names.forEach(a => { strata = strata.concat(MX.stratumTable(J[j], H[a], idsJ.filter(id => meta[id]), IT, meta, j + '|' + a)); }));
+      ranking = jv ? MX.modelRanking(H, J, idsJ.filter(id => meta[id]), IT, meta) : null;
     }
     const sec = extra.seconds.slice().sort((a, b) => a - b);
     return { computed_at: new Date().toISOString(), dataset_id: D.id, windows: ids.length, windows_total: extra.total, window_ids: ids,
@@ -490,7 +498,7 @@
       median_minutes_per_window: sec.length ? sec[sec.length >> 1] / 60 : null,
       inter_annotator: pairs.map(p => ({ pair: p.pair, table: p.table, verdict: p.verdict, kappa_B_lower95: p.lower, granularity: p.gran, flags: p.flags })),
       all_annotators: all,
-      human_llm: jv ? { table: jv.rows, per_annotator: Object.fromEntries(Object.keys(jv.detail).map(j => [j, jv.detail[j].perAnn])),
+      human_llm: jv ? { windows: idsJ.length, annotator_kappa_B_on_these_windows: primaryJ.hh.kappa_B, table: jv.rows, per_annotator: Object.fromEntries(Object.keys(jv.detail).map(j => [j, jv.detail[j].perAnn])),
         edits: Object.fromEntries(Object.keys(jv.detail).map(j => [j, jv.detail[j].errors])),
         by_model: Object.fromEntries(Object.keys(jv.detail).map(j => [j, jv.detail[j].byModel])),
         alt_test: Object.fromEntries(Object.keys(jv.detail).map(j => [j, jv.detail[j].alt])) } : null,
@@ -516,7 +524,7 @@
     if (A.human_llm) {
       const T = A.human_llm.table, cols = T.map(r => r.judge);
       const row = (label, f, cls) => '<tr><th class="rowh">' + label + '</th>' + T.map(r => (cls ? cls(r) : '<td class="nm">' + f(r) + '</td>')).join('') + '</tr>';
-      h += '<h3 class="agr">Human–LLM agreement</h3><p class="muted small">Each judge against every annotator (mean over annotators), as in Part B cell B4. Δ = judge κ<sub>B</sub> − annotator κ<sub>B</sub> (' + esc(A.annotators[0]) + '–' + esc(A.annotators[1]) + '); J1 = non-inferior (one-sided 95% lower bound of Δ above −' + P.noninferiority_delta + ', paired bootstrap); J2 = no model with a mean B gap below ' + P.model_gap_floor + ' (needs key.csv). The Alternative Annotator Test (ε = ' + P.alt_epsilon + ') is reported but does not decide validation.</p>';
+      h += '<h3 class="agr">Human–LLM agreement</h3>' + (A.human_llm.windows < A.windows ? '<div class="note warn small">Computed on <b>' + A.human_llm.windows + ' of ' + A.windows + '</b> windows: the loaded judge files do not cover the others yet (e.g. a model added later). Δ and J1 compare with the annotators on the same ' + A.human_llm.windows + ' windows (annotator κ<sub>B</sub> there: ' + f3(A.human_llm.annotator_kappa_B_on_these_windows) + '). Load the updated judge files to include every window.</div>' : '') + '<p class="muted small">Each judge against every annotator (mean over annotators), as in Part B cell B4. Δ = judge κ<sub>B</sub> − annotator κ<sub>B</sub> (' + esc(A.annotators[0]) + '–' + esc(A.annotators[1]) + '); J1 = non-inferior (one-sided 95% lower bound of Δ above −' + P.noninferiority_delta + ', paired bootstrap); J2 = no model with a mean B gap below ' + P.model_gap_floor + ' (needs key.csv). The Alternative Annotator Test (ε = ' + P.alt_epsilon + ') is reported but does not decide validation.</p>';
       h += '<div class="tbl-wrap"><table class="grid-tbl compact"><thead><tr><th></th>' + cols.map(c => '<th>' + esc(c) + '</th>').join('') + '</tr></thead><tbody>' +
         row('κ<sub>B</sub> (mean over annotators)', r => '<b>' + f3(r.kappa_B) + '</b> ' + fci(r.kappa_B_ci)) +
         row('Δ vs annotators', r => f3(r.delta_vs_human)) + row('Δ one-sided 95% lower', r => f3(r.delta_lower95)) +
