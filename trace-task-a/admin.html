@@ -37,6 +37,15 @@
   .kpi b { display: block; font-size: 22px; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
   .kpi span { font-size: 12.5px; color: var(--muted); }
   tr.tot td { font-weight: 600; color: var(--ink); background: #f7f8f4; }
+  .agr-box { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: var(--paper); margin: 10px 0 14px; display: grid; gap: 8px; }
+  .agr-row { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; font-size: 14px; }
+  .agr-row label { display: inline-flex; gap: 6px; align-items: center; }
+  h3.agr { font-size: 16px; margin: 22px 0 4px; }
+  .verdict { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .04em; padding: 3px 9px; border-radius: 99px; background: var(--line); color: var(--ink); }
+  .verdict.ok { background: #dcefe3; color: #1d6b3d; } .verdict.mid { background: #fbecc9; color: #7a5300; } .verdict.no { background: #f7d9d6; color: #8a2a20; }
+  .grid-tbl td.yes { color: #1d6b3d; font-weight: 600; } .grid-tbl td.nope { color: #8a2a20; font-weight: 600; }
+  .grid-tbl.compact th, .grid-tbl.compact td { padding: 6px 10px; }
+  .grid-tbl th.rowh { text-transform: none; letter-spacing: 0; font-size: 13px; color: var(--ink-2); font-weight: 600; }
 </style>
 </head>
 <body>
@@ -61,6 +70,19 @@
     <p class="muted small">Active time counts only while the window is open in the foreground and the annotator was active in the last minute. Annotators never see it. <button type="button" class="link small" id="refreshBtn">Refresh</button></p>
     <div class="kpis" id="progKpis"></div>
     <div class="tbl-wrap"><table class="grid-tbl" id="progTbl"></table></div>
+
+    <h2>Agreement (live)</h2>
+    <p class="muted small">Inter-annotator and human–LLM agreement, recomputed from the submitted windows every time this page loads or refreshes. The code is a line-by-line port of Part B of <code>taskA_human_validation.ipynb</code> (same units, metrics, tolerance, preregistered thresholds; checked against the notebook to floating-point precision). Only the bootstrap intervals and the chance floor use a different random-number generator, so they can differ from the notebook in the third decimal. <b>Report the numbers Part B prints.</b> Until every annotator has submitted every window, everything here is provisional and computed on the windows that all selected annotators have submitted.</p>
+    <div class="agr-box">
+      <div class="agr-row"><b>Judges</b> <span class="muted small">Load <code>TaskA/private/key.csv</code> and the judge files <code>TaskA/judges/*.jsonl</code>. They are read and kept only in this browser, never uploaded or published.</span></div>
+      <div class="agr-row"><input type="file" id="refFiles" multiple accept=".jsonl,.csv,text/csv,application/json"> <button type="button" class="link small" id="refForget">Forget loaded judges</button></div>
+      <div class="small" id="refInfo"></div>
+      <div class="agr-row" id="agrAnn"></div>
+      <div class="agr-row" id="agrJudges"></div>
+      <div class="agr-row"><label class="small"><input type="checkbox" id="agrAuto"> Refresh automatically every 2 minutes</label> <button type="button" class="btn sm" id="agrRun">Recompute now</button> <button type="button" class="link small" id="agrDl" disabled>Download all metrics (JSON)</button></div>
+    </div>
+    <div class="note" id="agrStatus" hidden></div>
+    <div id="agrOut"></div>
 
     <h2>Workload &amp; cost estimate</h2>
     <p class="muted small">Planning figures from the windows in <code>data/</code>. Each window's time = words to segment ÷ annotation speed + words to read only (problem and grey context) ÷ reading speed + a fixed overhead for review and submit. Change any assumption; values are remembered in this browser. Once annotators have submitted windows, their observed speed appears below and can replace the assumption.</p>
@@ -98,6 +120,7 @@
   </div>
 </main>
 <script src="config.js"></script>
+<script src="metrics.js"></script>
 <script>
 (function () {
   'use strict';
@@ -206,6 +229,7 @@
       try { sessionStorage.setItem('tta:admin', $('adminKey').value.trim()); } catch (e) {}
       last = r; $('msg').hidden = true; $('panel').hidden = false;
       render(r);
+      renderAgrAnnotators(); runAgreement();
     } catch (err) { msg('err', err.code === 'auth' ? 'Wrong admin key.' : 'Could not reach the backend: ' + esc(err.message)); }
   }
 
@@ -338,9 +362,213 @@
     catch (err) { msg('err', esc(err.message)); }
   });
 
+  // ---------------- agreement (live) ----------------
+  const MX = window.TaskAMetrics;
+  const REF_KEY = () => 'tta:refs:' + D.id;
+  let REF = null, AGR = null, agrTimer = null, agrBusy = false;
+  const f3 = v => (v === v && v != null && isFinite(v)) ? Number(v).toFixed(3) : '—';
+  const fci = c => c && c[0] === c[0] ? '[' + f3(c[0]) + ', ' + f3(c[1]) + ']' : '';
+  const pct = v => v === v ? Math.round(v * 100) + '%' : '—';
+  function loadRefs() { try { REF = JSON.parse(localStorage.getItem(REF_KEY()) || 'null'); } catch (e) { REF = null; } renderRefInfo(); }
+  function saveRefs() { try { if (REF) localStorage.setItem(REF_KEY(), JSON.stringify(REF)); else localStorage.removeItem(REF_KEY()); } catch (e) {} renderRefInfo(); }
+  function renderRefInfo() {
+    const j = REF ? Object.keys(REF.judges || {}) : [];
+    $('refInfo').innerHTML = REF ? 'Loaded ' + esc(String(REF.loaded_at).slice(0, 16).replace('T', ' ')) + ': key (' + Object.keys(REF.meta || {}).length + ' windows)' +
+      (j.length ? ', judges: <b>' + j.map(esc).join(', ') + '</b>' : ', no judge file yet') : '<span class="muted">No key or judge files loaded: inter-annotator agreement only.</span>';
+    $('agrJudges').innerHTML = j.length ? '<b class="small">Judges to compare:</b> ' + j.map(n => '<label class="small"><input type="checkbox" data-agrj="' + esc(n) + '" checked> ' + esc(n) + '</label>').join('') : '';
+  }
+  function parseCsv(text) {
+    const rows = []; let row = [], cell = '', q = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (q) { if (c === '"' && text[i + 1] === '"') { cell += '"'; i++; } else if (c === '"') q = false; else cell += c; }
+      else if (c === '"') q = true; else if (c === ',') { row.push(cell); cell = ''; }
+      else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(cell); rows.push(row); row = []; cell = ''; }
+      else cell += c;
+    }
+    if (cell || row.length) { row.push(cell); rows.push(row); }
+    const h = rows.shift() || [];
+    return rows.filter(r => r.length > 1).map(r => { const o = {}; h.forEach((k, i) => { o[k.trim()] = (r[i] || '').trim(); }); return o; });
+  }
+  $('refFiles').addEventListener('change', async e => {
+    const files = Array.from(e.target.files || []); if (!files.length) return;
+    const texts = await Promise.all(files.map(f => f.text().then(t => ({ name: f.name, text: t }))));
+    const keyF = texts.find(f => /\.csv$/i.test(f.name)), judgeF = texts.filter(f => /\.jsonl$/i.test(f.name));
+    const next = REF ? JSON.parse(JSON.stringify(REF)) : { meta: {}, codes: {}, judges: {} };
+    const problems = [];
+    if (keyF) {
+      const rows = parseCsv(keyF.text);
+      if (!rows.length || !('char_start' in rows[0]) || !('window_sha1' in rows[0])) { msg('err', esc(keyF.name) + ' is not the Task A key (key.csv).'); return; }
+      next.meta = {}; next.codes = {};
+      rows.filter(r => String(r.practice).toLowerCase() !== 'true').forEach(r => {
+        if (!D.byId[r.item_id]) { problems.push(r.item_id + ' is not on the site'); return; }
+        if (r.window_sha1 !== D.sha1[r.item_id]) { problems.push(r.item_id + ': window text differs from the key'); return; }
+        next.meta[r.item_id] = { model_code: r.model_code, domain: r.domain, correct: String(r.correct).toLowerCase() === 'true' ? 'True' : 'False', position: r.position };
+        next.codes[r.code] = { item_id: r.item_id, start: Number(r.char_start), end: Number(r.char_end) };
+      });
+    }
+    if (judgeF.length && !Object.keys(next.codes || {}).length) { msg('err', 'Load key.csv together with the judge files (it maps each trace to its window).'); return; }
+    judgeF.forEach(f => {
+      const name = f.name.replace(/\.jsonl$/i, ''), units = {};
+      f.text.split('\n').filter(l => l.trim()).forEach(l => {
+        let rec; try { rec = JSON.parse(l); } catch (x) { return; }
+        const k = next.codes[rec.code]; if (!k || !Array.isArray(rec.cuts)) return;
+        units[k.item_id] = MX.snapUnits(D.byId[k.item_id], rec.cuts.map(Number).filter(c => k.start < c && c < k.end).map(c => c - k.start));
+      });
+      const missing = Object.keys(next.meta).filter(id => !units[id]);
+      if (missing.length) problems.push(name + ': no segmentation for ' + missing.length + ' window(s)');
+      else next.judges[name] = units;
+    });
+    if (problems.length) { msg('err', 'Not loaded: ' + problems.slice(0, 8).map(esc).join('; ') + (problems.length > 8 ? ' …' : '')); return; }
+    next.loaded_at = new Date().toISOString(); REF = next; saveRefs(); e.target.value = '';
+    msg('', 'Reference files loaded (kept in this browser only).'); runAgreement();
+  });
+  $('refForget').addEventListener('click', () => { REF = null; saveRefs(); runAgreement(); });
+  $('agrRun').addEventListener('click', () => runAgreement());
+  $('agrAuto').addEventListener('change', e => { clearInterval(agrTimer); agrTimer = e.target.checked ? setInterval(() => { load(); }, 120000) : null; });
+  document.addEventListener('change', e => { if (e.target.closest('[data-agra],[data-agrj]')) runAgreement(); });
+  $('agrDl').addEventListener('click', () => { if (AGR) download('taskA_agreement_' + D.id + '_' + new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-') + '.json', AGR); });
+
+  function renderAgrAnnotators() {
+    if (!last) return;
+    const prev = {}; document.querySelectorAll('[data-agra]').forEach(c => { prev[c.dataset.agra] = c.checked; });
+    const s = slots().filter(sl => last.annotators.some(a => a.slot === sl && a.active));
+    $('agrAnn').innerHTML = '<b class="small">Annotators:</b> ' + (s.length ? s.map(sl => '<label class="small"><input type="checkbox" data-agra="' + esc(sl) + '"' + (prev[sl] === false ? '' : ' checked') + '> ' + esc(sl) + '</label>').join('') : '<span class="muted small">no active annotator with a slot</span>');
+  }
+
+  async function runAgreement() {
+    if (!last || agrBusy) return;
+    agrBusy = true; renderAgrAnnotators();
+    const st = $('agrStatus'); st.hidden = false; st.className = 'note'; st.innerHTML = 'Computing agreement…';
+    try {
+      const r = await api('admin_export');
+      const sel = Array.from(document.querySelectorAll('[data-agra]')).filter(c => c.checked).map(c => c.dataset.agra);
+      const H = {}, seconds = [], flagged = new Set();
+      sel.forEach(sl => {
+        const who = last.annotators.find(a => a.slot === sl && a.active); if (!who) return;
+        H[sl] = {};
+        r.windows.filter(w => w.annotator_id === who.annotator_id && !w.practice && w.status === 'submitted' && D.byId[w.item_id] && (!w.window_sha1 || w.window_sha1 === D.sha1[w.item_id]))
+          .forEach(w => { H[sl][w.item_id] = MX.snapUnits(D.byId[w.item_id], w.cuts || []); if (w.active_ms) seconds.push(w.active_ms / 1000); if ((w.flags || []).length) flagged.add(w.item_id); });
+      });
+      const names = Object.keys(H), total = mainIds().length;
+      if (names.length < 2) { st.innerHTML = 'Select at least two annotators with submitted windows.'; $('agrOut').innerHTML = ''; agrBusy = false; return; }
+      const ids = mainIds().filter(id => names.every(a => H[a][id]));
+      if (ids.length < 2) { st.innerHTML = 'Not enough windows submitted by all selected annotators yet (' + ids.length + ' of ' + total + ').'; $('agrOut').innerHTML = ''; agrBusy = false; return; }
+      const jsel = new Set(Array.from(document.querySelectorAll('[data-agrj]')).filter(c => c.checked).map(c => c.dataset.agrj));
+      const J = {}; if (REF) Object.keys(REF.judges || {}).filter(n => jsel.has(n)).forEach(n => { J[n] = REF.judges[n]; });
+      const meta = REF && Object.keys(REF.meta || {}).length ? REF.meta : null;
+      st.innerHTML = 'Computing on ' + ids.length + ' windows…';
+      await new Promise(res => setTimeout(res, 20));
+      AGR = computeAgreement(H, J, ids, meta, { flagged: Array.from(flagged), seconds, total });
+      renderAgreement(AGR); $('agrDl').disabled = false;
+      st.className = 'note' + (ids.length < total ? ' warn' : '');
+      st.innerHTML = (ids.length < total ? '<b>Provisional:</b> ' : '<b>Complete:</b> ') + ids.length + ' of ' + total + ' windows submitted by all of ' + names.map(esc).join(', ') +
+        '. ' + (Object.keys(J).length ? Object.keys(J).length + ' judge(s) compared.' : 'Load the key and judge files above to see human–LLM agreement.') + ' Computed ' + new Date().toLocaleTimeString() + '.';
+    } catch (err) { st.className = 'note err'; st.innerHTML = 'Could not compute agreement: ' + esc(err.message); }
+    agrBusy = false;
+  }
+
+  function computeAgreement(H, J, ids, meta, extra) {
+    const IT = D.byId, names = Object.keys(H), BI = MX.bootIdx(ids.length, MX.N_BOOT, MX.SEED);
+    const pairs = [];
+    for (let m = 0; m < names.length - 1; m++) for (let k = m + 1; k < names.length; k++) {
+      const hr = MX.humanReliability({ [names[m]]: H[names[m]], [names[k]]: H[names[k]] }, [names[m], names[k]], ids, IT, BI, { flagged: extra.flagged });
+      pairs.push({ pair: [names[m], names[k]], table: hr.table, verdict: hr.verdict, lower: hr.lower, gran: hr.gran, flags: hr.flags, hh: hr.hh, hr: hr });
+    }
+    const all = names.length > 2 ? Object.assign(MX.multiAgreement(H, ids, IT), { alpha_exact: MX.alphaNominal(H, ids, IT) }) : null;
+    const primary = pairs[0].hr;     // Part B: annotators A1, A2 (the first two selected)
+    const jv = Object.keys(J).length ? MX.judgesVsHumans(H, J, ids, IT, BI, primary, meta) : null;
+    let strata = null, ranking = null;
+    if (meta) {
+      strata = MX.stratumTable(H[names[0]], H[names[1]], ids, IT, meta, 'annotators');
+      Object.keys(J).forEach(j => names.forEach(a => { strata = strata.concat(MX.stratumTable(J[j], H[a], ids, IT, meta, j + '|' + a)); }));
+      ranking = Object.keys(J).length ? MX.modelRanking(H, J, ids, IT, meta) : null;
+    }
+    const sec = extra.seconds.slice().sort((a, b) => a - b);
+    return { computed_at: new Date().toISOString(), dataset_id: D.id, windows: ids.length, windows_total: extra.total, window_ids: ids,
+      annotators: names, judges: Object.keys(J), prereg: MX.PREREG, n_boot: MX.N_BOOT, seed: MX.SEED, tol_units: MX.TOL_UNITS,
+      median_minutes_per_window: sec.length ? sec[sec.length >> 1] / 60 : null,
+      inter_annotator: pairs.map(p => ({ pair: p.pair, table: p.table, verdict: p.verdict, kappa_B_lower95: p.lower, granularity: p.gran, flags: p.flags })),
+      all_annotators: all,
+      human_llm: jv ? { table: jv.rows, per_annotator: Object.fromEntries(Object.keys(jv.detail).map(j => [j, jv.detail[j].perAnn])),
+        edits: Object.fromEntries(Object.keys(jv.detail).map(j => [j, jv.detail[j].errors])),
+        by_model: Object.fromEntries(Object.keys(jv.detail).map(j => [j, jv.detail[j].byModel])),
+        alt_test: Object.fromEntries(Object.keys(jv.detail).map(j => [j, jv.detail[j].alt])) } : null,
+      strata, ranking };
+  }
+
+  function vClass(v) { return v === 'RELIABLE' ? 'ok' : v === 'ACCEPTABLE' ? 'mid' : 'no'; }
+  const yn = v => v === true ? '<td class="yes">yes</td>' : v === false ? '<td class="nope">no</td>' : '<td class="muted">—</td>';
+  function renderAgreement(A) {
+    const P = MX.PREREG; let h = '';
+    h += '<h3 class="agr">Inter-annotator agreement</h3>';
+    A.inter_annotator.forEach(p => {
+      h += '<p class="small"><b>' + esc(p.pair.join(' – ')) + '</b> &nbsp;<span class="verdict ' + vClass(p.verdict) + '">' + esc(p.verdict) + '</span> <span class="muted">(preregistered: κ<sub>B</sub> ≥ ' + P.human_reliable + ' and one-sided 95% lower bound ≥ ' + P.human_acceptable_lower + ' = reliable; lower bound ≥ ' + P.human_acceptable_lower + ' = acceptable; observed lower bound ' + f3(p.kappa_B_lower95) + ')</span></p>';
+      h += '<div class="tbl-wrap"><table class="grid-tbl compact"><thead><tr><th>Metric</th><th>Value</th><th>95% CI</th><th>Chance</th></tr></thead><tbody>' +
+        p.table.map(r => '<tr><td>' + esc(r.metric) + '</td><td class="nm"><b>' + f3(r.value) + '</b></td><td class="nm">' + fci(r.ci) + '</td><td class="nm muted">' + f3(r.chance) + '</td></tr>').join('') + '</tbody></table></div>';
+      const g = p.granularity;
+      h += '<p class="small">Granularity: ' + esc(p.pair[0]) + ' ' + f3(g.dens_a) + ' vs ' + esc(p.pair[1]) + ' ' + f3(g.dens_b) + ' boundaries per 100 units (Wilcoxon p = ' + f3(g.wilcoxon_p) + '); nestedness ' + pct(g.nested_a_in_b) + ' of ' + esc(p.pair[0]) + "'s boundaries are matched by " + esc(p.pair[1]) + ', ' + pct(g.nested_b_in_a) + ' the other way.' +
+        (p.flags && p.flags.windows ? ' Windows with an uncertainty flag: ' + p.flags.windows + ' (mean B ' + f3(p.flags.B_flagged) + ' vs ' + f3(p.flags.B_unflagged) + ' unflagged).' : '') + '</p>';
+    });
+    if (A.all_annotators) h += '<p class="small">All ' + A.annotators.length + ' annotators together: Fleiss-style κ<sub>B</sub> = <b>' + f3(A.all_annotators.kappa_B) + '</b>, π<sub>B</sub> = ' + f3(A.all_annotators.pi_B) + ', α (exact positions) = ' + f3(A.all_annotators.alpha_exact) + '.</p>';
+    if (A.median_minutes_per_window != null) h += '<p class="small muted">Median active minutes per submitted window: ' + A.median_minutes_per_window.toFixed(1) + '.</p>';
+
+    if (A.human_llm) {
+      const T = A.human_llm.table, cols = T.map(r => r.judge);
+      const row = (label, f, cls) => '<tr><th class="rowh">' + label + '</th>' + T.map(r => (cls ? cls(r) : '<td class="nm">' + f(r) + '</td>')).join('') + '</tr>';
+      h += '<h3 class="agr">Human–LLM agreement</h3><p class="muted small">Each judge against every annotator (mean over annotators), as in Part B cell B4. Δ = judge κ<sub>B</sub> − annotator κ<sub>B</sub> (' + esc(A.annotators[0]) + '–' + esc(A.annotators[1]) + '); J1 = non-inferior (one-sided 95% lower bound of Δ above −' + P.noninferiority_delta + ', paired bootstrap); J2 = no model with a mean B gap below ' + P.model_gap_floor + ' (needs key.csv). The Alternative Annotator Test (ε = ' + P.alt_epsilon + ') is reported but does not decide validation.</p>';
+      h += '<div class="tbl-wrap"><table class="grid-tbl compact"><thead><tr><th></th>' + cols.map(c => '<th>' + esc(c) + '</th>').join('') + '</tr></thead><tbody>' +
+        row('κ<sub>B</sub> (mean over annotators)', r => '<b>' + f3(r.kappa_B) + '</b> ' + fci(r.kappa_B_ci)) +
+        row('Δ vs annotators', r => f3(r.delta_vs_human)) + row('Δ one-sided 95% lower', r => f3(r.delta_lower95)) +
+        row('Ceiling ratio (judge κ<sub>B</sub> / annotator κ<sub>B</sub>)', r => f3(r.ceiling_ratio)) +
+        row('α, exact positions', r => f3(r.alpha_exact)) + row('Boundary Similarity B', r => f3(r.B)) +
+        row('F1 exact', r => f3(r.F1_exact)) + row('F1 within ' + MX.TOL_UNITS + ' units', r => f3(r.F1_tol)) +
+        row('Pk ↓', r => f3(r.Pk)) + row('WindowDiff ↓', r => f3(r.WindowDiff)) +
+        row('Precision vs union of annotators', r => f3(r.precision_vs_union)) + row('Recall of boundaries both annotators agree on', r => f3(r.recall_of_agreed)) +
+        row('Boundaries per 100 units: judge / annotators', r => f3(r.density_judge) + ' / ' + f3(r.density_human)) +
+        row('Alt-test ω (winning rate)', r => f3(r.alt_omega)) + row('Alt-test ρ (judge advantage)', r => f3(r.alt_rho)) +
+        row('Worst model (mean B gap)', r => r.worst_model ? esc(r.worst_model) + ' (' + f3(r.worst_model_gap) + ')' : '—') +
+        row('Kruskal–Wallis p (gap by model)', r => f3(r.kruskal_p_models)) +
+        row('J1 non-inferior', null, r => yn(r.J1_noninferior)) + row('J2 no model failure', null, r => yn(r.J2_no_model_failure)) +
+        row('<b>Validated</b> (H not "not reliable", J1 and J2)', null, r => yn(r.VALIDATED)) + '</tbody></table></div>';
+      // per annotator
+      const PA = A.human_llm.per_annotator;
+      h += '<details><summary class="small" style="cursor:pointer;color:var(--green)">Each judge against each annotator</summary><div class="tbl-wrap"><table class="grid-tbl compact"><thead><tr><th>Judge</th><th>Annotator</th><th>κ<sub>B</sub></th><th>π<sub>B</sub></th><th>α</th><th>B</th><th>F1 exact</th><th>F1@' + MX.TOL_UNITS + '</th><th>Pk ↓</th><th>WD ↓</th></tr></thead><tbody>' +
+        Object.keys(PA).map(j => Object.keys(PA[j]).map(a => { const s = PA[j][a]; return '<tr><td>' + esc(j) + '</td><td>' + esc(a) + '</td>' + ['kappa_B', 'pi_B', 'alpha_exact', 'B', 'F1_exact', 'F1_tol', 'Pk', 'WindowDiff'].map(k => '<td class="nm">' + f3(s[k]) + '</td>').join('') + '</tr>'; }).join('')).join('') + '</tbody></table></div></details>';
+      const E = A.human_llm.edits;
+      h += '<details><summary class="small" style="cursor:pointer;color:var(--green)">Edit breakdown (judge vs annotators) and Alternative Annotator Test</summary><div class="tbl-wrap"><table class="grid-tbl compact"><thead><tr><th>Judge</th><th>Match</th><th>Near miss</th><th>Spurious (judge only)</th><th>Missed (annotator only)</th></tr></thead><tbody>' +
+        Object.keys(E).map(j => { const e = E[j], t = Math.max(1, e.match + e.near + e.spurious + e.missed); return '<tr><td>' + esc(j) + '</td>' + ['match', 'near', 'spurious', 'missed'].map(k => '<td class="nm">' + e[k] + ' (' + pct(e[k] / t) + ')</td>').join('') + '</tr>'; }).join('') + '</tbody></table></div>' +
+        '<div class="tbl-wrap"><table class="grid-tbl compact"><thead><tr><th>Judge</th><th>Annotator left out</th><th>ρ judge</th><th>ρ annotator</th><th>p</th><th>p (BY)</th><th>Judge wins</th></tr></thead><tbody>' +
+        Object.keys(A.human_llm.alt_test).map(j => A.human_llm.alt_test[j].rows.map(x => '<tr><td>' + esc(j) + '</td><td>' + esc(x.excluded) + '</td><td class="nm">' + f3(x.rho_f) + '</td><td class="nm">' + f3(x.rho_h) + '</td><td class="nm">' + f3(x.p) + '</td><td class="nm">' + f3(x.p_BY) + '</td>' + yn(x.judge_wins) + '</tr>').join('')).join('') + '</tbody></table></div></details>';
+      const BM = A.human_llm.by_model;
+      if (Object.values(BM).some(Boolean)) {
+        const models = Array.from(new Set([].concat.apply([], Object.values(BM).map(b => Object.keys(b || {}))))).sort();
+        h += '<details><summary class="small" style="cursor:pointer;color:var(--green)">Mean B gap by model (judge–annotator minus annotator–annotator)</summary><div class="tbl-wrap"><table class="grid-tbl compact"><thead><tr><th>Judge</th>' + models.map(m => '<th>' + esc(m) + '</th>').join('') + '</tr></thead><tbody>' +
+          Object.keys(BM).map(j => '<tr><td>' + esc(j) + '</td>' + models.map(m => '<td class="nm">' + f3((BM[j] || {})[m]) + '</td>').join('') + '</tr>').join('') + '</tbody></table></div></details>';
+      }
+    }
+    if (A.strata) {
+      const pairs = Array.from(new Set(A.strata.map(s => s.pair.replace(/\|.*$/, ''))));
+      const keyOf = s => s.stratum + '|' + s.level, levels = Array.from(new Set(A.strata.map(keyOf)));
+      const cell = (pr, k) => { const v = A.strata.filter(s => s.pair.replace(/\|.*$/, '') === pr && keyOf(s) === k); if (!v.length) return '<td class="muted">—</td>'; const m = x => v.reduce((t, s) => t + s[x], 0) / v.length; return '<td class="nm">' + f3(m('B')) + ' <span class="muted small">[' + f3(m('lo')) + ', ' + f3(m('hi')) + ']</span></td>'; };
+      h += '<h3 class="agr">Strata (mean B, descriptive)</h3><p class="muted small">Annotator–annotator and each judge against the annotators (averaged over annotators), per model, domain, outcome and window position; 95% bootstrap CIs over windows. Each stratum holds only a few windows.</p>' +
+        '<div class="tbl-wrap"><table class="grid-tbl compact"><thead><tr><th>Stratum</th><th>Level</th><th>n</th>' + pairs.map(p => '<th>' + esc(p === 'annotators' ? 'annotators' : p + ' – annotators') + '</th>').join('') + '</tr></thead><tbody>' +
+        levels.map(k => { const s0 = A.strata.find(s => keyOf(s) === k); return '<tr><td>' + esc(s0.stratum) + '</td><td>' + esc(s0.level) + '</td><td class="nm">' + s0.n + '</td>' + pairs.map(p => cell(p, k)).join('') + '</tr>'; }).join('') + '</tbody></table></div>';
+    }
+    if (A.ranking) {
+      const js = A.judges;
+      h += '<h3 class="agr">Model ranking by segment density</h3><p class="muted small">Boundaries per 100 units for each analyzed model, under the annotators (mean) and under each judge; Spearman ρ of the model ranking, judge vs annotators. A ρ near 1 means the judge leaves the paper\'s model comparison unchanged.</p>' +
+        '<div class="tbl-wrap"><table class="grid-tbl compact"><thead><tr><th>Model</th><th>Annotators</th>' + js.map(j => '<th>' + esc(j) + '</th>').join('') + '</tr></thead><tbody>' +
+        A.ranking.dens.map(d => '<tr><td>' + esc(d.model_code) + '</td><td class="nm">' + f3(d.human) + '</td>' + js.map(j => '<td class="nm">' + f3(d[j]) + '</td>').join('') + '</tr>').join('') +
+        '<tr class="tot"><td>Spearman ρ vs annotators</td><td></td>' + js.map(j => '<td class="nm">' + f3(A.ranking.rho[j]) + '</td>').join('') + '</tr></tbody></table></div>';
+    }
+    $('agrOut').innerHTML = h;
+  }
+
   loadData().then(async () => {
     D.sha1 = {};
     await Promise.all(D.items.map(async it => { D.sha1[it.item_id] = await digest('SHA-1', it.window_text); }));
+    loadRefs();
     if ($('adminKey').value && API) load();
   }).catch(() => { $('dataFacts').innerHTML = '<span class="note err">Could not load data/items.json and data/assignments.json.</span>'; });
 })();
