@@ -8,7 +8,7 @@ researcher page exports one file per annotator in exactly the format Part B read
 |---|---|
 | `index.html`, `app.js`, `styles.css` | Annotator site: email sign-in → guidelines → warm-up (2 passages with feedback) → study windows |
 | `admin.html` | Researcher page: add annotators and their slot, progress, workload & cost estimate, reopen a window, export `A1.json`, `A2.json`, … |
-| `data/items.json`, `data/assignments.json` | Copied **unchanged** from `TaskA/platform/` (written by Part A). Nothing that un-blinds an item is here |
+| `data/items.json`, `data/assignments.json` | Copied from `TaskA/platform/` (written by Part A); `assignments.json` gives both annotators A1's order (see below). Nothing that un-blinds an item is here |
 | `config.js` | Backend URL, contact email, dry-run banner |
 | `backend/Code.gs` | Google Apps Script backend (Google Sheet: Annotators, Windows, Events) |
 
@@ -46,6 +46,13 @@ Never copy anything from `TaskA/private/`.
 **Stage 2 done (2026-11-19):** DeepSeek-R1-Distill-Qwen-32B (`DSR`) was appended with A5: 6 windows (W418, W779,
 W355, W883, W316, W176), one per domain × outcome, on problems not used before, at the end of every annotator's
 order. The study now has 36 windows per annotator; the first 30 and their order are unchanged.
+
+**One shared window order (2026-11-21):** both annotators now see the windows in the same order, A1's order (A2 used
+its own random order before). This lets inter-annotator agreement grow window by window as both progress.
+`data/assignments.json` therefore differs from `TaskA/platform/assignments.json` as Part A wrote it: `A2` = `A1`
+(same 39 items, practice first). Saved annotations are unaffected (they are stored per item); a window A2 already
+submitted stays submitted, and A2 continues with the first window of the shared order that is not submitted yet.
+Report this deviation from the per-annotator random order with the study design.
 
 ## Backend
 
