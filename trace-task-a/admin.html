@@ -42,7 +42,7 @@
   .agr-row label { display: inline-flex; gap: 6px; align-items: center; }
   h3.agr { font-size: 16px; margin: 22px 0 4px; }
   .verdict { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .04em; padding: 3px 9px; border-radius: 99px; background: var(--line); color: var(--ink); }
-  .verdict.ok { background: #dcefe3; color: #1d6b3d; } .verdict.mid { background: #fbecc9; color: #7a5300; } .verdict.no { background: #f7d9d6; color: #8a2a20; }
+  .verdict.ok { background: #dcefe3; color: #1d6b3d; } .verdict.mid { background: #fbecc9; color: #7a5300; } .verdict.no { background: #f7d9d6; color: #8a2a20; } .verdict.na { background: #ececef; color: #555; }
   .grid-tbl td.yes { color: #1d6b3d; font-weight: 600; } .grid-tbl td.nope { color: #8a2a20; font-weight: 600; }
   .grid-tbl.compact th, .grid-tbl.compact td { padding: 6px 10px; }
   .grid-tbl th.rowh { text-transform: none; letter-spacing: 0; font-size: 13px; color: var(--ink-2); font-weight: 600; }
@@ -72,7 +72,7 @@
     <div class="tbl-wrap"><table class="grid-tbl" id="progTbl"></table></div>
 
     <h2>Agreement (live)</h2>
-    <p class="muted small">Inter-annotator and human–LLM agreement, recomputed from the submitted windows every time this page loads or refreshes. The code is a line-by-line port of Part B of <code>taskA_human_validation.ipynb</code> (same units, metrics, tolerance, preregistered thresholds; checked against the notebook to floating-point precision). Only the bootstrap intervals and the chance floor use a different random-number generator, so they can differ from the notebook in the third decimal. <b>Report the numbers Part B prints.</b> Until every annotator has submitted every window, everything here is provisional and computed on the windows that all selected annotators have submitted.</p>
+    <p class="muted small">Inter-annotator and human–LLM agreement, recomputed from the submitted windows every time this page loads or refreshes. The code is a line-by-line port of Part B of <code>taskA_human_validation.ipynb</code> (same units, metrics, tolerance, preregistered thresholds; checked against the notebook to floating-point precision). Only the bootstrap intervals and the chance floor use a different random-number generator, so they can differ from the notebook in the third decimal. <b>Report the numbers Part B prints.</b> Until every annotator has submitted every window, everything here is provisional and computed on the windows that all selected annotators have submitted: every metric appears from the first such window, while bootstrap intervals, p-values and the preregistered verdicts appear from the second (one window cannot give an interval).</p>
     <div class="agr-box">
       <div class="agr-row"><b>Judges</b> <span class="muted small">Load <code>TaskA/private/key.csv</code> and the judge files <code>TaskA/judges/*.jsonl</code>. They are read and kept only in this browser, never uploaded or published.</span></div>
       <div class="agr-row"><input type="file" id="refFiles" multiple accept=".jsonl,.csv,text/csv,application/json"> <button type="button" class="link small" id="refForget">Forget loaded judges</button></div>
@@ -454,7 +454,7 @@
       const names = Object.keys(H), total = mainIds().length;
       if (names.length < 2) { st.innerHTML = 'Select at least two annotators with submitted windows.'; $('agrOut').innerHTML = ''; agrBusy = false; return; }
       const ids = mainIds().filter(id => names.every(a => H[a][id]));
-      if (ids.length < 2) { st.innerHTML = 'Not enough windows submitted by all selected annotators yet (' + ids.length + ' of ' + total + ').'; $('agrOut').innerHTML = ''; agrBusy = false; return; }
+      if (ids.length < 1) { st.innerHTML = 'No window submitted by all selected annotators yet (0 of ' + total + ').'; $('agrOut').innerHTML = ''; agrBusy = false; return; }
       const jsel = new Set(Array.from(document.querySelectorAll('[data-agrj]')).filter(c => c.checked).map(c => c.dataset.agrj));
       const J = {}; if (REF) Object.keys(REF.judges || {}).filter(n => jsel.has(n)).forEach(n => { J[n] = REF.judges[n]; });
       const meta = REF && Object.keys(REF.meta || {}).length ? REF.meta : null;
@@ -469,6 +469,19 @@
     agrBusy = false;
   }
 
+  // Every metric value is shown from the first window both annotators submitted. Bootstrap intervals, p-values and the
+  // preregistered verdicts (reliability, J1, J2, validated, Alternative Annotator Test) need at least MIN_INFER windows:
+  // with one window a resample is that window again, so an "interval" would be a single point and a verdict meaningless.
+  const MIN_INFER = 2, NA = [NaN, NaN], NOTYET = 'needs ≥ ' + MIN_INFER + ' windows';
+  function oneWindow(pairs, strata, jv) {
+    pairs.forEach(p => { p.table.forEach(r => { r.ci = NA; }); p.lower = NaN; p.verdict = NOTYET; p.gran.wilcoxon_p = NaN; });
+    (strata || []).forEach(r => { r.lo = NaN; r.hi = NaN; });
+    if (jv) {
+      jv.rows.forEach(r => Object.assign(r, { kappa_B_ci: NA, delta_lower95: NaN, alt_omega: NaN, alt_rho: NaN, kruskal_p_models: NaN,
+        J1_noninferior: null, J2_no_model_failure: null, VALIDATED: null }));
+      Object.values(jv.detail).forEach(d => { d.alt = { rows: [] }; });
+    }
+  }
   function computeAgreement(H, J, ids, meta, extra) {
     const IT = D.byId, names = Object.keys(H), BI = MX.bootIdx(ids.length, MX.N_BOOT, MX.SEED);
     const pairs = [];
@@ -480,7 +493,7 @@
     // human–LLM: windows every selected judge covers (all windows once every model has been judged)
     const idsJ = ids.filter(id => Object.keys(J).every(j => J[j][id]));
     let jv = null, primaryJ = pairs[0].hr;     // Part B: annotators A1, A2 (the first two selected)
-    if (Object.keys(J).length && idsJ.length >= 2) {
+    if (Object.keys(J).length && idsJ.length >= 1) {
       const BIJ = idsJ.length === ids.length ? BI : MX.bootIdx(idsJ.length, MX.N_BOOT, MX.SEED);
       if (idsJ.length !== ids.length) primaryJ = MX.humanReliability({ [names[0]]: H[names[0]], [names[1]]: H[names[1]] }, [names[0], names[1]], idsJ, IT, BIJ);
       jv = MX.judgesVsHumans(H, J, idsJ, IT, BIJ, primaryJ, meta);
@@ -492,6 +505,8 @@
       if (jv) Object.keys(J).forEach(j => names.forEach(a => { strata = strata.concat(MX.stratumTable(J[j], H[a], idsJ.filter(id => meta[id]), IT, meta, j + '|' + a)); }));
       ranking = jv ? MX.modelRanking(H, J, idsJ.filter(id => meta[id]), IT, meta) : null;
     }
+    if (ids.length < MIN_INFER) oneWindow(pairs, strata, idsJ.length < MIN_INFER ? jv : null);
+    else if (jv && idsJ.length < MIN_INFER) oneWindow([], null, jv);
     const sec = extra.seconds.slice().sort((a, b) => a - b);
     return { computed_at: new Date().toISOString(), dataset_id: D.id, windows: ids.length, windows_total: extra.total, window_ids: ids,
       annotators: names, judges: Object.keys(J), prereg: MX.PREREG, n_boot: MX.N_BOOT, seed: MX.SEED, tol_units: MX.TOL_UNITS,
@@ -505,7 +520,7 @@
       strata, ranking };
   }
 
-  function vClass(v) { return v === 'RELIABLE' ? 'ok' : v === 'ACCEPTABLE' ? 'mid' : 'no'; }
+  function vClass(v) { return v === 'RELIABLE' ? 'ok' : v === 'ACCEPTABLE' ? 'mid' : v === 'NOT RELIABLE' ? 'no' : 'na'; }
   const yn = v => v === true ? '<td class="yes">yes</td>' : v === false ? '<td class="nope">no</td>' : '<td class="muted">—</td>';
   function renderAgreement(A) {
     const P = MX.PREREG; let h = '';
