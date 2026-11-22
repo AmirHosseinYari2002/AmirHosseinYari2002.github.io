@@ -8,7 +8,7 @@ non-inferior). Every segment gets exactly one action: CONSTRUCT, INSPECT, REVISE
 | File | Purpose |
 |---|---|
 | `index.html`, `app.js`, `styles.css` | Annotator site: email sign-in → handbook → practice → 36 windows, one at a time |
-| `admin.html` | Researcher page: workload & cost estimate, progress with cost so far / remaining, add annotators, reopen a window, export |
+| `admin.html` | Researcher page: progress of every annotator (with cost so far / remaining), access to Task B, workload & cost estimate, reopen a window, export |
 | `traces.js` | The windows and their Gemini 3.8 Flash segment boundaries (generated; no model, outcome or labels) |
 | `config.js` | Backend URL and contact email |
 | `backend/Code.gs` | Google Apps Script backend (Google Sheet: Annotators, Annotations, Log) |
@@ -49,8 +49,33 @@ python3 trace-task-b/tools/build_segments.py \
   Submitted windows are locked until reopened from `admin.html`.
 * Annotators never see word counts, time estimates, active time, the model or the outcome.
 
+## Who can sign in
+
+**Only annotators registered and active in Task A**, with the same email (case does not matter). Register people on
+the Task A researcher page; there is nothing to register here. The Task B backend checks every sign-in, save and
+submit against the Task A web app (its read-only `login` check), and caches the answer for 10 minutes, so a change in
+Task A (a new annotator, a deactivation) takes effect in Task B within 10 minutes.
+
+* **Block** (researcher page → Annotators) keeps someone out of Task B only; Task A is not affected and their data is kept.
+  **Allow** undoes it.
+* If Task A cannot be reached, annotators who were admitted before keep working; a first-time sign-in is asked to try
+  again in a minute.
+* A **Task B-only annotator** (someone not in Task A) can still be added in the collapsed section under Annotators.
+* The Task A URL is `TASK_A_URL` at the top of `backend/Code.gs`. A Script Property `TASK_A_URL` overrides it; the
+  value `off` turns the link off, so only Task B's own Annotators sheet counts.
+
 ## Researcher page
 
+Enter the **Task B admin key** and, to list everyone registered in Task A (including people who have not opened Task B
+yet), the **Task A admin key**. Both stay in this browser tab only.
+
+* **Progress** (top of the page): per annotator: Task A slot, % done, windows submitted, labels, flags, active time,
+  median per window, last activity, estimated time and cost remaining (at the annotator's own pace once 3 windows are
+  in), cost so far; "has not opened Task B yet" / "cannot sign in" where it applies. Totals: active annotators,
+  windows submitted, cost so far, estimated cost remaining, projected total cost. Per-window details and **Reopen**.
+  **Refresh now**, or refresh every minute.
+* **Annotators:** everyone in Task A with their access to Task B (can sign in / inactive in Task A / blocked in
+  Task B), first time seen in Task B, and Block / Allow.
 * **Workload & cost estimate** (works before you enter the admin key). Per window:
   words of window text ÷ reading speed + segments × seconds per label + problem and grey-context words ÷ context
   reading speed + overhead. Plus onboarding (handbook + practice) and a buffer, times the hourly rate and the number
@@ -58,9 +83,6 @@ python3 trace-task-b/tools/build_segments.py \
   10 % buffer, 10 USD/h, 2 annotators → about 5 h 27 min and 54.50 USD per annotator, 109 USD for two. Every
   assumption is editable and remembered in the browser; a per-window table shows time and cost per window.
   Once windows are submitted, the observed pace appears and can replace the time per label.
-* **Progress:** per annotator: % done, windows submitted, labels, flags, active time, median per window, last
-  activity, estimated time and cost remaining (at the annotator's own pace once 3 windows are in), cost so far.
-  Totals: cost so far, estimated cost remaining, projected total cost. Per-window details and **Reopen**.
 * **Download all labels (JSON):** format `trace-task-b/v2`, current windows only (rows from the earlier full-trace
   version of Task B stay in the sheet but are not exported). Per annotator × window: `labels` (one per segment, in
   order; `null` = unlabeled), `flags` (`seg`, `reason`, `alts`, `note`), `dwell_ms` per segment, `active_ms`, status,
@@ -68,9 +90,11 @@ python3 trace-task-b/tools/build_segments.py \
 
 ## Backend
 
-The backend did not change: the same Apps Script deployment and Google Sheet keep working, and the URL in
-`config.js` stays the same. Annotators registered for Task B can sign in as before; new windows have new IDs, so they
-start with empty windows.
+After changing `backend/Code.gs`: open the Task B Google Sheet → Extensions → Apps Script, replace the code, then
+Deploy → Manage deployments → Edit → Version: **New version** → Deploy. The URL stays the same. Because the backend
+now calls the Task A web app, Google asks once to allow "Connect to an external service": accept it. The Annotators
+sheet gets `source` and `slot` columns on the next request; existing rows are kept (they count as Task B-only
+annotators).
 
 ## Agreement
 

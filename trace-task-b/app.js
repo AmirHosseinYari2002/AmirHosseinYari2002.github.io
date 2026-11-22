@@ -110,7 +110,9 @@
       jset(P + 'session', S); go('');
     } catch (err) {
       S = null;
-      note(n, 'err', err.code === 'auth' ? 'This email is not registered for Task B. Use the address you gave the researcher, or contact them.' : 'Could not reach the server. Check your connection and try again.');
+      note(n, 'err', err.code === 'auth' ? 'This email is not registered for the study. Use the email address you were registered with (the same as for Task A), or contact the researcher.'
+        : err.code === 'auth_unavailable' ? 'Your registration could not be checked just now. Please try again in a minute.'
+        : 'Could not reach the server. Check your connection and try again.');
     } finally { $('signinBtn').disabled = false; }
   });
   $('signOutBtn').addEventListener('click', () => {
