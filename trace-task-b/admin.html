@@ -44,31 +44,24 @@
   <div class="facts" id="dataFacts"></div>
 
   <form class="adm-form" id="keyForm">
-    <label>Task B admin key <input id="adminKey" type="password" autocomplete="off" required></label>
-    <label>Task A admin key <span class="muted" style="font-weight:400">(lists every registered annotator)</span><input id="adminKeyA" type="password" autocomplete="off"></label>
-    <button class="btn primary sm" type="submit">Load</button>
+    <label>Admin key <input id="adminKey" type="password" autocomplete="off" required></label>
+    <button class="btn primary sm" type="submit">Load progress</button>
     <button class="btn sm" type="button" id="exportBtn" disabled>Download all labels (JSON)</button>
   </form>
   <div class="note" id="msg" hidden></div>
 
-  <div id="panel" hidden>
+  <div id="panel">
     <h2>Progress</h2>
+    <div class="note warn" id="progEmpty">Enter the <b>admin key</b> (from the Apps Script execution log of <code>setup</code>, or Project Settings → Script Properties → <code>ADMIN_KEY</code>) and press <b>Load progress</b>.</div>
     <div class="row" style="margin:4px 0 12px"><button class="btn sm" type="button" id="refreshBtn">Refresh now</button><span class="small" style="display:inline-flex;gap:6px;align-items:center"><input type="checkbox" id="autoRef" style="accent-color:var(--green)"><label for="autoRef">Refresh every minute</label></span><span class="muted small" id="loadedAt"></span></div>
     <div class="kpis" id="progKpis"></div>
     <div class="tbl-wrap"><table class="grid-tbl" id="progTbl"></table></div>
     <div class="note warn" id="otherNote" hidden></div>
 
     <h2>Annotators</h2>
-    <p class="muted small"><b>Only annotators registered and active in Task A can sign in</b>, with the same email. Register people on the Task A researcher page; there is nothing to add here. Every sign-in, save and submit is checked against Task A (cached for up to 10 minutes, so a change in Task A takes effect within 10 minutes). <b>Block</b> keeps someone out of Task B only; their data is kept.</p>
-    <div class="note" id="rosterNote" hidden></div>
+    <p class="muted small"><b>Only these email addresses can sign in.</b> The list is <code>ANNOTATORS</code> at the top of <code>backend/Code.gs</code>; to change it, edit the list and deploy a new version. <b>Block</b> keeps one of them out without deleting their data; <b>Allow</b> undoes it.</p>
+    <div class="note warn" id="rosterNote" hidden></div>
     <div class="tbl-wrap"><table class="grid-tbl" id="annTbl"></table></div>
-    <details><summary class="small" style="cursor:pointer;color:var(--green)">Add a Task B-only annotator (not registered in Task A)</summary>
-      <form class="adm-form" id="addForm">
-        <label>Annotator email <input id="newId" type="email" placeholder="name@example.com" required></label>
-        <label>Name (optional) <input id="newName" placeholder="Full name"></label>
-        <button class="btn primary sm" type="submit">Add annotator</button>
-      </form>
-    </details>
   </div>
   <!-- the estimate works without the admin key: it only needs the windows in traces.js -->
   <h2>Workload &amp; cost estimate</h2>
@@ -104,10 +97,10 @@
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const median = a => { if (!a.length) return 0; const s = a.slice().sort((x, y) => x - y), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
   const minutes = ms => Math.round((ms || 0) / 6000) / 10;
-  let last = null, rosterA = null;   // rosterA: Task A annotators (with the Task A admin key), else null
-  const API_A = ((window.TASK_CONFIG || {}).taskAApiUrl || '').trim();
+  let last = null;
+  const LIST = ((window.TASK_CONFIG || {}).annotators || []).map(x => String(x).trim().toLowerCase());
   if (!API) $('cfgNote').hidden = false;
-  try { $('adminKey').value = sessionStorage.getItem('ttb:admin') || ''; $('adminKeyA').value = sessionStorage.getItem('ttb:adminA') || ''; } catch (e) {}
+  try { $('adminKey').value = sessionStorage.getItem('ttb:admin') || ''; } catch (e) {}
   const nSeg = TRACES.reduce((t, x) => t + x.segs.length, 0);
   $('dataFacts').innerHTML = '<span><b>' + TRACES.length + '</b> windows · <b>' + nSeg.toLocaleString() + '</b> segments per annotator</span>' +
     '<span>Segmentation: <b>' + esc(SRC.judge || '?') + '</b></span><span>Order: shared (slot ' + esc(SRC.order_slot || '?') + ' of Task A)</span>';
@@ -169,20 +162,16 @@
     E[k] = v; saveE(); renderEstimate(); if (last) renderProgress(last);
   }));
 
-  // ---------------- roster: Task A annotators + Task B's own rows ----------------
-  // status: ok (can sign in), blocked (in Task B), inactiveA (deactivated in Task A), goneA (no longer in Task A), extra (Task B only)
+  // ---------------- roster: the fixed list of annotators (ANNOTATORS in Code.gs) ----------------
+  function allowedList(r) { return (r && r.allowed && r.allowed.length ? r.allowed : LIST).map(x => String(x).toLowerCase()); }
   function roster(r) {
-    const m = {};
-    (rosterA || []).forEach(a => { const id = String(a.annotator_id).toLowerCase(); m[id] = { id: id, name: a.name || '', slot: a.slot || '', inA: true, activeA: a.active !== false && String(a.active) !== 'false', b: null }; });
-    r.annotators.forEach(b => { const id = String(b.annotator_id).toLowerCase(); m[id] = Object.assign(m[id] || { id: id, name: b.name || '', slot: b.slot || '', inA: null, activeA: null }, { b: b }); if (!m[id].name) m[id].name = b.name || ''; if (!m[id].slot) m[id].slot = b.slot || ''; });
-    return Object.values(m).map(x => {
-      const bAct = x.b ? x.b.active !== false && String(x.b.active) !== 'false' : true, src = x.b ? x.b.source : 'taskA';
-      x.status = !bAct ? 'blocked' : (x.b && src !== 'taskA') ? 'extra' : rosterA ? (!x.inA ? 'goneA' : x.activeA ? 'ok' : 'inactiveA') : 'ok';
-      x.can = x.status === 'ok' || x.status === 'extra';
-      return x;
-    }).sort((a, b) => (a.slot || '\uffff').localeCompare(b.slot || '\uffff') || a.id.localeCompare(b.id));
+    return allowedList(r).map(id => {
+      const b = r.annotators.find(x => String(x.annotator_id).toLowerCase() === id) || null;
+      const blocked = !!b && (b.active === false || String(b.active) === 'false');
+      return { id: id, name: (b && b.name) || '', slot: '', b: b, status: blocked ? 'blocked' : 'ok', can: !blocked };
+    });
   }
-  const STATUS = { ok: 'can sign in', extra: 'Task B only · can sign in', blocked: 'blocked in Task B', inactiveA: 'inactive in Task A · cannot sign in', goneA: 'not in Task A any more · cannot sign in' };
+  const STATUS = { ok: 'can sign in', blocked: 'blocked · cannot sign in' };
 
   // ---------------- progress ----------------
   const ago = iso => { if (!iso) return '—'; const m = (Date.now() - new Date(iso).getTime()) / 60000; if (!(m >= 0)) return '—'; return m < 2 ? 'just now' : m < 90 ? Math.round(m) + ' min ago' : m < 2880 ? Math.round(m / 60) + ' h ago' : Math.round(m / 1440) + ' days ago'; };
@@ -234,48 +223,29 @@
     ].map(k => '<div class="kpi"><b>' + esc(k[0]) + '</b><span>' + esc(k[1]) + '</span></div>').join('');
   }
   function renderAnnotators(r) {
-    const R = roster(r);
-    $('rosterNote').hidden = false;
-    $('rosterNote').className = 'note' + (rosterA ? '' : ' warn');
-    $('rosterNote').innerHTML = rosterA ? 'Showing the <b>' + rosterA.length + '</b> annotator(s) registered in Task A' + (R.length > rosterA.length ? ' and ' + (R.length - rosterA.length) + ' other(s) known to Task B' : '') + '.'
-      : 'Enter the <b>Task A admin key</b> above to list everyone registered in Task A. Without it, only annotators who have already signed in to Task B (or were added here) are listed.';
-    $('annTbl').innerHTML = '<thead><tr><th>Email</th><th>Name</th><th>Task A slot</th><th>Access to Task B</th><th>First seen in Task B</th><th></th></tr></thead><tbody>' +
-      (R.length ? R.map(a => '<tr><td><b>' + esc(a.id) + '</b></td><td>' + esc(a.name) + '</td><td>' + (esc(a.slot) || '<span class="muted">—</span>') + '</td><td>' + (a.can ? '' : '<b>') + esc(STATUS[a.status]) + (a.can ? '' : '</b>') + '</td><td class="small muted">' + (a.b && a.b.source === 'taskA' || a.b && a.b.source === '' ? esc(String(a.b.created_at).slice(0, 10)) : '—') + '</td>' +
-        '<td>' + (a.status === 'blocked' ? '<button class="link small" data-active="' + esc(a.id) + '" data-to="1">Allow</button>' : '<button class="link small" data-active="' + esc(a.id) + '" data-to="" data-name="' + esc(a.name) + '" data-slot="' + esc(a.slot) + '">Block</button>') + '</td></tr>').join('')
-        : '<tr><td colspan="6" class="muted">No annotators yet.</td></tr>') + '</tbody>';
-  }
-  async function loadTaskA() {
-    const k = $('adminKeyA').value.trim();
-    if (!k || !API_A) { rosterA = null; return; }
-    try {
-      const res = await fetch(API_A, { method: 'POST', body: JSON.stringify({ action: 'admin_overview', admin_key: k, dataset_id: 'taskA-study-1' }) });
-      const j = await res.json();
-      if (!j.ok) throw Object.assign(new Error(j.error), { code: j.error });
-      rosterA = j.annotators || [];
-      try { sessionStorage.setItem('ttb:adminA', k); } catch (e) {}
-    } catch (err) { rosterA = null; msg('warn', err.code === 'auth' ? 'Wrong <b>Task A</b> admin key: showing Task B\'s list only.' : 'Could not load the Task A annotator list (' + esc(err.message) + '): showing Task B\'s list only.'); }
+    const R = roster(r), ids = new Set(R.map(x => x.id));
+    const others = r.annotators.filter(x => !ids.has(String(x.annotator_id).toLowerCase())).length;
+    $('rosterNote').hidden = !others;
+    if (others) $('rosterNote').innerHTML = 'The Annotators sheet also has ' + others + ' older row(s) for emails that are not in the list. They cannot sign in and are not shown.';
+    $('annTbl').innerHTML = '<thead><tr><th>Email</th><th>Access to Task B</th><th>First sign-in</th><th></th></tr></thead><tbody>' +
+      R.map(a => '<tr><td><b>' + esc(a.id) + '</b></td><td>' + (a.can ? '' : '<b>') + esc(STATUS[a.status]) + (a.can ? '' : '</b>') + '</td><td class="small muted">' + (a.b && a.b.created_at ? esc(String(a.b.created_at).slice(0, 10)) : 'not yet') + '</td>' +
+        '<td>' + (a.status === 'blocked' ? '<button class="link small" data-active="' + esc(a.id) + '" data-to="1">Allow</button>' : '<button class="link small" data-active="' + esc(a.id) + '" data-to="">Block</button>') + '</td></tr>').join('') + '</tbody>';
   }
 
   async function load() {
     try {
       const r = await api('admin_overview');
       try { sessionStorage.setItem('ttb:admin', $('adminKey').value.trim()); } catch (e) {}
-      $('msg').hidden = true;
-      await loadTaskA();
-      last = r; $('panel').hidden = false; $('exportBtn').disabled = false;
+      $('msg').hidden = true; $('progEmpty').hidden = true;
+      last = r; $('exportBtn').disabled = false;
       $('loadedAt').textContent = 'Updated ' + new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
       renderProgress(r); renderAnnotators(r); renderEstimate();
-    } catch (err) { msg('err', err.code === 'auth' ? 'Wrong admin key.' : 'Could not reach the backend: ' + esc(err.message)); }
+    } catch (err) {
+      const t = err.code === 'auth' ? 'Wrong admin key.' : 'Could not reach the backend: ' + esc(err.message);
+      msg('err', t); $('progEmpty').hidden = false; $('progEmpty').className = 'note err'; $('progEmpty').innerHTML = t + ' Progress cannot be shown until the admin key is accepted.';
+    }
   }
   $('keyForm').addEventListener('submit', e => { e.preventDefault(); load(); });
-  $('addForm').addEventListener('submit', async e => {
-    e.preventDefault();
-    try {
-      const r = await api('admin_add_annotator', { annotator_id: $('newId').value.trim().toLowerCase(), name: $('newName').value.trim() });
-      msg('', 'Added <b>' + esc(r.annotator_id) + '</b>. They can now sign in with this email.');
-      $('newId').value = ''; $('newName').value = ''; load();
-    } catch (err) { msg('err', err.code === 'exists' ? 'That email is already registered.' : err.code === 'bad_id' ? 'Please enter a valid email address.' : esc(err.message)); }
-  });
   document.addEventListener('click', async e => {
     if (e.target.id === 'useObs') { const o = observed(); if (o && o.lab) { E.lab = Math.round(o.lab * 10) / 10; saveE(); renderEstimate(); if (last) renderProgress(last); } return; }
     const ro = e.target.closest('[data-reopen]');
@@ -286,8 +256,8 @@
     }
     const ac = e.target.closest('[data-active]');
     if (ac) {
-      if (!ac.dataset.to && !confirm('Block ' + ac.dataset.active + ' from Task B? They will not be able to sign in to Task B (Task A is not affected). Their data is kept.')) return;
-      try { await api('admin_set_active', { annotator_id: ac.dataset.active, active: !!ac.dataset.to, name: ac.dataset.name || '', slot: ac.dataset.slot || '' }); load(); } catch (err) { msg('err', esc(err.message)); }
+      if (!ac.dataset.to && !confirm('Block ' + ac.dataset.active + ' from Task B? They will not be able to sign in until you allow them again. Their data is kept.')) return;
+      try { await api('admin_set_active', { annotator_id: ac.dataset.active, active: !!ac.dataset.to }); load(); } catch (err) { msg('err', esc(err.message)); }
     }
   });
   $('exportBtn').addEventListener('click', async () => {
