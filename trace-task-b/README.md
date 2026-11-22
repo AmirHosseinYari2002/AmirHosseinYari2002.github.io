@@ -51,31 +51,30 @@ python3 trace-task-b/tools/build_segments.py \
 
 ## Who can sign in
 
-**Only annotators registered and active in Task A**, with the same email (case does not matter). Register people on
-the Task A researcher page; there is nothing to register here. The Task B backend checks every sign-in, save and
-submit against the Task A web app (its read-only `login` check), and caches the answer for 10 minutes, so a change in
-Task A (a new annotator, a deactivation) takes effect in Task B within 10 minutes.
+**Only the email addresses in `ANNOTATORS` at the top of `backend/Code.gs`** (case does not matter):
 
-* **Block** (researcher page → Annotators) keeps someone out of Task B only; Task A is not affected and their data is kept.
-  **Allow** undoes it.
-* If Task A cannot be reached, annotators who were admitted before keep working; a first-time sign-in is asked to try
-  again in a minute.
-* A **Task B-only annotator** (someone not in Task A) can still be added in the collapsed section under Annotators.
-* The Task A URL is `TASK_A_URL` at the top of `backend/Code.gs`. A Script Property `TASK_A_URL` overrides it; the
-  value `off` turns the link off, so only Task B's own Annotators sheet counts.
+```js
+const ANNOTATORS = [
+  'ahyari2002@gmail.com',
+  'aliyari1380@gmail.com'
+];
+```
+
+Every sign-in, save and submit is checked against this list; any other email gets "not registered". To change who
+takes part, edit the list (and `annotators` in `config.js`, which the researcher page shows) and deploy a new version.
+**Block** on the researcher page keeps one of them out without deleting their data; **Allow** undoes it.
 
 ## Researcher page
 
-Enter the **Task B admin key** and, to list everyone registered in Task A (including people who have not opened Task B
-yet), the **Task A admin key**. Both stay in this browser tab only.
+Enter the **admin key** (printed by `setup`; also Project Settings → Script Properties → `ADMIN_KEY`) and press
+**Load progress**.
 
-* **Progress** (top of the page): per annotator: Task A slot, % done, windows submitted, labels, flags, active time,
-  median per window, last activity, estimated time and cost remaining (at the annotator's own pace once 3 windows are
-  in), cost so far; "has not opened Task B yet" / "cannot sign in" where it applies. Totals: active annotators,
-  windows submitted, cost so far, estimated cost remaining, projected total cost. Per-window details and **Reopen**.
-  **Refresh now**, or refresh every minute.
-* **Annotators:** everyone in Task A with their access to Task B (can sign in / inactive in Task A / blocked in
-  Task B), first time seen in Task B, and Block / Allow.
+* **Progress** (top of the page; until the key is accepted it says what to do): per annotator: % done, windows
+  submitted, labels, flags, active time, median per window, last activity, estimated time and cost remaining (at the
+  annotator's own pace once 3 windows are in), cost so far; "has not opened Task B yet" before the first window.
+  Totals: windows submitted, cost so far, estimated cost remaining, projected total cost. Per-window details and
+  **Reopen**. **Refresh now**, or refresh every minute.
+* **Annotators:** the two emails, whether they can sign in, first sign-in, Block / Allow.
 * **Workload & cost estimate** (works before you enter the admin key). Per window:
   words of window text ÷ reading speed + segments × seconds per label + problem and grey-context words ÷ context
   reading speed + overhead. Plus onboarding (handbook + practice) and a buffer, times the hourly rate and the number
@@ -90,11 +89,9 @@ yet), the **Task A admin key**. Both stay in this browser tab only.
 
 ## Backend
 
-After changing `backend/Code.gs`: open the Task B Google Sheet → Extensions → Apps Script, replace the code, then
-Deploy → Manage deployments → Edit → Version: **New version** → Deploy. The URL stays the same. Because the backend
-now calls the Task A web app, Google asks once to allow "Connect to an external service": accept it. The Annotators
-sheet gets `source` and `slot` columns on the next request; existing rows are kept (they count as Task B-only
-annotators).
+After changing `backend/Code.gs`: open the Task B Google Sheet → Extensions → Apps Script, replace all the code, save,
+then Deploy → Manage deployments → Edit (pencil) → Version: **New version** → Deploy. The URL stays the same, so
+`config.js` does not change. Existing data is kept; the Annotators sheet gets two extra columns on the next request.
 
 ## Agreement
 
