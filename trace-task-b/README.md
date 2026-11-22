@@ -119,36 +119,32 @@ macro-F1) to floating-point precision.
 
 ## The judge notebook (labels exactly as the package)
 
-`notebooks/taskB_judge_study.ipynb` (Colab; open it from GitHub and save a copy in `TaskB/notebooks/` on Drive) never
-segments or prompts a model itself; it only runs reasoning-anatomy v1.8.9 commands.
+`notebooks/taskB_judge_study.ipynb` (Colab; a copy is in `TaskB/notebooks/` on Drive) never segments or prompts a
+model itself; it only runs **reasoning-anatomy v1.8.10** commands (`Reasoning Behavior/reasoning-anatomy-v1.8.10.zip`).
 
-**Why it recovers the segmentation first.** None of the six Task A Gemini 3.8 Flash runs is completely segmented
-(`stages/04_atomicity/quality.json`: `all_boundaries_resolved = false`). With its defaults the package refuses to label
-such a run (`relabel`: exit 3, *Segmentation remains unresolved … use the recovery command*), and `relabel` stops (exit
-6) where a source segmentation request failed and has no saved response. So, per creator model:
+**Why v1.8.10.** v1.8.9 did not replay two kinds of saved segmentation answers in derived runs (the native-ID
+selections `native_selection_missing_candidate` / `native_selection_low_cut_density` and their split checks), so
+`relabel` stopped (exit 6: *a segmentation request is not among the source run's saved responses*) and `resegment`
+asked them again (Gemini answers vary, so segments could change). v1.8.10 replays every saved answer, and adds
+`relabel --allow-unresolved-segments`: all six Task A Gemini 3.8 Flash runs have a few unresolved boundaries
+(`quality.json`: 34–6,123 tokens per model), which v1.8.9 refused to label at all (exit 3); with the option the
+segments stay exactly the source run's and the ones inside an unresolved boundary are recorded `TECHNICAL_MISSING`.
+`anatomy run` and every recorded result are unchanged (study policy 1.8.8). Tests: `tests/test_derived_replay.py`.
 
-1. **Recovery (section 4, once):** the package's own recovery command `anatomy resegment --source-run <run> --run-dir
-   <new run>` (segmentation model unchanged: Gemini 3.8 Flash; saved responses replayed, only unanswered requests
-   sent again), repeated on its own result until a round sends **no new request** (then every request is answered
-   from saved responses, as `relabel` requires). If boundaries remain unresolved (the segmenter's own answer, which is
-   replayed), one more derived run sets the package switch `require_complete_segmentation = false` (no request, same
-   segments, verified); the package then labels the resolved segments and marks the unresolved ones
-   `TECHNICAL_MISSING` for every judge alike (`ALLOW_UNRESOLVED = False` keeps the default and skips such models).
-   Written to `TaskB/judge_study/recovered/<MODEL>/record.json`; cost in `costs.csv` (stage `04_recovery`).
-2. **Segmentation check (free):** the Task A runs must cover all 947 website segments; then the recovered segments are
-   compared with them. A website segment whose package segments changed (`segmentation_changed`) or that lies in an
-   unresolved boundary (`unresolved_boundary`) is excluded for every judge and listed in
-   `TaskB/judge_study/recovered/excluded.json`.
-3. **Judges (section 6):** `anatomy check-judge`, then `anatomy relabel --source-run <recovered run>` (segmentation
-   replayed, never re-run; the package's own `05_semantics`: same prompt, request rendering, earlier-context selection,
-   referenced-setup context, COMMIT and answer-section rules, validation, retries and receipts), the package's own
-   segment-identity check (`segments_identical_to_source`), `anatomy export-annotations`, and the mapping onto the
-   website's segments. A website segment takes the label of the package segment(s) inside it; COMMIT (the final
-   answer), unlabeled and excluded segments are not compared.
+Per creator model:
 
-Inputs and outputs are on Drive (`Reasoning Behavior/TaskB/`): `platform/traces.js` (copied from the site on the first
-run), `judge_study/recovered/`, `judge_study/labels/<judge>/<MODEL>/` (package runs), `judge_study/costs.csv`,
-`judges/<judge>.json`. Runs from the earlier notebook version (`judge_study/<judge>/<MODEL>`) are not used.
+1. **Checks before anything is paid (section 4):** a replay audit of each Task A run with the package's own rules
+   (every saved segmentation answer must be replayable); the Task A runs must cover all 947 website segments; the
+   website segments inside an unresolved boundary are listed and excluded for every judge (`judge_study/excluded.json`).
+2. **Judges (section 6):** `anatomy check-judge`, then `anatomy relabel --source-run TaskA/judge_study/g3.8-flash/<MODEL>
+   [--allow-unresolved-segments]` (segmentation replayed, never re-run; `segments_identical_to_source` must be true;
+   the package's own `05_semantics`: same prompt, request rendering, earlier-context selection, referenced-setup
+   context, COMMIT and answer-section rules, validation, retries and receipts), `anatomy export-annotations`, and the
+   mapping onto the website's segments. A website segment takes the label of the package segment(s) inside it;
+   COMMIT (the final answer), unlabeled and excluded segments are not compared.
+
+Inputs and outputs are on Drive (`Reasoning Behavior/TaskB/`): `platform/traces.js`, `judge_study/source_exports/`,
+`judge_study/labels/<judge>/<MODEL>/` (package runs), `judge_study/costs.csv`, `judges/<judge>.json`.
 
 ## Agreement
 
