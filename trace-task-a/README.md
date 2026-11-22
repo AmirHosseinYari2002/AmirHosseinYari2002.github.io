@@ -10,7 +10,7 @@ researcher page exports one file per annotator in exactly the format Part B read
 | `admin.html` | Researcher page: add annotators and their slot, progress, workload & cost estimate, reopen a window, export `A1.json`, `A2.json`, … |
 | `data/items.json`, `data/assignments.json` | Copied from `TaskA/platform/` (written by Part A); `assignments.json` gives both annotators A1's order (see below). Nothing that un-blinds an item is here |
 | `config.js` | Backend URL, contact email, dry-run banner |
-| `backend/Code.gs` | Google Apps Script backend (Google Sheet: Annotators, Windows, Events) |
+| `backend/Code.gs` | Google Apps Script backend (Google Sheet: Annotators, Windows, Events, Corrections) |
 
 ## What the annotator sees
 
@@ -57,6 +57,7 @@ Report this deviation from the per-annotator random order with the study design.
 ## Backend
 
 1. Open the Google Sheet behind the web app → Extensions → Apps Script. Replace the code with `backend/Code.gs`.
+   (Needed once for researcher corrections; until then the review section is read-only.)
 2. Deploy → Manage deployments → Edit (pencil) → Version: **New version** → Deploy. The URL stays the same.
    (First-time setup: run `setup` once to print the admin key, then Deploy → New deployment → Web app,
    Execute as **Me**, access **Anyone**, and put the `/exec` URL in `config.js`.)
@@ -76,6 +77,18 @@ Report this deviation from the per-annotator random order with the study design.
   `[{"item_id": "W123", "cuts": [412, 980], "flags": [{"offset": 980, "note": "…"}], "seconds": 431}, …]`
   (study windows only, submitted only, CUTs as character offsets in `window_text`). Save them in
   `TaskA/annotations/` and run Part B. The page warns when a file is incomplete.
+* **Review & correct segmentations:** every annotator's submitted segmentation of a window side by side (shared
+  order, markers coloured by whether the other annotator cut within 3 units). **Correct** opens a researcher
+  correction of a submitted window (click a word to add or remove a CUT before it, undo, note). Saving appends a row
+  to the **Corrections** sheet: corrected CUTs, a copy of the annotator's submitted CUTs and version, who, when and
+  why. The annotator's record (`Windows`), their history (`Events`) and their own view are never changed; every
+  correction and every *Revert to original* is kept (append-only), and the full history can be downloaded. If an
+  annotator re-submits a window after it was corrected (after *Reopen*), the old correction is flagged out of date
+  and no longer applied.
+  * The Part B export (`A1.json`, …) and the agreement default stay on the **original submissions**. Corrected data
+    are a separate layer: *Download A1.corrected.json* (same format plus `corrected` and `correction_revision`; keep
+    it apart, e.g. in `TaskA/annotations_corrected/`) and the agreement option *with researcher corrections*.
+  * Report inter-annotator reliability on the original submissions; describe corrected data as researcher-adjudicated.
 * *Download every record* gives an archive of the dataset (drafts, timestamps, window SHA-1s that
   match `key.csv`'s `window_sha1`).
 * **Agreement (live):** inter-annotator and human–LLM agreement, recomputed from the submitted windows on every
