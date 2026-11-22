@@ -14,6 +14,10 @@
  *   Annotators — email, name, active, slot (A1, A2, … = the annotator's item order in assignments.json)
  *   Windows    — latest state per (annotator, dataset, item): cuts, flags, status, active time
  *   Events     — append-only history (every submit stores the full payload)
+ *   Corrections — append-only researcher corrections. Every save or revert adds one row with the corrected
+ *                CUTs and a copy of the annotator's submitted CUTs at that moment; rows are never edited or
+ *                deleted. The latest row per (dataset, annotator, item) is the current correction. Correction
+ *                actions never write to Windows or Events, so every annotator recording stays exactly as submitted.
  * A "dataset" is one set of platform files (items.json + assignments.json). The site sends a
  * fingerprint of them with every request, so annotations of a dry run never mix with the final sample.
  */
@@ -23,7 +27,9 @@ const SHEETS = {
   Windows: ['annotator_id', 'slot', 'dataset_id', 'item_id', 'practice', 'status', 'cuts_json', 'flags_json',
     'n_cuts', 'n_flags', 'active_ms', 'read_pct', 'window_sha1', 'client_updated', 'server_updated',
     'submitted_at', 'version', 'meta_json'],
-  Events: ['server_ts', 'annotator_id', 'slot', 'dataset_id', 'item_id', 'action', 'status', 'n_cuts', 'n_flags', 'payload_json']
+  Events: ['server_ts', 'annotator_id', 'slot', 'dataset_id', 'item_id', 'action', 'status', 'n_cuts', 'n_flags', 'payload_json'],
+  Corrections: ['server_ts', 'dataset_id', 'item_id', 'annotator_id', 'slot', 'revision', 'action', 'cuts_json', 'n_cuts',
+    'original_cuts_json', 'original_version', 'original_submitted_at', 'window_sha1', 'note', 'corrected_by']
 };
 
 function setup() {
@@ -213,6 +219,31 @@ function admin_(body) {
     setCell_('Windows', r._row, 'status', 'reopened');
     event_({ annotator_id: r.annotator_id, slot: r.slot }, ds, String(r.item_id), 'reopen', 'reopened', r.n_cuts, r.n_flags, null);
     return { ok: true };
+  }
+  if (a === 'admin_correct' || a === 'admin_revert_correction') {
+    // Corrects a SUBMITTED window as a new, separate record. The annotator's row in Windows is only read.
+    const id = normEmail_(body.annotator_id), itemId = String(body.item_id || '');
+    const r = find_(id, ds, itemId);
+    if (!r) return { ok: false, error: 'not_found' };
+    if (r.status !== 'submitted') return { ok: false, error: 'not_submitted' };
+    const prev = rows_('Corrections').filter(function (x) { return x.dataset_id === ds && normEmail_(x.annotator_id) === id && String(x.item_id) === itemId; });
+    const original = JSON.parse(r.cuts_json || '[]');
+    const cuts = a === 'admin_revert_correction' ? original : clean_({ cuts: body.cuts }).cuts;
+    writeRow_('Corrections', { server_ts: now_(), dataset_id: ds, item_id: itemId, annotator_id: id, slot: r.slot,
+      revision: prev.length + 1, action: a === 'admin_revert_correction' ? 'revert' : 'correct',
+      cuts_json: JSON.stringify(cuts), n_cuts: cuts.length, original_cuts_json: r.cuts_json || '[]',
+      original_version: r.version, original_submitted_at: r.submitted_at, window_sha1: r.window_sha1,
+      note: String(body.note || '').slice(0, 2000), corrected_by: String(body.corrected_by || '').slice(0, 120) });
+    return { ok: true, revision: prev.length + 1 };
+  }
+  if (a === 'admin_corrections') {
+    // The full, append-only correction history of this dataset (oldest first).
+    return { ok: true, dataset_id: ds, corrections: rows_('Corrections').filter(function (x) { return x.dataset_id === ds; }).map(function (x) {
+      return { server_ts: x.server_ts, item_id: String(x.item_id), annotator_id: normEmail_(x.annotator_id), slot: x.slot, revision: Number(x.revision) || 0,
+        action: x.action, cuts: JSON.parse(x.cuts_json || '[]'), original_cuts: JSON.parse(x.original_cuts_json || '[]'),
+        original_version: x.original_version, original_submitted_at: x.original_submitted_at, window_sha1: x.window_sha1,
+        note: x.note, corrected_by: x.corrected_by };
+    }) };
   }
   if (a === 'admin_export') {
     return { ok: true, exported_at: now_(), dataset_id: ds,

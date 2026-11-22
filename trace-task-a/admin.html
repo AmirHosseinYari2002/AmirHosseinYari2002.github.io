@@ -45,6 +45,25 @@
   .verdict.ok { background: #dcefe3; color: #1d6b3d; } .verdict.mid { background: #fbecc9; color: #7a5300; } .verdict.no { background: #f7d9d6; color: #8a2a20; } .verdict.na { background: #ececef; color: #555; }
   .grid-tbl td.yes { color: #1d6b3d; font-weight: 600; } .grid-tbl td.nope { color: #8a2a20; font-weight: 600; }
   .grid-tbl.compact th, .grid-tbl.compact td { padding: 6px 10px; }
+  .rv-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; margin: 10px 0 28px; }
+  .rv-col { border: 1px solid var(--line); border-radius: 10px; background: var(--paper); padding: 12px 14px; min-width: 0; }
+  .rv-col h3 { font-size: 15px; margin: 0 0 2px; } .rv-col .rv-meta { font-size: 12.5px; color: var(--muted); margin-bottom: 8px; }
+  .rv-tabs { display: inline-flex; border: 1px solid var(--line-2); border-radius: 8px; overflow: hidden; margin: 0 8px 8px 0; }
+  .rv-tabs button { font: inherit; font-size: 12.5px; border: 0; background: #fff; padding: 5px 10px; cursor: pointer; }
+  .rv-tabs button.on { background: var(--cut-bg); color: var(--cut-ink); font-weight: 600; }
+  .rv-col .trace { font-size: 15px; line-height: 1.95; max-height: 640px; overflow: auto; border-top: 1px solid var(--line); padding-top: 8px; }
+  .rv-col .trace .cut { font-size: 10.5px; padding: 3px 5px 2px; cursor: default; }
+  .rv-col .trace .cut:hover { text-decoration: none; }
+  .rv-col .trace .cut.rv-all { background: #dcefe3; border-color: #9fd0b0; color: #1d6b3d; }
+  .rv-col .trace .cut.rv-some { background: #fbecc9; border-color: #e8c77f; color: #7a5300; }
+  .rv-col .trace .cut.rv-none { background: #f7d9d6; border-color: #e3a59e; color: #8a2a20; }
+  .rv-col .trace .cut.rv-add { background: #dce8fb; border-color: #8fb1e8; color: #1f4f9a; }
+  .rv-col .trace .cut.rv-del { background: #fff; border-style: dashed; border-color: #c9a39e; color: #a0524a; text-decoration: line-through; }
+  .rv-col .trace.edit .u:not(.u0):hover { box-shadow: inset 2px 0 0 #1f4f9a; background: #e4ecfa; cursor: pointer; }
+  .rv-col textarea { width: 100%; font: inherit; font-size: 13px; border: 1px solid var(--line-2); border-radius: 8px; padding: 6px 8px; margin: 6px 0; min-height: 52px; }
+  .rv-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 6px 0; }
+  .rv-legend .cut { font-size: 10.5px; padding: 3px 5px 2px; }
+  .rv-hist { font-size: 12.5px; } .rv-hist td, .rv-hist th { padding: 4px 8px !important; }
   .grid-tbl th.rowh { text-transform: none; letter-spacing: 0; font-size: 13px; color: var(--ink-2); font-weight: 600; }
 </style>
 </head>
@@ -71,12 +90,23 @@
     <div class="kpis" id="progKpis"></div>
     <div class="tbl-wrap"><table class="grid-tbl" id="progTbl"></table></div>
 
+    <h2>Review &amp; correct segmentations</h2>
+    <p class="muted small">Each annotator's submitted segmentation of a window, side by side, in the platform's shared order. <b>Correct</b> opens a researcher correction of a submitted window: click a word to add or remove a CUT before it, then save with a note. A correction is stored as a <b>new, separate record</b> (with a copy of the annotator's submitted CUTs): the annotator's submission, its history and their own view never change, every correction and revert is kept, and the Part B export and the agreement default stay on the annotators' original submissions. Corrected data are a separate, labelled layer (corrected exports below; option in the agreement section).</p>
+    <div class="agr-box">
+      <div class="agr-row"><label class="small">Window <select id="rvWin"></select></label> <button type="button" class="btn sm" id="rvPrev" aria-label="Previous window">◀</button> <button type="button" class="btn sm" id="rvNext" aria-label="Next window">▶</button>
+        <label class="small">Corrections made by <input id="rvBy" placeholder="your name" style="font:inherit;border:1px solid var(--line-2);border-radius:8px;padding:5px 8px"></label> <button type="button" class="link small" id="rvReload">Reload</button></div>
+      <div class="small rv-legend">Markers: <span class="cut rv-all">n</span> the other annotator(s) cut within 3 units · <span class="cut rv-some">n</span> some do · <span class="cut rv-none">n</span> none do. In a correction: <span class="cut rv-add">+</span> CUT added by the researcher · <span class="cut rv-del">×</span> annotator's CUT removed by the researcher.</div>
+      <div class="small" id="rvInfo"></div>
+    </div>
+    <div id="rvOut"></div>
+
     <h2>Agreement (live)</h2>
     <p class="muted small">Inter-annotator and human–LLM agreement, recomputed from the submitted windows every time this page loads or refreshes. The code is a line-by-line port of Part B of <code>taskA_human_validation.ipynb</code> (same units, metrics, tolerance, preregistered thresholds; checked against the notebook to floating-point precision). Only the bootstrap intervals and the chance floor use a different random-number generator, so they can differ from the notebook in the third decimal. <b>Report the numbers Part B prints.</b> Until every annotator has submitted every window, everything here is provisional and computed on the windows that all selected annotators have submitted: every metric appears from the first such window, while bootstrap intervals, p-values and the preregistered verdicts appear from the second (one window cannot give an interval).</p>
     <div class="agr-box">
       <div class="agr-row"><b>Judges</b> <span class="muted small">Load <code>TaskA/private/key.csv</code> and the judge files <code>TaskA/judges/*.jsonl</code>. They are read and kept only in this browser, never uploaded or published.</span></div>
       <div class="agr-row"><input type="file" id="refFiles" multiple accept=".jsonl,.csv,text/csv,application/json"> <button type="button" class="link small" id="refForget">Forget loaded judges</button></div>
       <div class="small" id="refInfo"></div>
+      <div class="agr-row"><b class="small">Data:</b> <label class="small"><input type="radio" name="agrData" value="orig" checked> annotators' original submissions (as in Part B)</label> <label class="small"><input type="radio" name="agrData" value="corr"> with researcher corrections</label></div>
       <div class="agr-row" id="agrAnn"></div>
       <div class="agr-row" id="agrJudges"></div>
       <div class="agr-row"><label class="small"><input type="checkbox" id="agrAuto"> Refresh automatically every 2 minutes</label> <button type="button" class="btn sm" id="agrRun">Recompute now</button> <button type="button" class="link small" id="agrDl" disabled>Download all metrics (JSON)</button></div>
@@ -106,6 +136,8 @@
     <p class="muted small">One file per annotator slot, in the format of <code>platform/export_format.md</code>: study windows only, submitted only, CUTs as character offsets in <code>window_text</code>, flags as <code>{offset, note}</code>, active <code>seconds</code>. Save the files as <code>TaskA/annotations/A1.json</code>, <code>A2.json</code>, … and run Part B.</p>
     <div class="export-row" id="exportRow"></div>
     <div class="note warn" id="exportNote" hidden></div>
+    <p class="muted small"><b>Corrected exports</b> (separate files, never named <code>A1.json</code>): the same format with researcher corrections applied where they exist, plus <code>corrected</code> and <code>correction_revision</code> fields. Keep them apart from the originals, e.g. in <code>TaskA/annotations_corrected/</code>. A correction made before the annotator re-submitted the window is not applied and is reported.</p>
+    <div class="export-row" id="exportRowCorr"></div>
     <p class="small"><button type="button" class="link" id="rawBtn">Download every record of this dataset (archive JSON, includes drafts)</button></p>
 
     <h2>Annotators</h2>
@@ -229,7 +261,7 @@
       try { sessionStorage.setItem('tta:admin', $('adminKey').value.trim()); } catch (e) {}
       last = r; $('msg').hidden = true; $('panel').hidden = false;
       render(r);
-      renderAgrAnnotators(); runAgreement();
+      renderAgrAnnotators(); runAgreement(); loadReview();
     } catch (err) { msg('err', err.code === 'auth' ? 'Wrong admin key.' : 'Could not reach the backend: ' + esc(err.message)); }
   }
 
@@ -358,8 +390,173 @@
     }
   });
   $('rawBtn').addEventListener('click', async () => {
-    try { const r = await api('admin_export'); download('taskA_records_' + D.id + '_' + r.exported_at.slice(0, 10) + '.json', { dataset_id: D.id, exported_at: r.exported_at, assignments: D.assign, annotators: last ? last.annotators : [], windows: r.windows }); }
+    try { const r = await api('admin_export'); let corrections = null; try { corrections = (await api('admin_corrections')).corrections; } catch (e2) {}
+      download('taskA_records_' + D.id + '_' + r.exported_at.slice(0, 10) + '.json', { dataset_id: D.id, exported_at: r.exported_at, assignments: D.assign, annotators: last ? last.annotators : [], windows: r.windows, corrections }); }
     catch (err) { msg('err', esc(err.message)); }
+  });
+
+  // ---------------- review & correct ----------------
+  // Reads the submitted windows (admin_export) and the append-only correction history (admin_corrections).
+  // Saving a correction calls admin_correct, which only APPENDS a row to the Corrections sheet; the annotator's
+  // own record (Windows) and history (Events) are never written from this page.
+  const RV = { windows: [], corr: [], ok: false, enabled: true, item: '', edit: null };
+  const rvKey = (id, item) => id + '|' + item;
+  try { $('rvBy').value = localStorage.getItem('tta:rvBy') || ''; } catch (e) {}
+  $('rvBy').addEventListener('input', () => { try { localStorage.setItem('tta:rvBy', $('rvBy').value.trim()); } catch (e) {} });
+  const reviewIds = () => { const s0 = slots()[0]; return ((D.assign[s0] || []).filter(id => D.byId[id] && !D.byId[id].practice)); };
+  const reviewers = () => (last ? last.annotators.filter(a => a.active && a.slot).sort((a, b) => slots().indexOf(a.slot) - slots().indexOf(b.slot)) : []);
+  // latest correction per (annotator, item), and whether it still refers to the current submission
+  function latestCorrection(id, item) {
+    const all = RV.corr.filter(c => c.annotator_id === id && c.item_id === item).sort((a, b) => a.revision - b.revision);
+    return { all, last: all.length ? all[all.length - 1] : null };
+  }
+  function submittedOf(id, item) { return RV.windows.find(w => w.annotator_id === id && w.item_id === item && !w.practice && w.status === 'submitted') || null; }
+  function recordOf(id, item) { return RV.windows.find(w => w.annotator_id === id && w.item_id === item) || null; }
+  // the CUTs to use for an annotator's window: original, or the current researcher correction if it is valid
+  function effective(id, item) {
+    const w = submittedOf(id, item); if (!w) return null;
+    const { last: c } = latestCorrection(id, item);
+    const active = c && c.action === 'correct' && String(c.original_version) === String(w.version);
+    const stale = c && c.action === 'correct' && String(c.original_version) !== String(w.version);
+    return { w, cuts: active ? c.cuts : w.cuts, corrected: !!active, stale: !!stale, revision: c ? c.revision : 0, correction: c };
+  }
+  async function loadReview() {
+    try {
+      const ex = await api('admin_export'); RV.windows = ex.windows;
+      try { const co = await api('admin_corrections'); RV.corr = co.corrections || []; RV.enabled = true; }
+      catch (err) { RV.corr = []; RV.enabled = false; }
+      RV.ok = true;
+    } catch (err) { RV.ok = false; $('rvInfo').innerHTML = '<span class="note err">Could not load the windows: ' + esc(err.message) + '</span>'; return; }
+    renderReviewSelect(); renderReview(); renderCorrExports();
+  }
+  function renderReviewSelect() {
+    const ids = reviewIds(), people = reviewers();
+    if (!RV.item || ids.indexOf(RV.item) < 0) RV.item = ids.find(id => people.some(a => submittedOf(a.annotator_id, id))) || ids[0] || '';
+    $('rvWin').innerHTML = ids.map((id, k) => {
+      const subs = people.filter(a => submittedOf(a.annotator_id, id)).map(a => a.slot);
+      const corr = people.filter(a => { const e = effective(a.annotator_id, id); return e && e.corrected; }).map(a => a.slot);
+      return '<option value="' + esc(id) + '"' + (id === RV.item ? ' selected' : '') + '>' + (k + 1) + '. ' + esc(id) + ' — ' + (subs.length ? 'submitted: ' + subs.join(', ') : 'not submitted yet') + (corr.length ? ' · corrected: ' + corr.join(', ') : '') + '</option>';
+    }).join('');
+  }
+  // window text as units with CUT markers (cuts and marks are code-point offsets at unit starts)
+  function traceHtml(item, marks, editable) {
+    const cps = Array.from(item.window_text), st = item.unit_starts, n = cps.length, at = new Map();
+    marks.forEach(m => { if (!at.has(m.pos)) at.set(m.pos, []); at.get(m.pos).push(m); });
+    const boundary = new Set(marks.filter(m => m.cls !== 'rv-del').map(m => m.pos));
+    let h = st.length && st[0] > 0 ? esc(cps.slice(0, st[0]).join('')) : '', shade = 0;
+    for (let i = 0; i < st.length; i++) {
+      const a = st[i], b = i + 1 < st.length ? st[i + 1] : n, seg = cps.slice(a, b).join(''), k = seg.indexOf('\n');
+      (at.get(a) || []).forEach(m => { h += '<span class="cut ' + m.cls + '" title="' + esc(m.title || '') + '">' + esc(m.label) + '</span>'; });
+      if (i > 0 && boundary.has(a)) shade ^= 1;
+      h += '<span class="u' + (i === 0 ? ' u0' : '') + (shade ? ' s1' : '') + '"' + (editable && i > 0 ? ' data-rvu="' + a + '"' : '') + '>' + esc(k < 0 ? seg : seg.slice(0, k)) + '</span>' + (k >= 0 ? esc(seg.slice(k)) : '');
+    }
+    return h;
+  }
+  function snapCuts(item, cuts) { return MX.snapUnits(item, cuts || []).map(u => item.unit_starts[u]); }   // display only
+  function renderReview() {
+    const id = RV.item, item = D.byId[id], people = reviewers();
+    if (!item) { $('rvOut').innerHTML = ''; return; }
+    const k = reviewIds().indexOf(id);
+    $('rvInfo').innerHTML = (RV.enabled ? '' : '<div class="note warn small">The backend does not know corrections yet: deploy the updated <code>backend/Code.gs</code> (Deploy → Manage deployments → Edit → New version). Until then this section is read-only.</div>') +
+      '<b>' + (k + 1) + ' of ' + reviewIds().length + '</b> · ' + esc(id) + ' · ' + item.n_units + ' units';
+    const units = {}; people.forEach(a => { const e = effective(a.annotator_id, id); units[a.slot] = e ? MX.snapUnits(item, e.w.cuts) : null; });
+    $('rvOut').innerHTML = '<div class="rv-cols">' + people.map(a => colHtml(a, item, units)).join('') + '</div>';
+  }
+  function colHtml(a, item, units) {
+    const id = item.item_id, rec = recordOf(a.annotator_id, id), e = effective(a.annotator_id, id);
+    const head = '<h3>' + esc(a.slot) + ' <span class="muted small">' + esc(a.annotator_id) + '</span></h3>';
+    if (!e) return '<div class="rv-col">' + head + '<div class="rv-meta">' + (rec ? 'Status: ' + esc(rec.status) + ' (only submitted windows can be reviewed)' : 'Not started') + '</div></div>';
+    const { all } = latestCorrection(a.annotator_id, id), ed = RV.edit && RV.edit.id === a.annotator_id && RV.edit.item === id ? RV.edit : null;
+    const orig = snapCuts(item, e.w.cuts), origSet = new Set(orig);
+    const others = Object.keys(units).filter(s => s !== a.slot && units[s]).map(s => units[s]);
+    let view = ed ? 'edit' : (RV.view && RV.view[rvKey(a.annotator_id, id)]) || (e.corrected ? 'corr' : 'orig');
+    let marks, cutsShown;
+    if (view === 'orig' || (view === 'corr' && !e.corrected)) {
+      cutsShown = orig; view = 'orig';
+      marks = orig.map((p, j) => { const u = item.unit_starts.indexOf(p), agree = others.filter(o => o.some(v => Math.abs(v - u) <= MX.TOL_UNITS)).length;
+        return { pos: p, cls: others.length ? (agree === others.length ? 'rv-all' : agree ? 'rv-some' : 'rv-none') : 'rv-all', label: String(j + 2), title: 'CUT ' + (j + 2) }; });
+    } else {
+      const cur = view === 'edit' ? Array.from(ed.cuts).sort((x, y) => x - y) : snapCuts(item, e.cuts), curSet = new Set(cur);
+      cutsShown = cur;
+      marks = cur.map((p, j) => ({ pos: p, cls: origSet.has(p) ? 'rv-all' : 'rv-add', label: origSet.has(p) ? String(j + 2) : '+', title: origSet.has(p) ? 'Annotator CUT, kept' : 'Added by the researcher' }))
+        .concat(orig.filter(p => !curSet.has(p)).map(p => ({ pos: p, cls: 'rv-del', label: '×', title: 'Annotator CUT removed by the researcher' })));
+    }
+    const added = cutsShown.filter(p => !origSet.has(p)).length, removed = orig.filter(p => cutsShown.indexOf(p) < 0).length;
+    let meta = orig.length + ' CUTs submitted' + (e.w.submitted_at ? ' ' + esc(String(e.w.submitted_at).slice(0, 16).replace('T', ' ')) : '') + ' · ' + Math.round((e.w.active_ms || 0) / 60000) + ' active min' + ((e.w.flags || []).length ? ' · ' + e.w.flags.length + ' flag(s)' : '');
+    if (e.corrected) meta += '<br><b>Corrected</b> (revision ' + e.revision + (e.correction.corrected_by ? ' by ' + esc(e.correction.corrected_by) : '') + ', ' + esc(String(e.correction.server_ts).slice(0, 16).replace('T', ' ')) + '): ' + snapCuts(item, e.cuts).length + ' CUTs';
+    else if (e.stale) meta += '<br><span style="color:#8a2a20"><b>Correction out of date:</b> the annotator re-submitted this window after revision ' + e.revision + '. It is not applied; review the new submission.</span>';
+    else if (e.correction && e.correction.action === 'revert') meta += '<br>Reverted to the original (revision ' + e.revision + ').';
+    const key = rvKey(a.annotator_id, id);
+    let h = '<div class="rv-col">' + head + '<div class="rv-meta">' + meta + '</div>';
+    if (!ed) {
+      h += (e.corrected ? '<span class="rv-tabs"><button type="button" data-rvview="' + esc(key) + '|orig" class="' + (view === 'orig' ? 'on' : '') + '">Original</button><button type="button" data-rvview="' + esc(key) + '|corr" class="' + (view === 'corr' ? 'on' : '') + '">Corrected (+' + added + ' −' + removed + ')</button></span>' : '') +
+        '<span class="rv-actions" style="display:inline-flex">' + (RV.enabled ? '<button type="button" class="btn sm" data-rvedit="' + esc(key) + '">' + (e.corrected ? 'Edit correction' : 'Correct') + '</button>' : '') +
+        (RV.enabled && e.corrected ? '<button type="button" class="link small" data-rvrevert="' + esc(key) + '">Revert to original</button>' : '') + '</span>';
+    } else {
+      h += '<div class="note small" style="margin:4px 0 6px">Editing a correction of ' + esc(a.slot) + '\'s submission: click a word to add a CUT before it; click a word that starts a segment to remove that CUT. The submission itself is not changed. Changes vs the original: <b>+' + added + ' −' + removed + '</b>.</div>' +
+        '<div class="rv-actions"><button type="button" class="btn primary sm" data-rvsave="' + esc(key) + '">Save correction</button><button type="button" class="btn sm" data-rvundo="1"' + (ed.undo.length ? '' : ' disabled') + '>Undo</button><button type="button" class="link small" data-rvcancel="1">Cancel</button></div>' +
+        '<textarea id="rvNote" placeholder="Reason for the correction (kept with it), e.g. accidental CUT inside a formula">' + esc(ed.note) + '</textarea>';
+    }
+    h += '<div class="trace shade' + (ed ? ' edit' : '') + '" data-rvtrace="' + esc(key) + '">' + traceHtml(item, marks, !!ed) + '</div>';
+    if (all.length) h += '<details style="margin-top:8px"><summary class="small" style="cursor:pointer;color:var(--green)">Correction history (' + all.length + ')</summary><div class="tbl-wrap" style="margin:6px 0"><table class="grid-tbl rv-hist"><thead><tr><th>Rev.</th><th>When</th><th>Action</th><th>By</th><th>CUTs</th><th>vs original</th><th>Note</th></tr></thead><tbody>' +
+      all.map(c => { const cs = snapCuts(item, c.cuts), os = snapCuts(item, c.original_cuts); return '<tr><td>' + c.revision + '</td><td>' + esc(String(c.server_ts).slice(0, 16).replace('T', ' ')) + '</td><td>' + esc(c.action) + '</td><td>' + esc(c.corrected_by || '') + '</td><td class="nm">' + cs.length + '</td><td class="nm">+' + cs.filter(p => os.indexOf(p) < 0).length + ' −' + os.filter(p => cs.indexOf(p) < 0).length + '</td><td>' + esc(c.note || '') + '</td></tr>'; }).join('') + '</tbody></table></div></details>';
+    return h + '</div>';
+  }
+  $('rvWin').addEventListener('change', () => { if (RV.edit && !confirm('Discard the unsaved correction?')) { $('rvWin').value = RV.item; return; } RV.edit = null; RV.item = $('rvWin').value; renderReview(); });
+  const rvStep = d => { const ids = reviewIds(), k = ids.indexOf(RV.item) + d; if (k < 0 || k >= ids.length) return; if (RV.edit && !confirm('Discard the unsaved correction?')) return; RV.edit = null; RV.item = ids[k]; $('rvWin').value = RV.item; renderReview(); };
+  $('rvPrev').addEventListener('click', () => rvStep(-1)); $('rvNext').addEventListener('click', () => rvStep(1));
+  $('rvReload').addEventListener('click', () => { if (RV.edit && !confirm('Discard the unsaved correction?')) return; RV.edit = null; loadReview(); });
+  document.addEventListener('input', e => { if (e.target.id === 'rvNote' && RV.edit) RV.edit.note = e.target.value; });
+  document.addEventListener('click', async e => {
+    const t = e.target;
+    const v = t.closest('[data-rvview]'); if (v) { const [id, item, view] = v.dataset.rvview.split('|'); RV.view = RV.view || {}; RV.view[rvKey(id, item)] = view; renderReview(); return; }
+    const ed = t.closest('[data-rvedit]');
+    if (ed) { const [id, item] = ed.dataset.rvedit.split('|'); if (RV.edit && !confirm('Discard the unsaved correction?')) return; const ef = effective(id, item);
+      RV.edit = { id, item, cuts: new Set(snapCuts(D.byId[item], ef.cuts)), undo: [], note: '' }; renderReview(); return; }
+    const u = t.closest('[data-rvu]');
+    if (u && RV.edit) { const p = Number(u.dataset.rvu); const had = RV.edit.cuts.has(p); if (had) RV.edit.cuts.delete(p); else RV.edit.cuts.add(p); RV.edit.undo.push(p);
+      const sc = u.closest('.trace').scrollTop; renderReview(); document.querySelectorAll('.rv-col .trace.edit').forEach(x => { x.scrollTop = sc; }); return; }
+    if (t.closest('[data-rvundo]') && RV.edit) { const p = RV.edit.undo.pop(); if (p != null) { if (RV.edit.cuts.has(p)) RV.edit.cuts.delete(p); else RV.edit.cuts.add(p); } renderReview(); return; }
+    if (t.closest('[data-rvcancel]')) { RV.edit = null; renderReview(); return; }
+    const sv = t.closest('[data-rvsave]');
+    if (sv && RV.edit) {
+      const ef = effective(RV.edit.id, RV.edit.item), item = D.byId[RV.edit.item], orig = snapCuts(item, ef.w.cuts), cur = Array.from(RV.edit.cuts).sort((x, y) => x - y);
+      const add = cur.filter(p => orig.indexOf(p) < 0).length, rem = orig.filter(p => cur.indexOf(p) < 0).length;
+      if (!add && !rem) { if (!confirm('This correction is identical to the annotator\'s submission. Save it anyway?')) return; }
+      if (!confirm('Save a correction of ' + RV.edit.id + ' on ' + RV.edit.item + ' (+' + add + ' −' + rem + ' CUTs vs their submission)?\n\nIt is stored as a new record; the annotator\'s submission is not changed.')) return;
+      try { sv.disabled = true; await api('admin_correct', { annotator_id: RV.edit.id, item_id: RV.edit.item, cuts: cur, note: RV.edit.note, corrected_by: $('rvBy').value.trim() });
+        RV.edit = null; await loadReview(); msg('', 'Correction saved as a new record. The annotator\'s submission is unchanged.'); }
+      catch (err) { sv.disabled = false; msg('err', 'Could not save the correction: ' + esc(err.code || err.message)); }
+      return;
+    }
+    const rv = t.closest('[data-rvrevert]');
+    if (rv) { const [id, item] = rv.dataset.rvrevert.split('|');
+      if (!confirm('Revert ' + id + ' on ' + item + ' to the annotator\'s original CUTs?\n\nThe correction history is kept; a "revert" record is added.')) return;
+      try { await api('admin_revert_correction', { annotator_id: id, item_id: item, note: 'reverted to original', corrected_by: $('rvBy').value.trim() }); await loadReview(); msg('', 'Reverted. The previous corrections stay in the history.'); }
+      catch (err) { msg('err', 'Could not revert: ' + esc(err.code || err.message)); }
+    }
+  });
+  // corrected exports and the full correction history
+  function renderCorrExports() {
+    if (!last) return;
+    $('exportRowCorr').innerHTML = slots().map(s => { const a = last.annotators.find(x => x.slot === s && x.active);
+      const n = a ? reviewIds().filter(id => { const e = effective(a.annotator_id, id); return e && e.corrected; }).length : 0;
+      return '<button class="btn sm" type="button" data-export-corr="' + esc(s) + '"' + (a && RV.ok ? '' : ' disabled') + '>Download ' + esc(s) + '.corrected.json · ' + n + ' corrected</button>'; }).join('') +
+      '<button class="btn sm" type="button" id="corrHist"' + (RV.enabled && RV.ok ? '' : ' disabled') + '>Download correction history (JSON)</button>';
+  }
+  document.addEventListener('click', async e => {
+    const ex = e.target.closest('[data-export-corr]');
+    if (ex) {
+      const slot = ex.dataset.exportCorr; await loadReview();
+      const who = last.annotators.find(x => x.slot === slot && x.active); if (!who) return;
+      const out = [], stale = [];
+      (D.assign[slot] || []).forEach(id => { const ef = D.byId[id] && !D.byId[id].practice ? effective(who.annotator_id, id) : null; if (!ef) return;
+        if (ef.stale) stale.push(id);
+        out.push({ item_id: id, cuts: ef.cuts, flags: (ef.w.flags || []).map(f => ({ offset: f.offset, note: f.note })), seconds: Math.round((ef.w.active_ms || 0) / 1000), corrected: ef.corrected, correction_revision: ef.corrected ? ef.revision : null }); });
+      download(slot + '.corrected.json', out);
+      $('exportNote').hidden = !stale.length; if (stale.length) $('exportNote').innerHTML = '<b>' + esc(slot) + '.corrected.json:</b> ' + stale.length + ' correction(s) were made before the annotator re-submitted and were not applied (' + stale.map(esc).join(', ') + ').';
+    }
+    if (e.target.id === 'corrHist') { await loadReview(); download('taskA_corrections_' + D.id + '_' + new Date().toISOString().slice(0, 10) + '.json', { dataset_id: D.id, downloaded_at: new Date().toISOString(), corrections: RV.corr }); }
   });
 
   // ---------------- agreement (live) ----------------
@@ -427,7 +624,7 @@
   $('refForget').addEventListener('click', () => { REF = null; saveRefs(); runAgreement(); });
   $('agrRun').addEventListener('click', () => runAgreement());
   $('agrAuto').addEventListener('change', e => { clearInterval(agrTimer); agrTimer = e.target.checked ? setInterval(() => { load(); }, 120000) : null; });
-  document.addEventListener('change', e => { if (e.target.closest('[data-agra],[data-agrj]')) runAgreement(); });
+  document.addEventListener('change', e => { if (e.target.closest('[data-agra],[data-agrj],input[name="agrData"]')) runAgreement(); });
   $('agrDl').addEventListener('click', () => { if (AGR) download('taskA_agreement_' + D.id + '_' + new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-') + '.json', AGR); });
 
   function renderAgrAnnotators() {
@@ -451,6 +648,15 @@
         r.windows.filter(w => w.annotator_id === who.annotator_id && !w.practice && w.status === 'submitted' && D.byId[w.item_id] && (!w.window_sha1 || w.window_sha1 === D.sha1[w.item_id]))
           .forEach(w => { H[sl][w.item_id] = MX.snapUnits(D.byId[w.item_id], w.cuts || []); if (w.active_ms) seconds.push(w.active_ms / 1000); if ((w.flags || []).length) flagged.add(w.item_id); });
       });
+      let nCorr = 0;
+      const useCorr = (document.querySelector('input[name="agrData"]:checked') || {}).value === 'corr';
+      if (useCorr) {          // apply the current, valid researcher corrections (read-only; nothing is written)
+        let cor = []; try { cor = (await api('admin_corrections')).corrections || []; } catch (e2) { throw new Error('the backend does not provide corrections yet (deploy the updated Code.gs)'); }
+        sel.forEach(sl => { const who = last.annotators.find(a => a.slot === sl && a.active); if (!who || !H[sl]) return;
+          Object.keys(H[sl]).forEach(id => { const w = r.windows.find(x => x.annotator_id === who.annotator_id && x.item_id === id && x.status === 'submitted'); if (!w) return;
+            const cs = cor.filter(c => c.annotator_id === who.annotator_id && c.item_id === id).sort((a, b) => a.revision - b.revision), c = cs[cs.length - 1];
+            if (c && c.action === 'correct' && String(c.original_version) === String(w.version)) { H[sl][id] = MX.snapUnits(D.byId[id], c.cuts); nCorr++; } }); });
+      }
       const names = Object.keys(H), total = mainIds().length;
       if (names.length < 2) { st.innerHTML = 'Select at least two annotators with submitted windows.'; $('agrOut').innerHTML = ''; agrBusy = false; return; }
       const ids = mainIds().filter(id => names.every(a => H[a][id]));
@@ -463,7 +669,7 @@
       AGR = computeAgreement(H, J, ids, meta, { flagged: Array.from(flagged), seconds, total });
       renderAgreement(AGR); $('agrDl').disabled = false;
       st.className = 'note' + (ids.length < total ? ' warn' : '');
-      st.innerHTML = (ids.length < total ? '<b>Provisional:</b> ' : '<b>Complete:</b> ') + ids.length + ' of ' + total + ' windows submitted by all of ' + names.map(esc).join(', ') +
+      st.innerHTML = (useCorr ? '<b>With researcher corrections</b> (' + nCorr + ' annotator window(s) corrected; not the Part B data). ' : '') + (ids.length < total ? '<b>Provisional:</b> ' : '<b>Complete:</b> ') + ids.length + ' of ' + total + ' windows submitted by all of ' + names.map(esc).join(', ') +
         '. ' + (Object.keys(J).length ? Object.keys(J).length + ' judge(s) compared.' : 'Load the key and judge files above to see human–LLM agreement.') + ' Computed ' + new Date().toLocaleTimeString() + '.';
     } catch (err) { st.className = 'note err'; st.innerHTML = 'Could not compute agreement: ' + esc(err.message); }
     agrBusy = false;
