@@ -195,6 +195,7 @@ exclude:
   - trace-task-b/backend
   - trace-task-b/analysis
   - trace-task-b/tools
+  - trace-task-b/notebooks
 keep_files:
   - .git
   - .svn

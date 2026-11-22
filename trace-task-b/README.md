@@ -13,7 +13,9 @@ non-inferior). Every segment gets exactly one action: CONSTRUCT, INSPECT, REVISE
 | `config.js` | Backend URL and contact email |
 | `backend/Code.gs` | Google Apps Script backend (Google Sheet: Annotators, Annotations, Log) |
 | `tools/build_segments.py` | Regenerates `traces.js` |
-| `analysis/task_b_agreement.py` | Inter-annotator (and, later, LLM–human) label agreement |
+| `metrics.js` | Agreement statistics for the researcher page (α, κ, π, AC1, per-label agreement, window bootstrap, claims H / J1 / J2, alt-test, strata); runs in the browser and in Node |
+| `notebooks/taskB_judge_labeling.ipynb` | Colab notebook: label the same segments with candidate LLM judges, record the cost, write `TaskB/judges/<judge>.json` |
+| `analysis/task_b_agreement.py` | Offline agreement report (human–human, optionally one judge) |
 
 ## The data
 
@@ -92,6 +94,40 @@ Enter the **admin key** (printed by `setup`; also Project Settings → Script Pr
 After changing `backend/Code.gs`: open the Task B Google Sheet → Extensions → Apps Script, replace all the code, save,
 then Deploy → Manage deployments → Edit (pencil) → Version: **New version** → Deploy. The URL stays the same, so
 `config.js` does not change. Existing data is kept; the Annotators sheet gets two extra columns on the next request.
+
+## Agreement on the researcher page (live)
+
+The **Agreement** section is recomputed on every *Load progress* / refresh from the windows **both** annotators have
+submitted, so it grows window by window. Unit: one segment; a segment flagged without a label is missing.
+
+* **Inter-annotator:** Krippendorff's α (nominal, primary), Cohen's κ, Scott's π, Gwet's AC1, raw agreement, each
+  with a 95% percentile bootstrap CI over **windows** (2,000 resamples, seed 20261115); per label: counts, positive
+  specific agreement with CI, one-vs-rest κ; the confusion matrix. **Claim H:** α ≥ 0.80 and one-sided 95% lower bound
+  ≥ 0.667 (thresholds in `metrics.js`, `PREREG`; fix them before looking at judge results).
+* **Judges:** load `TaskB/judges/*.json` (from the notebook) and `TaskA/private/key.csv` under *Agreement → Judges*;
+  they stay in the browser and are never uploaded. Per judge: α / κ / AC1 / raw agreement against each annotator
+  (mean), Δ = judge α − annotator α with a paired window bootstrap (**J1**: one-sided 95% lower bound > −0.05),
+  accuracy, macro-F1 and per-label F1 against the labels both annotators agree on, the Alternative Annotator Test
+  (supporting evidence; little power with two annotators), **J2** (no creator model with an α gap below −0.10;
+  needs key.csv), cost of the run. **VALIDATED** = H + J1 + J2; the best validated judge (highest α) is named.
+* With key.csv: label shares per creator model (annotators vs each judge, Spearman ρ of the model ranking) and α per
+  model, domain, outcome and window position.
+* **Download all metrics (JSON)** saves everything shown.
+
+`metrics.js` was checked against `krippendorff` and scikit-learn (α with missing values for 2 and 3 coders, κ,
+macro-F1) to floating-point precision.
+
+## The judge notebook
+
+`notebooks/taskB_judge_labeling.ipynb` (Colab) gives the same 947 segments to one candidate judge at a time:
+one request per segment with the problem, the **earlier** text only (grey context + earlier segments, nearest first,
+about 400 tokens) and the segment under review; the system prompt is `LABELING_PROMPT` read from
+`reasoning-anatomy-v1.8.9.zip` on Drive (the main pipeline's prompt; an embedded v1.6.1 copy is the fallback, and the
+version used is recorded in the output). The judge answers the package's four tests; the first *yes* decides the
+action, as in the package. Responses are saved as they arrive (re-running resumes, nothing is paid twice), the cost
+comes from the providers' token counts, and `TaskB/judges/<judge>.json` is written. Judges: Gemini 3.8 Flash,
+3.5 Flash-Lite (± thinking), 3.1 / 2.5 Flash-Lite, Gemini 4 Hydrogen, Claude Haiku 5.5 (± thinking), and a `mock`
+judge that tests the pipeline without API calls.
 
 ## Agreement
 
