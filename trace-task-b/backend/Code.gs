@@ -7,11 +7,16 @@
  *      and prints the ADMIN KEY in the execution log (also stored in Script Properties).
  *   3. Deploy → New deployment → Web app. Execute as: Me. Who has access: Anyone.
  *      Copy the /exec URL into trace-task-b/config.js (apiUrl).
- *   4. Open trace-task-b/admin.html, paste the admin key, and add your annotators by email.
- *      Annotators sign in with that email address.
+ *
+ * Who can sign in: the annotators registered (and active) in Task A. Every sign-in, save and submit is checked
+ * against the Task A web app (its read-only "login" check; the answer is cached for 10 minutes), so annotators
+ * are registered once, on the Task A researcher page. Task B can still block someone (admin.html → Block), and
+ * can add a Task B-only annotator. The Task A URL is TASK_A_URL below; a Script Property TASK_A_URL overrides it
+ * ("off" turns the link off, so only the Annotators sheet counts). Calling Task A needs the "connect to an external
+ * service" permission: Apps Script asks for it once when you deploy the new version.
  *
  * Sheets:
- *   Annotators  — one row per annotator (email, name, active)
+ *   Annotators  — email, name, active, source ("taskA" = admitted through Task A, "" = added in Task B), slot
  *   Annotations — latest state per (annotator, trace): labels, flags, status
  *   Log         — append-only history (every submit stores the full payload)
  */
@@ -25,6 +30,8 @@ const SHEETS = {
   log: ['server_ts', 'annotator_id', 'trace_id', 'action', 'status', 'n_labeled', 'n_flags', 'payload_json']
 };
 const CELL_MAX = 49000; // Google Sheets limit is 50,000 characters per cell
+const TASK_A_URL = 'https://script.google.com/macros/s/AKfycbxG1XYCkBJiVEaqBVO6yJTsIJKb7vM42wdbbHI0ze5jpELj05q_Ui6trWxgf_erqk3myw/exec';
+const ANNOTATOR_COLS = ['annotator_id', 'access_code', 'name', 'active', 'created_at', 'source', 'slot'];
 
 function setup() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -34,6 +41,7 @@ function setup() {
     if (!sh) sh = ss.insertSheet(name);
     if (sh.getLastRow() === 0) { sh.appendRow(SHEETS[k]); sh.setFrozenRows(1); }
   });
+  ensureAnnotatorCols_();
   const props = PropertiesService.getScriptProperties();
   let key = props.getProperty('ADMIN_KEY');
   if (!key) { key = Utilities.getUuid().replace(/-/g, ''); props.setProperty('ADMIN_KEY', key); }
@@ -54,7 +62,7 @@ function rows_(k) {
   return v.map(function (r, i) { const o = { _row: i + 2 }; head.forEach(function (h, j) { o[h] = r[j] instanceof Date ? r[j].toISOString() : r[j]; }); return o; });
 }
 
-function doGet() { return out_({ ok: true, service: 'trace-task-b' }); }
+function doGet() { return out_({ ok: true, service: 'trace-task-b', version: 3, task_a_linked: !!taskAUrl_() }); }
 
 function doPost(e) {
   let body;
@@ -62,11 +70,12 @@ function doPost(e) {
   const lock = LockService.getScriptLock();
   try {
     lock.waitLock(20000);
+    ensureAnnotatorCols_();
     const a = body.action;
     if (a && a.indexOf('admin_') === 0) return out_(admin_(body));
     const who = auth_(body.annotator_id);
-    if (!who) return out_({ ok: false, error: 'auth' });
-    if (a === 'login') return out_({ ok: true, name: who.name, progress: progress_(who.annotator_id), practiced: practiced_(who.annotator_id) });
+    if (!who || who.error) return out_({ ok: false, error: who ? who.error : 'auth' });
+    if (a === 'login') return out_({ ok: true, service: 'trace-task-b', name: who.name, via: who.via, progress: progress_(who.annotator_id), practiced: practiced_(who.annotator_id) });
     if (a === 'load') return out_(load_(who.annotator_id, body.trace_id));
     if (a === 'save') return out_(save_(who.annotator_id, body, false));
     if (a === 'submit') return out_(save_(who.annotator_id, body, true));
@@ -82,12 +91,62 @@ function doPost(e) {
 function normEmail_(e) { return String(e || '').trim().toLowerCase(); }
 function isEmail_(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) && e.length <= 120; }
 
+function isActive_(r) { return !(r.active === false || String(r.active).toLowerCase() === 'false'); }
+
+// Older sheets have only the first five Annotators columns: add `source` and `slot`.
+function ensureAnnotatorCols_() {
+  const sh = sheet_('annotators');
+  const head = sh.getRange(1, 1, 1, Math.max(1, sh.getLastColumn())).getValues()[0].map(String);
+  ANNOTATOR_COLS.forEach(function (c) { if (head.indexOf(c) < 0) { head.push(c); sh.getRange(1, head.length).setValue(c); } });
+}
+function addAnnotator_(o) {
+  const sh = sheet_('annotators');
+  const head = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(String);
+  sh.appendRow(head.map(function (h) { return o[h] === undefined ? '' : o[h]; }));
+}
+
+function taskAUrl_() {
+  const p = PropertiesService.getScriptProperties().getProperty('TASK_A_URL');
+  if (p && p.toLowerCase() === 'off') return '';
+  return p || TASK_A_URL;
+}
+// Is this email registered and active in Task A? {ok:true,name,slot} | {ok:false} | {unreachable:true}
+function taskA_(id) {
+  const url = taskAUrl_();
+  if (!url) return { ok: false };
+  const cache = CacheService.getScriptCache(), ck = 'taskA:' + id;
+  const hit = cache.get(ck);
+  if (hit) return JSON.parse(hit);
+  let r;
+  try {
+    const res = UrlFetchApp.fetch(url, { method: 'post', contentType: 'text/plain', payload: JSON.stringify({ action: 'login', annotator_id: id }),
+      muteHttpExceptions: true, followRedirects: true });
+    r = JSON.parse(res.getContentText());
+  } catch (err) { return { unreachable: true }; }
+  if (r && r.ok) { const v = { ok: true, name: String(r.name || ''), slot: String(r.slot || '') }; cache.put(ck, JSON.stringify(v), 600); return v; }
+  if (r && r.error === 'auth') { cache.put(ck, JSON.stringify({ ok: false }), 60); return { ok: false }; }
+  return { unreachable: true };
+}
+
+// Returns the annotator, {error: 'auth'} or {error: 'auth_unavailable'}.
+//  1. A row in Task B's Annotators sheet that is not active blocks the email from Task B.
+//  2. An active row added in Task B (source "") admits it (Task B-only annotator).
+//  3. Otherwise the email must be registered and active in Task A. The first time, a row with source "taskA" is
+//     added here, so the researcher page lists them. If Task A cannot be reached, someone admitted through Task A
+//     before keeps working; a new email is asked to try again.
 function auth_(id) {
   id = normEmail_(id);
-  if (!id) return null;
+  if (!id) return { error: 'auth' };
   const r = rows_('annotators').filter(function (x) { return normEmail_(x.annotator_id) === id; })[0];
-  if (!r || r.active === false || String(r.active).toLowerCase() === 'false') return null;
-  return { annotator_id: id, name: r.name };
+  if (r && !isActive_(r)) return { error: 'auth' };
+  if (r && String(r.source || '') !== 'taskA') return { annotator_id: id, name: r.name, via: 'taskB' };
+  const t = taskA_(id);
+  if (t.ok) {
+    if (!r) addAnnotator_({ annotator_id: id, name: t.name, active: true, created_at: now_(), source: 'taskA', slot: t.slot });
+    return { annotator_id: id, name: t.name || (r && r.name) || '', via: 'taskA' };
+  }
+  if (t.unreachable && r) return { annotator_id: id, name: r.name, via: 'taskA' };
+  return { error: t.unreachable ? 'auth_unavailable' : 'auth' };
 }
 
 function find_(id, traceId) {
@@ -168,8 +227,8 @@ function admin_(body) {
   const a = body.action;
   if (a === 'admin_overview') {
     return {
-      ok: true,
-      annotators: rows_('annotators').map(function (x) { return { annotator_id: normEmail_(x.annotator_id), name: x.name, active: x.active, created_at: x.created_at }; }),
+      ok: true, task_a_linked: !!taskAUrl_(),
+      annotators: rows_('annotators').map(function (x) { return { annotator_id: normEmail_(x.annotator_id), name: x.name, active: isActive_(x), created_at: x.created_at, source: String(x.source || ''), slot: String(x.slot || '') }; }),
       annotations: rows_('annotations').map(function (x) { return { annotator_id: x.annotator_id, trace_id: x.trace_id, status: x.status, n_segments: x.n_segments, n_labeled: x.n_labeled, n_flags: x.n_flags, n_unresolved: x.n_unresolved, active_ms: x.active_ms, server_updated: x.server_updated, submitted_at: x.submitted_at, version: x.version }; })
     };
   }
@@ -177,13 +236,20 @@ function admin_(body) {
     const id = normEmail_(body.annotator_id);
     if (!isEmail_(id)) return { ok: false, error: 'bad_id' };
     if (rows_('annotators').some(function (x) { return normEmail_(x.annotator_id) === id; })) return { ok: false, error: 'exists' };
-    sheet_('annotators').appendRow([id, '', String(body.name || ''), true, now_()]);
+    addAnnotator_({ annotator_id: id, name: String(body.name || ''), active: true, created_at: now_(), source: '' });
     return { ok: true, annotator_id: id };
   }
   if (a === 'admin_set_active') {
-    const r = rows_('annotators').filter(function (x) { return normEmail_(x.annotator_id) === normEmail_(body.annotator_id); })[0];
-    if (!r) return { ok: false, error: 'not_found' };
+    // Block or allow an email in Task B only. Blocking a Task A annotator who never opened Task B adds a blocked row.
+    const id = normEmail_(body.annotator_id);
+    const r = rows_('annotators').filter(function (x) { return normEmail_(x.annotator_id) === id; })[0];
+    if (!r) {
+      if (body.active || !isEmail_(id)) return { ok: false, error: 'not_found' };
+      addAnnotator_({ annotator_id: id, name: String(body.name || ''), active: false, created_at: now_(), source: 'taskA', slot: String(body.slot || '') });
+      return { ok: true };
+    }
     sheet_('annotators').getRange(r._row, 4).setValue(!!body.active);
+    CacheService.getScriptCache().remove('taskA:' + id);
     return { ok: true };
   }
   if (a === 'admin_reopen') {
