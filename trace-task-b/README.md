@@ -120,23 +120,35 @@ macro-F1) to floating-point precision.
 ## The judge notebook (labels exactly as the package)
 
 `notebooks/taskB_judge_study.ipynb` (Colab; open it from GitHub and save a copy in `TaskB/notebooks/` on Drive) never
-prompts a model itself. For each candidate judge and each creator model it runs, with reasoning-anatomy v1.8.9:
+segments or prompts a model itself; it only runs reasoning-anatomy v1.8.9 commands.
 
-1. `anatomy check-judge` (one cheap test; a wrong model ID, setting or key stops here and creates nothing);
-2. `anatomy relabel --source-run TaskA/judge_study/g3.8-flash/<MODEL>`: the package's own command to label the
-   segments of a finished run with another judge. Segmentation is replayed from the source run's saved responses (no
-   segmentation call; `segments_identical_to_source` must be true) and the package's `05_semantics` stage labels every
-   segment: same prompt, request rendering, earlier-context selection (token budget over the full trace),
-   referenced-setup context, deterministic COMMIT and answer-section rules, schema validation, retries and receipts as
-   the real pipeline;
-3. `anatomy export-annotations`, then a bookkeeping step that maps the package's trace segments onto the website's 947
-   segments (checked on the Gemini 3.8 Flash runs before anything is paid: every website segment must be covered).
-   A website segment takes the label of the package segment(s) inside it; segments the package marks COMMIT (the
-   final answer) or leaves unlabeled are not compared, for every judge alike.
+**Why it recovers the segmentation first.** None of the six Task A Gemini 3.8 Flash runs is completely segmented
+(`stages/04_atomicity/quality.json`: `all_boundaries_resolved = false`). With its defaults the package refuses to label
+such a run (`relabel`: exit 3, *Segmentation remains unresolved … use the recovery command*), and `relabel` stops (exit
+6) where a source segmentation request failed and has no saved response. So, per creator model:
 
-Inputs and outputs are on Drive (`Reasoning Behavior/TaskB/`, see its README): `platform/traces.js` (copied from the
-site on the first run), `judge_study/` (package runs, `costs.csv` from the package's receipts), `judges/<judge>.json`.
-The package labels every segment of the 36 traces (as the real pipeline would); only the window segments are compared.
+1. **Recovery (section 4, once):** the package's own recovery command `anatomy resegment --source-run <run> --run-dir
+   <new run>` (segmentation model unchanged: Gemini 3.8 Flash; saved responses replayed, only unanswered requests
+   sent again), repeated on its own result until a round sends **no new request** (then every request is answered
+   from saved responses, as `relabel` requires). If boundaries remain unresolved (the segmenter's own answer, which is
+   replayed), one more derived run sets the package switch `require_complete_segmentation = false` (no request, same
+   segments, verified); the package then labels the resolved segments and marks the unresolved ones
+   `TECHNICAL_MISSING` for every judge alike (`ALLOW_UNRESOLVED = False` keeps the default and skips such models).
+   Written to `TaskB/judge_study/recovered/<MODEL>/record.json`; cost in `costs.csv` (stage `04_recovery`).
+2. **Segmentation check (free):** the Task A runs must cover all 947 website segments; then the recovered segments are
+   compared with them. A website segment whose package segments changed (`segmentation_changed`) or that lies in an
+   unresolved boundary (`unresolved_boundary`) is excluded for every judge and listed in
+   `TaskB/judge_study/recovered/excluded.json`.
+3. **Judges (section 6):** `anatomy check-judge`, then `anatomy relabel --source-run <recovered run>` (segmentation
+   replayed, never re-run; the package's own `05_semantics`: same prompt, request rendering, earlier-context selection,
+   referenced-setup context, COMMIT and answer-section rules, validation, retries and receipts), the package's own
+   segment-identity check (`segments_identical_to_source`), `anatomy export-annotations`, and the mapping onto the
+   website's segments. A website segment takes the label of the package segment(s) inside it; COMMIT (the final
+   answer), unlabeled and excluded segments are not compared.
+
+Inputs and outputs are on Drive (`Reasoning Behavior/TaskB/`): `platform/traces.js` (copied from the site on the first
+run), `judge_study/recovered/`, `judge_study/labels/<judge>/<MODEL>/` (package runs), `judge_study/costs.csv`,
+`judges/<judge>.json`. Runs from the earlier notebook version (`judge_study/<judge>/<MODEL>`) are not used.
 
 ## Agreement
 
