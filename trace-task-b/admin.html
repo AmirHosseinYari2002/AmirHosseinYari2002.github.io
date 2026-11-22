@@ -71,7 +71,7 @@
     <h2>Agreement</h2>
     <p class="muted small">Recomputed on every <b>Load progress</b> / refresh from the windows <b>both</b> annotators have submitted (drafts are not used), so the numbers grow window by window. Unit: one segment. 95% intervals: percentile bootstrap over windows (2,000 resamples, seed 20261115), because segments of one window are not independent. Primary statistic: Krippendorff's α (nominal); a segment flagged without a label is missing for that annotator.</p>
     <div class="agr-box">
-      <div class="agr-row"><b>Judges</b> <span class="muted small">Load the judge files written by <code>taskB_judge_labeling.ipynb</code> (<code>TaskB/judges/*.json</code>) and, for the per-model claim J2 and the strata, <code>TaskA/private/key.csv</code>. They are read and kept only in this browser, never uploaded or published.</span></div>
+      <div class="agr-row"><b>Judges</b> <span class="muted small">Load the judge files written by <code>taskB_judge_study.ipynb</code> (<code>TaskB/judges/*.json</code>) and, for the per-model claim J2 and the strata, <code>TaskA/private/key.csv</code>. They are read and kept only in this browser, never uploaded or published.</span></div>
       <div class="agr-row"><input type="file" id="refFiles" multiple accept=".json,.csv,text/csv,application/json"> <button type="button" class="link small" id="refForget">Forget loaded files</button></div>
       <div class="small" id="refInfo"></div>
       <div class="agr-row" id="agrJudges"></div>

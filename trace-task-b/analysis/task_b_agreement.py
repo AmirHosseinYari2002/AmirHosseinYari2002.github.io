@@ -13,7 +13,7 @@ Inputs
   --traces       the site's traces.js: the 36 Task A study windows segmented by Gemini 3.8 Flash (what annotators saw).
   --annotations  JSON export(s) from the researcher page (admin.html). Duplicates are merged
                  (submitted beats draft, newer beats older).
-  --ai-labels    optional: a judge file written by notebooks/taskB_judge_labeling.ipynb (TaskB/judges/<judge>.json),
+  --ai-labels    optional: a judge file written by notebooks/taskB_judge_study.ipynb (TaskB/judges/<judge>.json),
                  or plain JSON {"<window id>": ["CONSTRUCT", ...], ...}, one label per segment in order.
                  Without it, only human-human agreement is reported. To compare several judges and choose one, use the
                  researcher page (Agreement -> Judges): it adds window-bootstrap CIs, J1/J2 and the alt-test.
@@ -161,7 +161,7 @@ def main():
 
     bundle, hashes, order = load_traces(args.traces)
     ai_labels = json.load(open(args.ai_labels, encoding="utf-8")) if args.ai_labels else {}
-    if isinstance(ai_labels.get("labels"), dict):          # a judge file from notebooks/taskB_judge_labeling.ipynb
+    if isinstance(ai_labels.get("labels"), dict):          # a judge file from notebooks/taskB_judge_study.ipynb
         ai_labels = ai_labels["labels"]
     has_ai = bool(ai_labels)
     ann = load_annotations(args.annotations, args.include_drafts)
