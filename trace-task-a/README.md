@@ -85,9 +85,11 @@ Report this deviation from the per-annotator random order with the study design.
   correction and every *Revert to original* is kept (append-only), and the full history can be downloaded. If an
   annotator re-submits a window after it was corrected (after *Reopen*), the old correction is flagged out of date
   and no longer applied.
-  * The Part B export (`A1.json`, …) and the agreement default stay on the **original submissions**. Corrected data
-    are a separate layer: *Download A1.corrected.json* (same format plus `corrected` and `correction_revision`; keep
-    it apart, e.g. in `TaskA/annotations_corrected/`) and the agreement option *with researcher corrections*.
+  * The live agreement uses the **corrected data** by default (a correction where one exists, otherwise the
+    submission) and recomputes as soon as a correction is saved or reverted; *original submissions only* is an option.
+  * The Part B export (`A1.json`, …) stays the annotators' original submissions. *Download A1.corrected.json* gives the
+    corrected layer (same format plus `corrected` and `correction_revision`; keep it apart, e.g. in
+    `TaskA/annotations_corrected/`, or use it as `A1.json` in a separate Part B run).
   * Report inter-annotator reliability on the original submissions; describe corrected data as researcher-adjudicated.
 * *Download every record* gives an archive of the dataset (drafts, timestamps, window SHA-1s that
   match `key.csv`'s `window_sha1`).

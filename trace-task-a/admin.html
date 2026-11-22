@@ -91,7 +91,7 @@
     <div class="tbl-wrap"><table class="grid-tbl" id="progTbl"></table></div>
 
     <h2>Review &amp; correct segmentations</h2>
-    <p class="muted small">Each annotator's submitted segmentation of a window, side by side, in the platform's shared order. <b>Correct</b> opens a researcher correction of a submitted window: click a word to add or remove a CUT before it, then save with a note. A correction is stored as a <b>new, separate record</b> (with a copy of the annotator's submitted CUTs): the annotator's submission, its history and their own view never change, every correction and revert is kept, and the Part B export and the agreement default stay on the annotators' original submissions. Corrected data are a separate, labelled layer (corrected exports below; option in the agreement section).</p>
+    <p class="muted small">Each annotator's submitted segmentation of a window, side by side, in the platform's shared order. <b>Correct</b> opens a researcher correction of a submitted window: click a word to add or remove a CUT before it, then save with a note. A correction is stored as a <b>new, separate record</b> (with a copy of the annotator's submitted CUTs): the annotator's submission, its history and their own view never change, and every correction and revert is kept. The agreement below uses your corrections (recomputed as soon as you save or revert one); the annotators' original submissions stay available there as an option and in the Part B export files.</p>
     <div class="agr-box">
       <div class="agr-row"><label class="small">Window <select id="rvWin"></select></label> <button type="button" class="btn sm" id="rvPrev" aria-label="Previous window">◀</button> <button type="button" class="btn sm" id="rvNext" aria-label="Next window">▶</button>
         <label class="small">Corrections made by <input id="rvBy" placeholder="your name" style="font:inherit;border:1px solid var(--line-2);border-radius:8px;padding:5px 8px"></label> <button type="button" class="link small" id="rvReload">Reload</button></div>
@@ -101,12 +101,12 @@
     <div id="rvOut"></div>
 
     <h2>Agreement (live)</h2>
-    <p class="muted small">Inter-annotator and human–LLM agreement, recomputed from the submitted windows every time this page loads or refreshes. The code is a line-by-line port of Part B of <code>taskA_human_validation.ipynb</code> (same units, metrics, tolerance, preregistered thresholds; checked against the notebook to floating-point precision). Only the bootstrap intervals and the chance floor use a different random-number generator, so they can differ from the notebook in the third decimal. <b>Report the numbers Part B prints.</b> Until every annotator has submitted every window, everything here is provisional and computed on the windows that all selected annotators have submitted: every metric appears from the first such window, while bootstrap intervals, p-values and the preregistered verdicts appear from the second (one window cannot give an interval).</p>
+    <p class="muted small">Inter-annotator and human–LLM agreement, recomputed from the submitted windows every time this page loads or refreshes. The code is a line-by-line port of Part B of <code>taskA_human_validation.ipynb</code> (same units, metrics, tolerance, preregistered thresholds; checked against the notebook to floating-point precision). Only the bootstrap intervals and the chance floor use a different random-number generator, so they can differ from the notebook in the third decimal. <b>Report the numbers Part B prints.</b> By default the metrics use your corrections where you made one (option: original submissions only). Until every annotator has submitted every window, everything here is provisional and computed on the windows that all selected annotators have submitted: every metric appears from the first such window, while bootstrap intervals, p-values and the preregistered verdicts appear from the second (one window cannot give an interval).</p>
     <div class="agr-box">
       <div class="agr-row"><b>Judges</b> <span class="muted small">Load <code>TaskA/private/key.csv</code> and the judge files <code>TaskA/judges/*.jsonl</code>. They are read and kept only in this browser, never uploaded or published.</span></div>
       <div class="agr-row"><input type="file" id="refFiles" multiple accept=".jsonl,.csv,text/csv,application/json"> <button type="button" class="link small" id="refForget">Forget loaded judges</button></div>
       <div class="small" id="refInfo"></div>
-      <div class="agr-row"><b class="small">Data:</b> <label class="small"><input type="radio" name="agrData" value="orig" checked> annotators' original submissions (as in Part B)</label> <label class="small"><input type="radio" name="agrData" value="corr"> with researcher corrections</label></div>
+      <div class="agr-row"><b class="small">Data:</b> <label class="small"><input type="radio" name="agrData" value="corr" checked> with researcher corrections (your correction where one exists, otherwise the submission)</label> <label class="small"><input type="radio" name="agrData" value="orig"> annotators' original submissions only</label></div>
       <div class="agr-row" id="agrAnn"></div>
       <div class="agr-row" id="agrJudges"></div>
       <div class="agr-row"><label class="small"><input type="checkbox" id="agrAuto"> Refresh automatically every 2 minutes</label> <button type="button" class="btn sm" id="agrRun">Recompute now</button> <button type="button" class="link small" id="agrDl" disabled>Download all metrics (JSON)</button></div>
@@ -525,14 +525,14 @@
       if (!add && !rem) { if (!confirm('This correction is identical to the annotator\'s submission. Save it anyway?')) return; }
       if (!confirm('Save a correction of ' + RV.edit.id + ' on ' + RV.edit.item + ' (+' + add + ' −' + rem + ' CUTs vs their submission)?\n\nIt is stored as a new record; the annotator\'s submission is not changed.')) return;
       try { sv.disabled = true; await api('admin_correct', { annotator_id: RV.edit.id, item_id: RV.edit.item, cuts: cur, note: RV.edit.note, corrected_by: $('rvBy').value.trim() });
-        RV.edit = null; await loadReview(); msg('', 'Correction saved as a new record. The annotator\'s submission is unchanged.'); }
+        RV.edit = null; await loadReview(); runAgreement(); msg('', 'Correction saved as a new record; agreement recomputed. The annotator\'s submission is unchanged.'); }
       catch (err) { sv.disabled = false; msg('err', 'Could not save the correction: ' + esc(err.code || err.message)); }
       return;
     }
     const rv = t.closest('[data-rvrevert]');
     if (rv) { const [id, item] = rv.dataset.rvrevert.split('|');
       if (!confirm('Revert ' + id + ' on ' + item + ' to the annotator\'s original CUTs?\n\nThe correction history is kept; a "revert" record is added.')) return;
-      try { await api('admin_revert_correction', { annotator_id: id, item_id: item, note: 'reverted to original', corrected_by: $('rvBy').value.trim() }); await loadReview(); msg('', 'Reverted. The previous corrections stay in the history.'); }
+      try { await api('admin_revert_correction', { annotator_id: id, item_id: item, note: 'reverted to original', corrected_by: $('rvBy').value.trim() }); await loadReview(); runAgreement(); msg('', 'Reverted; agreement recomputed. The previous corrections stay in the history.'); }
       catch (err) { msg('err', 'Could not revert: ' + esc(err.code || err.message)); }
     }
   });
@@ -562,7 +562,7 @@
   // ---------------- agreement (live) ----------------
   const MX = window.TaskAMetrics;
   const REF_KEY = () => 'tta:refs:' + D.id;
-  let REF = null, AGR = null, agrTimer = null, agrBusy = false;
+  let REF = null, AGR = null, agrTimer = null, agrBusy = false, agrAgain = false;
   const f3 = v => (v === v && v != null && isFinite(v)) ? Number(v).toFixed(3) : '—';
   const fci = c => c && c[0] === c[0] ? '[' + f3(c[0]) + ', ' + f3(c[1]) + ']' : '';
   const pct = v => v === v ? Math.round(v * 100) + '%' : '—';
@@ -635,7 +635,8 @@
   }
 
   async function runAgreement() {
-    if (!last || agrBusy) return;
+    if (!last) return;
+    if (agrBusy) { agrAgain = true; return; }          // a run is in progress: recompute again right after it
     agrBusy = true; renderAgrAnnotators();
     const st = $('agrStatus'); st.hidden = false; st.className = 'note'; st.innerHTML = 'Computing agreement…';
     try {
@@ -648,19 +649,19 @@
         r.windows.filter(w => w.annotator_id === who.annotator_id && !w.practice && w.status === 'submitted' && D.byId[w.item_id] && (!w.window_sha1 || w.window_sha1 === D.sha1[w.item_id]))
           .forEach(w => { H[sl][w.item_id] = MX.snapUnits(D.byId[w.item_id], w.cuts || []); if (w.active_ms) seconds.push(w.active_ms / 1000); if ((w.flags || []).length) flagged.add(w.item_id); });
       });
-      let nCorr = 0;
+      let nCorr = 0, corrMissing = false;
       const useCorr = (document.querySelector('input[name="agrData"]:checked') || {}).value === 'corr';
       if (useCorr) {          // apply the current, valid researcher corrections (read-only; nothing is written)
-        let cor = []; try { cor = (await api('admin_corrections')).corrections || []; } catch (e2) { throw new Error('the backend does not provide corrections yet (deploy the updated Code.gs)'); }
+        let cor = []; try { cor = (await api('admin_corrections')).corrections || []; } catch (e2) { corrMissing = true; }
         sel.forEach(sl => { const who = last.annotators.find(a => a.slot === sl && a.active); if (!who || !H[sl]) return;
           Object.keys(H[sl]).forEach(id => { const w = r.windows.find(x => x.annotator_id === who.annotator_id && x.item_id === id && x.status === 'submitted'); if (!w) return;
             const cs = cor.filter(c => c.annotator_id === who.annotator_id && c.item_id === id).sort((a, b) => a.revision - b.revision), c = cs[cs.length - 1];
             if (c && c.action === 'correct' && String(c.original_version) === String(w.version)) { H[sl][id] = MX.snapUnits(D.byId[id], c.cuts); nCorr++; } }); });
       }
       const names = Object.keys(H), total = mainIds().length;
-      if (names.length < 2) { st.innerHTML = 'Select at least two annotators with submitted windows.'; $('agrOut').innerHTML = ''; agrBusy = false; return; }
+      if (names.length < 2) { st.innerHTML = 'Select at least two annotators with submitted windows.'; $('agrOut').innerHTML = ''; agrBusy = false; if (agrAgain) { agrAgain = false; runAgreement(); } return; }
       const ids = mainIds().filter(id => names.every(a => H[a][id]));
-      if (ids.length < 1) { st.innerHTML = 'No window submitted by all selected annotators yet (0 of ' + total + ').'; $('agrOut').innerHTML = ''; agrBusy = false; return; }
+      if (ids.length < 1) { st.innerHTML = 'No window submitted by all selected annotators yet (0 of ' + total + ').'; $('agrOut').innerHTML = ''; agrBusy = false; if (agrAgain) { agrAgain = false; runAgreement(); } return; }
       const jsel = new Set(Array.from(document.querySelectorAll('[data-agrj]')).filter(c => c.checked).map(c => c.dataset.agrj));
       const J = {}; if (REF) Object.keys(REF.judges || {}).filter(n => jsel.has(n)).forEach(n => { J[n] = REF.judges[n]; });
       const meta = REF && Object.keys(REF.meta || {}).length ? REF.meta : null;
@@ -669,10 +670,11 @@
       AGR = computeAgreement(H, J, ids, meta, { flagged: Array.from(flagged), seconds, total });
       renderAgreement(AGR); $('agrDl').disabled = false;
       st.className = 'note' + (ids.length < total ? ' warn' : '');
-      st.innerHTML = (useCorr ? '<b>With researcher corrections</b> (' + nCorr + ' annotator window(s) corrected; not the Part B data). ' : '') + (ids.length < total ? '<b>Provisional:</b> ' : '<b>Complete:</b> ') + ids.length + ' of ' + total + ' windows submitted by all of ' + names.map(esc).join(', ') +
+      st.innerHTML = (useCorr ? (corrMissing ? '<b>Original submissions</b> (the backend does not store corrections yet: deploy the updated Code.gs). ' : '<b>With researcher corrections:</b> ' + nCorr + ' annotator window(s) corrected. ') : '<b>Original submissions only.</b> ') + (ids.length < total ? '<b>Provisional:</b> ' : '<b>Complete:</b> ') + ids.length + ' of ' + total + ' windows submitted by all of ' + names.map(esc).join(', ') +
         '. ' + (Object.keys(J).length ? Object.keys(J).length + ' judge(s) compared.' : 'Load the key and judge files above to see human–LLM agreement.') + ' Computed ' + new Date().toLocaleTimeString() + '.';
     } catch (err) { st.className = 'note err'; st.innerHTML = 'Could not compute agreement: ' + esc(err.message); }
     agrBusy = false;
+    if (agrAgain) { agrAgain = false; runAgreement(); }
   }
 
   // Every metric value is shown from the first window both annotators submitted. Bootstrap intervals, p-values and the
