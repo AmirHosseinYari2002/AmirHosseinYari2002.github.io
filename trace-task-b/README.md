@@ -120,7 +120,13 @@ macro-F1) to floating-point precision.
 ## The judge notebook (labels exactly as the package)
 
 `notebooks/taskB_judge_study.ipynb` (Colab; a copy is in `TaskB/notebooks/` on Drive) never segments or prompts a
-model itself; it only runs **reasoning-anatomy v1.8.10** commands (`Reasoning Behavior/reasoning-anatomy-v1.8.10.zip`).
+model itself; it only runs **reasoning-anatomy v1.8.11** commands (`Reasoning Behavior/reasoning-anatomy-v1.8.11.zip`).
+
+**Why v1.8.11.** The labeling stage capped retries only for some rejection kinds: a judge that kept answering with a
+wrong segment ID was asked the identical prompt again without limit (Gemini 2.5 Flash-Lite: 930 calls for one
+segment). v1.8.11 enforces the documented cap of 3 (then `TECHNICAL_MISSING`), for `anatomy run` and `relabel`.
+Runs are written to the Colab disk while they run and archived to Drive (`labels/<judge>/<MODEL>/run.tar.gz`,
+`export.json`); Gemini judges run at `GEMINI_RPM` (300) requests per minute (pace only).
 
 **Why v1.8.10.** v1.8.9 did not replay two kinds of saved segmentation answers in derived runs (the native-ID
 selections `native_selection_missing_candidate` / `native_selection_low_cut_density` and their split checks), so
