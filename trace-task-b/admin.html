@@ -11,14 +11,29 @@
 <link rel="stylesheet" href="styles.css">
 <style>
   .grid-tbl { width: 100%; border-collapse: collapse; font-size: 14px; background: var(--paper); }
-  .grid-tbl th, .grid-tbl td { border-bottom: 1px solid var(--line); padding: 10px 12px; text-align: left; vertical-align: top; }
+  .grid-tbl th, .grid-tbl td { border-bottom: 1px solid var(--line); padding: 9px 12px; text-align: left; vertical-align: top; }
   .grid-tbl th { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; }
-  .tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin: 12px 0 32px; }
+  .grid-tbl td.nm { font-variant-numeric: tabular-nums; }
+  .tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin: 12px 0 28px; }
   .adm-form { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin: 8px 0 12px; }
   .adm-form label { display: grid; gap: 4px; font-size: 13px; font-weight: 600; color: var(--ink-2); }
-  .adm-form input { font: inherit; border: 1px solid var(--line-2); border-radius: 8px; padding: 9px 10px; min-width: 200px; background: #fff; }
-  .cell small { display: block; color: var(--muted); }
-  code.k { user-select: all; }
+  .adm-form input { font: inherit; border: 1px solid var(--line-2); border-radius: 8px; padding: 8px 10px; min-width: 220px; background: #fff; }
+  .facts { display: flex; flex-wrap: wrap; gap: 8px 28px; font-size: 14px; margin: 6px 0 4px; }
+  .facts b { color: var(--ink); }
+  code.k { user-select: all; font-size: 12.5px; }
+  details.win { margin: 4px 0 0; } details.win summary { cursor: pointer; color: var(--green); font-size: 13px; }
+  h2 { margin-top: 30px; }
+  .bar { height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; min-width: 120px; margin-top: 6px; }
+  .bar span { display: block; height: 100%; background: var(--green); }
+  .est-form { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; margin: 10px 0 14px; }
+  .est-form label { display: grid; gap: 4px; font-size: 13px; font-weight: 600; color: var(--ink-2); }
+  .est-form label span { font-weight: 400; color: var(--muted); font-size: 12px; }
+  .est-form input { font: inherit; border: 1px solid var(--line-2); border-radius: 8px; padding: 8px 10px; background: #fff; width: 100%; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; margin: 6px 0 14px; }
+  .kpi { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .kpi b { display: block; font-size: 22px; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .kpi span { font-size: 12.5px; color: var(--muted); }
+  tr.tot td { font-weight: 600; color: var(--ink); background: #f7f8f4; }
 </style>
 </head>
 <body>
@@ -26,17 +41,40 @@
 <main class="wrap view">
   <h1 class="h1">Researcher workspace</h1>
   <div class="note warn" id="cfgNote" hidden>No <code>apiUrl</code> in <code>config.js</code>. Deploy the Apps Script backend first (see <code>README.md</code>).</div>
+  <div class="facts" id="dataFacts"></div>
 
   <form class="adm-form" id="keyForm">
     <label>Admin key <input id="adminKey" type="password" autocomplete="off" required></label>
     <button class="btn primary sm" type="submit">Load</button>
-    <button class="btn sm" type="button" id="exportBtn" disabled>Download all annotations (JSON)</button>
+    <button class="btn sm" type="button" id="exportBtn" disabled>Download all labels (JSON)</button>
   </form>
   <div class="note" id="msg" hidden></div>
 
+  <!-- the estimate works without the admin key: it only needs the windows in traces.js -->
+  <h2>Workload &amp; cost estimate</h2>
+  <p class="muted small">Planning figures from the windows in <code>traces.js</code>. Each window's time = words of window text ÷ reading speed + segments × seconds per label + words to read only (problem and grey context) ÷ context reading speed + a fixed overhead for flags, review and submit. Change any assumption; values are remembered in this browser. Once annotators have submitted windows, their observed speed appears below and can replace the assumption.</p>
+  <div class="est-form">
+    <label>Reading speed <span>words of window text per minute</span><input type="number" id="eRead" min="20" step="10"></label>
+    <label>Time per label <span>seconds per segment (decide + click)</span><input type="number" id="eLab" min="0" step="1"></label>
+    <label>Context reading <span>words per minute, problem + grey context</span><input type="number" id="eCtx" min="20" step="10"></label>
+    <label>Overhead per window <span>minutes (flags, checklist, submit)</span><input type="number" id="eOver" min="0" step="0.5"></label>
+    <label>Onboarding <span>minutes (handbook + practice)</span><input type="number" id="eOnb" min="0" step="5"></label>
+    <label>Hourly rate <span>paid per annotator hour</span><input type="number" id="eRate" min="0" step="0.5"></label>
+    <label>Currency <span>label only</span><input type="text" id="eCur" maxlength="8"></label>
+    <label>Annotators <span>number of people paid</span><input type="number" id="eN" min="1" step="1"></label>
+    <label>Buffer <span>% added for breaks and re-reading</span><input type="number" id="eBuf" min="0" step="5"></label>
+  </div>
+  <div class="note" id="obsNote" hidden></div>
+  <div class="kpis" id="estKpis"></div>
+  <details><summary class="small" style="cursor:pointer;color:var(--green)">Per-window breakdown</summary>
+    <div class="tbl-wrap"><table class="grid-tbl" id="estTbl"></table></div>
+  </details>
+
   <div id="panel" hidden>
-    <h2 style="margin-top:28px">Progress</h2>
+    <h2>Progress</h2>
+    <div class="kpis" id="progKpis"></div>
     <div class="tbl-wrap"><table class="grid-tbl" id="progTbl"></table></div>
+    <div class="note warn" id="otherNote" hidden></div>
 
     <h2>Annotators</h2>
     <form class="adm-form" id="addForm">
@@ -55,10 +93,18 @@
   'use strict';
   const API = ((window.TASK_CONFIG || {}).apiUrl || '').trim();
   const TRACES = window.TRACES || [];
+  const SRC = window.TASKB_SOURCE || {};
+  const TBY = {}; TRACES.forEach(t => { TBY[t.id] = t; });
   const $ = id => document.getElementById(id);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const median = a => { if (!a.length) return 0; const s = a.slice().sort((x, y) => x - y), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+  const minutes = ms => Math.round((ms || 0) / 6000) / 10;
+  let last = null;
   if (!API) $('cfgNote').hidden = false;
   try { $('adminKey').value = sessionStorage.getItem('ttb:admin') || ''; } catch (e) {}
+  const nSeg = TRACES.reduce((t, x) => t + x.segs.length, 0);
+  $('dataFacts').innerHTML = '<span><b>' + TRACES.length + '</b> windows · <b>' + nSeg.toLocaleString() + '</b> segments per annotator</span>' +
+    '<span>Segmentation: <b>' + esc(SRC.judge || '?') + '</b></span><span>Order: shared (slot ' + esc(SRC.order_slot || '?') + ' of Task A)</span>';
 
   function msg(kind, html) { const m = $('msg'); m.className = 'note' + (kind ? ' ' + kind : ''); m.innerHTML = html; m.hidden = false; }
   async function api(action, extra) {
@@ -67,32 +113,117 @@
     if (!j.ok) throw Object.assign(new Error(j.error), { code: j.error });
     return j;
   }
+
+  // ---------------- workload & cost estimate ----------------
+  const EST_DEFAULT = { read: 150, lab: 6, ctx: 250, over: 1, onb: 30, rate: 10, cur: 'USD', n: 2, buf: 10 };
+  const EST_FIELDS = { read: 'eRead', lab: 'eLab', ctx: 'eCtx', over: 'eOver', onb: 'eOnb', rate: 'eRate', cur: 'eCur', n: 'eN', buf: 'eBuf' };
+  let E = Object.assign({}, EST_DEFAULT);
+  try { Object.assign(E, JSON.parse(localStorage.getItem('ttb:est') || '{}')); } catch (e) {}
+  const readMin = t => t.words / Math.max(1, E.read) + t.read_words / Math.max(1, E.ctx) + E.over;   // minutes not spent deciding labels
+  const labMin = t => t.segs.length * E.lab / 60;
+  const estMin = t => readMin(t) + labMin(t);                                                        // minutes for one window
+  const fmtH = m => { const h = Math.floor(m / 60), mm = Math.round(m % 60); return h ? h + ' h ' + String(mm).padStart(2, '0') + ' min' : mm + ' min'; };
+  const money = v => (Math.round(v * 100) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ' + (E.cur || '');
+  const perAnnotatorMin = () => (E.onb + TRACES.reduce((t, x) => t + estMin(x), 0)) * (1 + E.buf / 100);
+  const sum = (arr, f) => arr.reduce((t, x) => t + f(x), 0);
+
+  function observed() { // submitted windows with recorded active time, all annotators
+    if (!last) return null;
+    const ws = last.annotations.filter(w => w.status === 'submitted' && w.active_ms > 0 && TBY[w.trace_id]);
+    if (!ws.length) return null;
+    const act = sum(ws, w => w.active_ms / 60000), pred = sum(ws, w => estMin(TBY[w.trace_id]));
+    const rest = sum(ws, w => readMin(TBY[w.trace_id])), segs = sum(ws, w => TBY[w.trace_id].segs.length);
+    return { n: ws.length, act: act, pred: pred, lab: act - rest > 0.2 ? (act - rest) * 60 / segs : null, med: median(ws.map(w => w.active_ms / 60000)) };
+  }
+  function renderEstimate() {
+    Object.keys(EST_FIELDS).forEach(k => { const el = $(EST_FIELDS[k]); if (document.activeElement !== el) el.value = E[k]; });
+    const per = perAnnotatorMin(), cost = per / 60 * E.rate;
+    $('estKpis').innerHTML = [
+      [TRACES.length + '', 'windows per annotator'],
+      [nSeg.toLocaleString(), 'segments to label'],
+      [sum(TRACES, t => t.words).toLocaleString(), 'words of window text'],
+      [sum(TRACES, t => t.read_words).toLocaleString(), 'words to read only (problem + context)'],
+      [fmtH(sum(TRACES, estMin) / Math.max(1, TRACES.length)), 'per window (avg)'],
+      [fmtH(per), 'per annotator, incl. onboarding + ' + E.buf + '%'],
+      [money(cost), 'per annotator'],
+      [money(cost * E.n), 'total for ' + E.n + ' annotator' + (E.n > 1 ? 's' : '')]
+    ].map(k => '<div class="kpi"><b>' + esc(k[0]) + '</b><span>' + esc(k[1]) + '</span></div>').join('');
+    $('estTbl').innerHTML = '<thead><tr><th>Window</th><th>Item</th><th>Segments</th><th>Words</th><th>Words to read</th><th>Est. time</th><th>Est. cost</th></tr></thead><tbody>' +
+      TRACES.map(t => '<tr><td>' + esc(t.label) + '</td><td>' + esc(t.id) + '</td><td class="nm">' + t.segs.length + '</td><td class="nm">' + t.words + '</td><td class="nm">' + t.read_words + '</td><td class="nm">' + estMin(t).toFixed(1) + ' min</td><td class="nm">' + money(estMin(t) / 60 * E.rate) + '</td></tr>').join('') +
+      '<tr class="tot"><td colspan="2">Total (one annotator, before onboarding and buffer)</td><td class="nm">' + nSeg.toLocaleString() + '</td><td class="nm">' + sum(TRACES, t => t.words).toLocaleString() + '</td><td class="nm">' + sum(TRACES, t => t.read_words).toLocaleString() + '</td><td class="nm">' + fmtH(sum(TRACES, estMin)) + '</td><td class="nm">' + money(sum(TRACES, estMin) / 60 * E.rate) + '</td></tr></tbody>';
+    const o = observed();
+    $('obsNote').hidden = !o;
+    if (o) $('obsNote').innerHTML = '<b>Observed so far</b> (' + o.n + ' submitted window' + (o.n > 1 ? 's' : '') + '): median ' + o.med.toFixed(1) + ' active min per window; actual time is <b>' + Math.round(o.act / o.pred * 100) + '%</b> of the estimate for the same windows' +
+      (o.lab ? ', which corresponds to about <b>' + o.lab.toFixed(1) + ' s per label</b> at the assumed reading speeds. <button type="button" class="link" id="useObs">Use observed time per label</button>' : '.');
+  }
+  function saveE() { try { localStorage.setItem('ttb:est', JSON.stringify(E)); } catch (x) {} }
+  Object.keys(EST_FIELDS).forEach(k => $(EST_FIELDS[k]).addEventListener('input', e => {
+    const v = k === 'cur' ? e.target.value.trim() : Number(e.target.value);
+    if (k !== 'cur' && !(v >= 0)) return;
+    E[k] = v; saveE(); renderEstimate(); if (last) renderProgress(last);
+  }));
+
+  // ---------------- progress ----------------
+  const ago = iso => { if (!iso) return '—'; const m = (Date.now() - new Date(iso).getTime()) / 60000; if (!(m >= 0)) return '—'; return m < 2 ? 'just now' : m < 90 ? Math.round(m) + ' min ago' : m < 2880 ? Math.round(m / 60) + ' h ago' : Math.round(m / 1440) + ' days ago'; };
+  function renderProgress(r) {
+    const by = {};
+    r.annotations.filter(w => TBY[w.trace_id]).forEach(w => { (by[String(w.annotator_id).toLowerCase()] = by[String(w.annotator_id).toLowerCase()] || []).push(w); });
+    const other = r.annotations.filter(w => !TBY[w.trace_id]).length;
+    $('otherNote').hidden = !other;
+    if (other) $('otherNote').innerHTML = 'The backend also holds <b>' + other + '</b> row(s) for traces that are not in the current <code>traces.js</code> (the earlier full-trace version of Task B). They are kept in the sheet but not shown, counted or exported here.';
+    const people = r.annotators.filter(a => String(a.active) !== 'false');
+    let totSub = 0, totAct = 0, totRemain = 0;
+    let h = '<thead><tr><th>Annotator</th><th>Progress</th><th>Windows</th><th>Labels</th><th>Flags</th><th>Active time</th><th>Median / window</th><th>Last activity</th><th>Est. remaining</th><th>Cost so far</th><th>Est. cost remaining</th></tr></thead><tbody>';
+    r.annotators.forEach(a => {
+      const id = String(a.annotator_id).toLowerCase(), act = String(a.active) !== 'false';
+      const ws = by[id] || [], wsBy = {}; ws.forEach(w => { wsBy[w.trace_id] = w; });
+      const sub = ws.filter(w => w.status === 'submitted');
+      const tot = sum(ws, w => Number(w.active_ms) || 0);
+      const mine = sub.filter(w => w.active_ms > 0);
+      // the annotator's own pace once 3+ windows are in, otherwise the assumption + buffer
+      const ratio = mine.length >= 3 ? sum(mine, w => w.active_ms / 60000) / sum(mine, w => estMin(TBY[w.trace_id])) : 1 + E.buf / 100;
+      const remainIds = TRACES.filter(t => !(wsBy[t.id] && wsBy[t.id].status === 'submitted'));
+      const remain = sum(remainIds, t => estMin(t)) * ratio + (ws.length ? 0 : E.onb);
+      const pct = Math.round(sub.length / Math.max(1, TRACES.length) * 100);
+      const lastAct = ws.reduce((m, w) => (String(w.server_updated) > m ? String(w.server_updated) : m), '');
+      if (act) { totSub += sub.length; totAct += tot; totRemain += remain; }
+      const detail = TRACES.filter(t => wsBy[t.id]).map(t => { const w = wsBy[t.id];
+        return '<tr><td>' + esc(t.label) + ' <span class="muted">' + esc(t.id) + '</span></td><td><span class="pill ' + esc(w.status) + '" style="margin:0">' + esc(w.status) + '</span></td><td class="nm">' + w.n_labeled + '/' + t.segs.length + '</td><td class="nm">' + w.n_flags + '</td><td class="nm">' + minutes(w.active_ms) + ' min</td><td>' +
+          (w.status === 'submitted' ? '<button class="link small" data-reopen="' + esc(id) + '|' + esc(t.id) + '">Reopen</button>' : '') + '</td></tr>'; }).join('');
+      h += '<tr><td><b>' + esc(id) + '</b>' + (a.name ? '<span class="muted small" style="display:block">' + esc(a.name) + '</span>' : '') + (act ? '' : '<span class="muted small" style="display:block">inactive</span>') +
+        (ws.length ? '<details class="win"><summary>Windows (' + ws.length + ')</summary><table class="grid-tbl"><thead><tr><th>Window</th><th>Status</th><th>Labeled</th><th>Flags</th><th>Active</th><th></th></tr></thead><tbody>' + detail + '</tbody></table></details>' : '') + '</td>' +
+        '<td>' + pct + '%<div class="bar"><span style="width:' + pct + '%"></span></div></td>' +
+        '<td class="nm"><b>' + sub.length + '/' + TRACES.length + '</b></td><td class="nm">' + sum(ws, w => Number(w.n_labeled) || 0).toLocaleString() + '/' + nSeg.toLocaleString() + '</td>' +
+        '<td class="nm">' + sum(ws, w => Number(w.n_flags) || 0) + '</td><td class="nm">' + fmtH(tot / 60000) + '</td><td class="nm">' + (mine.length ? minutes(median(mine.map(w => w.active_ms))) + ' min' : '—') + '</td>' +
+        '<td class="small">' + ago(lastAct) + '</td><td class="nm">' + (remainIds.length ? fmtH(remain) + (mine.length >= 3 ? '<span class="muted small" style="display:block">at own pace</span>' : '') : 'done') + '</td>' +
+        '<td class="nm">' + money(tot / 3600000 * E.rate) + '</td><td class="nm">' + (remainIds.length ? money(remain / 60 * E.rate) : '—') + '</td></tr>';
+    });
+    $('progTbl').innerHTML = h + '</tbody>';
+    const target = people.length * TRACES.length;
+    $('progKpis').innerHTML = [
+      [people.length + '', 'active annotators'],
+      [totSub + ' / ' + target, 'windows submitted (all annotators)'],
+      [target ? Math.round(totSub / target * 100) + '%' : '—', 'of the annotation done'],
+      [fmtH(totAct / 60000), 'active time so far'],
+      [money(totAct / 3600000 * E.rate), 'cost so far (active time × rate)'],
+      [fmtH(totRemain), 'estimated time remaining'],
+      [money(totRemain / 60 * E.rate), 'estimated cost remaining'],
+      [money((totAct / 60000 + totRemain) / 60 * E.rate), 'projected total cost']
+    ].map(k => '<div class="kpi"><b>' + esc(k[0]) + '</b><span>' + esc(k[1]) + '</span></div>').join('');
+  }
+  function renderAnnotators(r) {
+    $('annTbl').innerHTML = '<thead><tr><th>Email</th><th>Name</th><th>Active</th><th>Created</th><th></th></tr></thead><tbody>' +
+      r.annotators.map(a => { const act = String(a.active) !== 'false'; return '<tr><td><b>' + esc(a.annotator_id) + '</b></td><td>' + esc(a.name) + '</td><td>' + (act ? 'yes' : 'no') + '</td><td class="small muted">' + esc(String(a.created_at).slice(0, 10)) + '</td>' +
+        '<td><button class="link small" data-active="' + esc(a.annotator_id) + '" data-to="' + (act ? '' : '1') + '">' + (act ? 'Deactivate' : 'Activate') + '</button></td></tr>'; }).join('') + '</tbody>';
+  }
+
   async function load() {
     try {
       const r = await api('admin_overview');
       try { sessionStorage.setItem('ttb:admin', $('adminKey').value.trim()); } catch (e) {}
-      $('msg').hidden = true; $('panel').hidden = false; $('exportBtn').disabled = false;
-      render(r);
+      last = r; $('msg').hidden = true; $('panel').hidden = false; $('exportBtn').disabled = false;
+      renderProgress(r); renderAnnotators(r); renderEstimate();
     } catch (err) { msg('err', err.code === 'auth' ? 'Wrong admin key.' : 'Could not reach the backend: ' + esc(err.message)); }
-  }
-  function render(r) {
-    const by = {};
-    r.annotations.forEach(a => { by[a.annotator_id + '|' + a.trace_id] = a; });
-    let h = '<thead><tr><th>Annotator</th>' + TRACES.map(t => '<th>' + esc(t.label) + '<small style="display:block;text-transform:none;letter-spacing:0">' + t.segs.length + ' segments · ' + t.words.toLocaleString() + ' words</small><small style="display:block;text-transform:none;letter-spacing:0">est. ' + Math.max(5, Math.round(t.segs.length * 12 / 60 / 5) * 5) + '–' + Math.max(10, Math.round(t.segs.length * 25 / 60 / 5) * 5) + ' min</small></th>').join('') + '</tr></thead><tbody>';
-    r.annotators.forEach(a => {
-      const id = String(a.annotator_id).toLowerCase();
-      h += '<tr><td><b>' + esc(id) + '</b><small class="muted" style="display:block">' + esc(a.name) + '</small></td>' + TRACES.map(t => {
-        const x = by[id + '|' + t.id];
-        if (!x) return '<td class="cell muted">—</td>';
-        return '<td class="cell"><span class="pill ' + esc(x.status) + '" style="margin:0">' + esc(x.status) + '</span>' +
-          '<small>' + x.n_labeled + '/' + x.n_segments + ' labeled · ' + x.n_flags + ' flags · ' + x.n_unresolved + ' open</small><small>' + Math.round((x.active_ms || 0) / 60000) + ' min active</small>' +
-          (x.status === 'submitted' ? '<button class="link small" data-reopen="' + esc(id) + '|' + esc(t.id) + '">Reopen</button>' : '') + '</td>';
-      }).join('') + '</tr>';
-    });
-    $('progTbl').innerHTML = h + '</tbody>';
-    $('annTbl').innerHTML = '<thead><tr><th>Email</th><th>Name</th><th>Active</th><th>Created</th><th></th></tr></thead><tbody>' +
-      r.annotators.map(a => '<tr><td><b>' + esc(a.annotator_id) + '</b></td><td>' + esc(a.name) + '</td><td>' + (String(a.active) !== 'false' ? 'yes' : 'no') + '</td><td class="small muted">' + esc(String(a.created_at).slice(0, 10)) + '</td>' +
-        '<td><button class="link small" data-active="' + esc(a.annotator_id) + '" data-to="' + (String(a.active) === 'false' ? '1' : '') + '">' + (String(a.active) === 'false' ? 'Activate' : 'Deactivate') + '</button></td></tr>').join('') + '</tbody>';
   }
   $('keyForm').addEventListener('submit', e => { e.preventDefault(); load(); });
   $('addForm').addEventListener('submit', async e => {
@@ -104,10 +235,11 @@
     } catch (err) { msg('err', err.code === 'exists' ? 'That email is already registered.' : err.code === 'bad_id' ? 'Please enter a valid email address.' : esc(err.message)); }
   });
   document.addEventListener('click', async e => {
+    if (e.target.id === 'useObs') { const o = observed(); if (o && o.lab) { E.lab = Math.round(o.lab * 10) / 10; saveE(); renderEstimate(); if (last) renderProgress(last); } return; }
     const ro = e.target.closest('[data-reopen]');
     if (ro) {
       const [id, tid] = ro.dataset.reopen.split('|');
-      if (!confirm('Reopen ' + tid + ' for ' + id + '? They will be able to edit and must submit again.')) return;
+      if (!confirm('Reopen ' + (TBY[tid] ? TBY[tid].label + ' (' + tid + ')' : tid) + ' for ' + id + '? They will be able to edit it and must submit it again.')) return;
       try { await api('admin_reopen', { annotator_id: id, trace_id: tid }); load(); } catch (err) { msg('err', esc(err.message)); }
     }
     const ac = e.target.closest('[data-active]');
@@ -116,13 +248,16 @@
   $('exportBtn').addEventListener('click', async () => {
     try {
       const r = await api('admin_export');
-      const out = { format: r.format, exported_at: r.exported_at, source: 'server', traces: TRACES.map(t => ({ id: t.id, sha256: t.sha256, seg_sha256: t.seg_sha256, n_segments: t.segs.length })), annotations: r.annotations };
+      const out = { format: 'trace-task-b/v2', exported_at: r.exported_at, source: 'server', segmentation: SRC,
+        windows: TRACES.map(t => ({ id: t.id, label: t.label, sha256: t.sha256, seg_sha256: t.seg_sha256, n_segments: t.segs.length })),
+        annotations: r.annotations.filter(a => TBY[a.trace_id]) };
       const a = document.createElement('a');
       a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 1)], { type: 'application/json' }));
-      a.download = 'task-b_annotations_' + r.exported_at.slice(0, 10) + '.json';
+      a.download = 'task-b_labels_' + r.exported_at.slice(0, 10) + '.json';
       document.body.appendChild(a); a.click(); a.remove();
     } catch (err) { msg('err', esc(err.message)); }
   });
+  renderEstimate();
   if ($('adminKey').value && API) load();
 })();
 </script>

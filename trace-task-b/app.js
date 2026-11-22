@@ -1,4 +1,4 @@
-/* TRACE · Task B — annotator app (sign in → guidelines → practice → traces → label segments). */
+/* TRACE · Task B — annotator app (sign in → guidelines → practice → windows → label segments). */
 (function () {
   'use strict';
   const CFG = window.TASK_CONFIG || {};
@@ -132,7 +132,7 @@
     show('guide');
     $('agree').checked = agreed();
     $('guideNext').disabled = !$('agree').checked;
-    $('guideNextLabel').textContent = practiced() ? 'Continue to traces' : 'Continue to practice';
+    $('guideNextLabel').textContent = practiced() ? 'Continue to the windows' : 'Continue to practice';
   }
   $('agree').addEventListener('change', () => { $('guideNext').disabled = !$('agree').checked; });
   $('guideNext').addEventListener('click', () => { jset(key('agreed'), true); go(practiced() ? 'traces' : 'practice'); });
@@ -238,6 +238,15 @@
     if ((l && (nLabeled(l) || (l.flags || []).length)) || s) return 'draft';
     return 'new';
   }
+  // Windows open one at a time in the shared order (as in Task A): a window is available once every earlier
+  // window is submitted, or as soon as the annotator has started it (e.g. a window the researcher reopened).
+  function available(tid) {
+    const i = TRACES.findIndex(t => t.id === tid);
+    if (i < 0) return false;
+    if (statusOf(tid) !== 'new') return true;
+    return TRACES.slice(0, i).every(t => statusOf(t.id) === 'submitted');
+  }
+  function nextOpenWindow() { return TRACES.find(t => statusOf(t.id) !== 'submitted' && available(t.id)); }
   async function showTraces() {
     show('traces');
     renderTraceList();
@@ -249,24 +258,30 @@
     let done = 0;
     TRACES.forEach(t => {
       const st = statusOf(t.id); if (st === 'submitted') done++;
+      const open = available(t.id);
       const l = localDraft(t.id), s = serverProgress[t.id] || {};
       const n = t.segs.length;
       const lab = l ? nLabeled(l) : (s.n_labeled || 0);
-      const card = document.createElement('div'); card.className = 'card tcard';
+      const card = document.createElement('div'); card.className = 'card tcard' + (open ? '' : ' locked');
       const label = { new: 'Not started', draft: 'In progress', submitted: 'Submitted', reopened: 'Reopened' }[st];
       const pct = Math.round(100 * lab / n);
       card.innerHTML = '<div><h3>' + esc(t.label) + '<span class="pill ' + st + '">' + label + '</span></h3>' +
         '<p class="muted">' + n.toLocaleString() + ' segments' +
         (st !== 'new' ? ' · ' + lab + ' labeled' : '') + '</p>' +
         (st !== 'new' ? '<div class="mini-bar"><span style="width:' + pct + '%"></span></div>' : '') + '</div>' +
-        '<button class="btn ' + (st === 'submitted' ? '' : 'primary sm') + '" type="button">' + (st === 'submitted' ? 'View' : st === 'new' ? 'Start' : 'Continue') + '</button>';
-      card.querySelector('button').addEventListener('click', () => go('trace/' + t.id));
+        (open ? '<button class="btn ' + (st === 'submitted' ? '' : 'primary sm') + '" type="button">' + (st === 'submitted' ? 'View' : st === 'new' ? 'Start' : 'Continue') + '</button>'
+          : '<span class="muted small">Opens after the previous window</span>');
+      const b = card.querySelector('button'); if (b) b.addEventListener('click', () => go('trace/' + t.id));
       list.appendChild(card);
     });
     if (LOCAL_ONLY) note($('syncNote'), 'warn', '<b>Local mode.</b> No server is configured, so your work is saved only in this browser. Please contact the researcher.');
+    const nx = nextOpenWindow();
+    $('listSummary').innerHTML = '<b>' + done + ' of ' + TRACES.length + '</b> windows submitted' +
+      (nx ? ' · <button type="button" class="btn primary sm" id="goNext">' + (statusOf(nx.id) === 'new' ? 'Start ' : 'Continue ') + esc(nx.label) + '</button>' : '');
+    if (nx) $('goNext').addEventListener('click', () => go('trace/' + nx.id));
     if (done === TRACES.length && TRACES.length) {
       const n = document.createElement('div'); n.className = 'note';
-      n.innerHTML = '<b>All traces submitted.</b> Thank you — you can close this page.';
+      n.innerHTML = '<b>All windows submitted.</b> Thank you — you can close this page.';
       list.prepend(n);
     }
   }
@@ -309,7 +324,7 @@
     const t = W.trace, i = W.active, n = t.segs.length;
     $('lpNum').textContent = i + 1; $('lpTotal').textContent = n;
     const prev = i > 0 ? W.cores[i - 1] : '';
-    $('lpPrev').textContent = prev ? '…' + prev.slice(-160) : 'Start of trace';
+    $('lpPrev').textContent = prev ? '…' + prev.slice(-160) : 'Start of window (see the grey context above)';
     $('lpPrev').classList.toggle('start', !prev);
     $('lpText').textContent = W.cores[i] || '(whitespace)';
     $('lpText').scrollTop = 0;
@@ -445,7 +460,7 @@
       setSave('Saved · ' + fmtTime(r.server_updated));
     } catch (err) {
       W.dirty = true;
-      if (err.code === 'locked') { const id = W.trace.id; lsDel(key('draft', id)); W.trace = null; openWork(id); toast('This trace was submitted from another device.'); }
+      if (err.code === 'locked') { const id = W.trace.id; lsDel(key('draft', id)); W.trace = null; openWork(id); toast('This window was submitted from another device.'); }
       else setSave('Saved on this device · will sync', true);
     } finally { W.saving = false; }
   }
@@ -478,11 +493,13 @@
   async function openWork(tid) {
     const t = TBY[tid]; if (!t) return go('traces');
     if (W.trace && W.trace.id === tid) return show('work');
+    if (!available(tid)) { toast('Windows open in order. Please finish the earlier windows first.'); return go('traces'); }
     show('work');
     W.trace = t; W.ready = false; W.dirty = false; W.saving = false; W.lastAct = Date.now(); W.undo = [];
     clearInterval(W.tick); clearTimeout(W.syncT);
     $('wTitle').textContent = t.label;
     $('problem').textContent = t.question; typeset($('problem'));
+    $('ctxBox').hidden = !t.context; $('ctxText').textContent = t.context || '';
     $('trace').textContent = 'Loading…';
     $('autoAdv').checked = jget(P + 'auto', true) !== false;
     $('tint').checked = jget(P + 'tint', true) !== false; $('trace').classList.toggle('tint', $('tint').checked);
@@ -601,7 +618,7 @@
     const prev = W.status;
     if (LOCAL_ONLY) {
       W.status = 'submitted'; saveLocal(); applyLock(); setSave('Submitted (this device)');
-      toast('Trace submitted. Thank you!');
+      toast('Window submitted. Thank you!');
       return afterSubmit();
     }
     setSave('Submitting…'); $('submitBtn').disabled = true;
@@ -610,10 +627,10 @@
       const r = await api('submit', payload());
       W.version = r.version; W.status = 'submitted'; jset(key('draft', W.trace.id), draftObj());
       serverProgress[W.trace.id] = { status: 'submitted' };
-      applyLock(); setSave('Submitted · ' + fmtTime(r.server_updated)); toast('Trace submitted. Thank you!');
+      applyLock(); setSave('Submitted · ' + fmtTime(r.server_updated)); toast('Window submitted. Thank you!');
       afterSubmit();
     } catch (err) {
-      if (err.code === 'locked') { W.status = 'submitted'; applyLock(); return toast('This trace was already submitted.'); }
+      if (err.code === 'locked') { W.status = 'submitted'; applyLock(); return toast('This window was already submitted.'); }
       if (err.code === 'incomplete') toast('The server found unresolved segments. Please review and try again.');
       else toast('Could not submit. Check your connection and try again.');
       W.status = prev; saveLocal(); applyLock();
@@ -621,7 +638,9 @@
     }
   });
   function afterSubmit() {
-    if (TRACES.every(t => statusOf(t.id) === 'submitted')) setTimeout(() => go('done'), 900);
+    if (TRACES.every(t => statusOf(t.id) === 'submitted')) return setTimeout(() => go('done'), 900);
+    const nx = nextOpenWindow();
+    if (nx) { toast('Submitted. Opening ' + nx.label + '…'); setTimeout(() => go('trace/' + nx.id), 1200); }
   }
 
   // ---------------- boot ----------------

@@ -26,7 +26,7 @@ window.MathJax = {
     <button class="brand" type="button" data-go="home">TRACE <span>/ Task B</span></button>
     <nav class="toplinks" id="topnav" hidden>
       <button type="button" data-go="guide">Guidelines</button>
-      <button type="button" data-go="traces">Traces</button>
+      <button type="button" data-go="traces">Windows</button>
       <span class="who" id="whoChip"></span>
       <button type="button" id="signOutBtn" class="quiet">Sign out</button>
     </nav>
@@ -67,7 +67,7 @@ window.MathJax = {
 <template id="guideTpl">
   <p class="hb-eyebrow">Annotator handbook · Task B</p>
   <h1 class="hb-display">Identify the action.<br><span>Follow the reasoning.</span></h1>
-  <p class="hb-lede">Read the full trace and label its segments in order. Your task is to identify what the text explicitly does at each step.</p>
+  <p class="hb-lede">Read each window of reasoning and label its segments in order. Your task is to identify what the text explicitly does at each step.</p>
 
   <div class="hb-alert">
     <h2>Do not use AI.</h2>
@@ -77,6 +77,7 @@ window.MathJax = {
   <section class="hb-sec">
     <h2><span class="hb-n">01</span>The annotation unit</h2>
     <p class="hb-p"><b>One segment is one explicitly expressed local reasoning operation.</b> Keep its lead-in, operands, and stated result together when interpreting it. For this task, the LLM-judge segmentation is already supplied and boundaries are fixed. Do not rewrite the trace or change its segmentation. Flag a segment if its boundary makes one label inappropriate.</p>
+    <p class="hb-p"><b>Each window is an excerpt.</b> The grey text above a window is the reasoning that came just before it: read it for context, but it is not labeled. The first segment of a window may continue an operation that began in the grey text; label what that segment itself does.</p>
   </section>
 
   <section class="hb-sec">
@@ -104,10 +105,10 @@ window.MathJax = {
   </section>
 
   <section class="hb-sec">
-    <h2><span class="hb-n">04</span>Work through a trace</h2>
+    <h2><span class="hb-n">04</span>Work through a window</h2>
     <ol class="hb-steps">
-      <li>Read the question and orient yourself in the full trace.</li>
-      <li>Read consecutive segments. The active segment is highlighted in the trace and shown in the labeling panel.</li>
+      <li>Read the question and the grey context, and orient yourself in the window.</li>
+      <li>Read consecutive segments. The active segment is highlighted in the window and shown in the labeling panel.</li>
       <li>Select one action using the buttons or keys <kbd>1</kbd>–<kbd>5</kbd>. With auto-advance enabled, selecting a label moves to the next segment.</li>
       <li>If uncertain, flag the segment and explain why. You may keep a tentative label, or leave it unlabeled for adjudication. For multiple operations or poor boundaries, use the <b>segmentation issue</b> flag reason in your note.</li>
       <li>Review all unresolved and flagged items. Submit only after every segment has a label or an explained flag.</li>
@@ -135,15 +136,16 @@ window.MathJax = {
   <p class="lede">The segments are fixed. Choose one action for each, then compare with a reference. Practice answers are not part of the study; they only help you calibrate.</p>
   <div id="practiceList" class="stack"></div>
   <div class="row end">
-    <button class="btn primary" type="button" id="practiceDone" disabled>Continue to the traces <svg class="arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg></button>
+    <button class="btn primary" type="button" id="practiceDone" disabled>Continue to the windows <svg class="arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg></button>
   </div>
 </section>
 
-<!-- ============ TRACE LIST ============ -->
+<!-- ============ WINDOW LIST ============ -->
 <section id="v-traces" class="wrap view" hidden>
-  <p class="eyebrow">Your traces</p>
-  <h1 class="h1">Four shared traces.</h1>
-  <p class="lede">Every annotator labels the same segments, independently. Work in any order and at your own pace; drafts are saved automatically. Once you submit a trace it is locked.</p>
+  <p class="eyebrow">Your windows</p>
+  <h1 class="h1">Label each window in turn.</h1>
+  <p class="lede">Every annotator labels the same segments, independently. Windows open one at a time, in order; work at your own pace, and drafts are saved automatically. Once you submit a window it is locked and the next one opens.</p>
+  <p class="list-summary" id="listSummary"></p>
   <div class="note" id="syncNote" hidden></div>
   <div id="traceList" class="trace-list"></div>
   <div class="row between small muted">
@@ -155,8 +157,8 @@ window.MathJax = {
 <section id="v-work" class="view" hidden>
   <div class="toolbar">
     <div class="wrap tb-in">
-      <button type="button" class="quiet back" data-go="traces" aria-label="Back to traces"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 10H4M9 5l-5 5 5 5"/></svg></button>
-      <div class="tb-title"><b id="wTitle">Trace</b><span id="wSub" class="muted"></span></div>
+      <button type="button" class="quiet back" data-go="traces" aria-label="Back to the windows"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 10H4M9 5l-5 5 5 5"/></svg></button>
+      <div class="tb-title"><b id="wTitle">Window</b><span id="wSub" class="muted"></span></div>
       <button type="button" class="quiet" id="guideBtn" title="Open the guidelines"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6.5C10 5 7 4.5 3.5 5v13c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5z M12 6.5v13"/></svg>Guide</button>
       <span class="save" id="saveState"></span>
       <button type="button" class="btn primary sm" id="submitBtn">Review &amp; submit</button>
@@ -166,13 +168,17 @@ window.MathJax = {
 
   <div class="wrap work-grid">
     <article class="paper">
-      <div class="locked-note" id="lockedNote" hidden>This trace has been submitted and is locked. Contact the researcher if you need to change it.</div>
+      <div class="locked-note" id="lockedNote" hidden>This window has been submitted and is locked. Contact the researcher if you need to change it.</div>
       <details class="qbox" open>
         <summary>Question</summary>
         <div id="problem" class="problem"></div>
       </details>
+      <details class="ctxbox" id="ctxBox" open>
+        <summary>Earlier in the reasoning · context only, not labeled</summary>
+        <div class="ctx-text" id="ctxText"></div>
+      </details>
       <div id="trace" class="trace segtrace" aria-label="Reasoning trace. Click a segment to select it."></div>
-      <p class="end-mark">— End of trace —</p>
+      <p class="end-mark">— End of window —</p>
     </article>
 
     <aside class="side">
@@ -218,9 +224,9 @@ window.MathJax = {
 
 <!-- ============ DONE ============ -->
 <section id="v-done" class="wrap view" hidden>
-  <p class="eyebrow">All traces submitted</p>
+  <p class="eyebrow">All windows submitted</p>
   <h1 class="hb-display">Thank you.<br><span>Every label counts.</span></h1>
-  <p class="lede">Your labels for all four traces have been received. You can close this page.</p>
+  <p class="lede">Your labels for every window have been received. You can close this page.</p>
   <p class="contact-line muted"></p>
 </section>
 
@@ -272,15 +278,15 @@ window.MathJax = {
     <p class="muted small" id="subSummary"></p>
     <div class="note" id="subNote" hidden></div>
     <ul class="checks tight">
-      <li><label class="check"><input type="checkbox" class="subchk"> <span>I read the question and every segment of the trace.</span></label></li>
+      <li><label class="check"><input type="checkbox" class="subchk"> <span>I read the question, the grey context and every segment of the window.</span></label></li>
       <li><label class="check"><input type="checkbox" class="subchk"> <span>Each label reflects the operation the segment explicitly performs, not whether it is correct.</span></label></li>
       <li><label class="check"><input type="checkbox" class="subchk"> <span>I reviewed my flags; each one explains the alternatives.</span></label></li>
       <li><label class="check"><input type="checkbox" class="subchk"> <span>I made every decision myself, without AI assistance.</span></label></li>
     </ul>
-    <p class="muted small">After submission this trace is locked.</p>
+    <p class="muted small">After submission this window is locked and the next one opens.</p>
     <div class="row end">
       <button value="cancel" class="btn" formnovalidate>Keep working</button>
-      <button value="ok" class="btn primary" id="subConfirm" disabled>Submit trace</button>
+      <button value="ok" class="btn primary" id="subConfirm" disabled>Submit window</button>
     </div>
   </form>
 </dialog>

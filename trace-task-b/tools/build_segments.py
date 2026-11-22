@@ -1,86 +1,77 @@
 #!/usr/bin/env python3
-"""Build trace-task-b/traces.js from the frozen pilot bundle.
+"""Build trace-task-b/traces.js: the Task A study windows, segmented by the chosen judge (Gemini 3.8 Flash).
 
 Usage:
-  python3 build_segments.py /path/to/frozen-pilot-v2 ../traces.js
+  python3 build_segments.py ITEMS_JSON JUDGE_UNITS_JSON ASSIGNMENTS_JSON OUT_JS [--judge g3.8-flash] [--slot A1]
 
-Task B shows the fixed LLM-judge segmentation (deepseek-pilot/results/segments.jsonl) and asks
-annotators for one action label per segment. Only the segment BOUNDARIES are exported: the LLM-judge
-action labels (`semantic.action_code`) are deliberately NOT written to the website, so annotators
-label independently.
+  ITEMS_JSON        TaskA/platform/items.json (= trace-task-a/data/items.json): window_text, context_before,
+                    problem, unit_starts for every window
+  JUDGE_UNITS_JSON  judge_units.json from reports/taskA_judge_agreement_v3.zip: every judge's CUTs per window,
+                    as unit indices (index into unit_starts), i.e. already converted to window coordinates
+  ASSIGNMENTS_JSON  trace-task-a/data/assignments.json: the shared window order (slot A1); practice items skipped
 
-As in Task A, only the reasoning up to and including </think> is shown. The segment that contains
-</think> is cut at the end of </think>; segments after it (the summary) are dropped.
-Offsets are character offsets into `completion_text` of trajectories.jsonl, in UTF-16 code units
-(what the browser uses). They equal Python code-point offsets when the text has no characters
-outside the Basic Multilingual Plane; the script checks this.
+Gemini 3.8 Flash was the judge closest to the human segmentation in Task A (validation report 2026-11-22:
+kappa_B 0.765 vs human-human 0.781, non-inferior). Task B shows its segments and collects one action label per
+segment. Nothing that un-blinds a window (model, problem code, outcome, trace id) is written: items.json has none,
+and the judge file's `code` / `trace_id` fields are not read.
+
+A segment runs from one CUT to the next: [unit_starts[u_k], unit_starts[u_k+1]). The first segment starts at the
+window start, which can be in the middle of an operation that began in the grey context.
 """
-import hashlib, json, os, sys
-
-THINK_END = "</think>"
-# Same fixed presentation order as Task A (shortest first) - identical for every annotator.
-ORDER = ["tr_c984bb200fcad93b2061", "tr_bd762da13a9edec43b6e", "tr_1e2d7e5f49120fe5a74d", "tr_2eb4a94d173163db6303"]
+import argparse, hashlib, json, sys
 
 
-def u16(text, cp):
-    return len(text[:cp].encode("utf-16-le")) // 2
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("items"); ap.add_argument("units"); ap.add_argument("assignments"); ap.add_argument("out")
+    ap.add_argument("--judge", default="g3.8-flash")
+    ap.add_argument("--slot", default="A1")
+    a = ap.parse_args()
 
+    items = {i["item_id"]: i for i in json.load(open(a.items, encoding="utf-8"))}
+    units = json.load(open(a.units, encoding="utf-8"))
+    if a.judge not in units:
+        sys.exit("judge %r not in %s (has: %s)" % (a.judge, a.units, ", ".join(units)))
+    cuts = units[a.judge]
+    order = [i for i in json.load(open(a.assignments, encoding="utf-8"))[a.slot] if not items[i].get("practice")]
+    study = sorted(i for i in items if not items[i].get("practice"))
+    if sorted(order) != study or sorted(cuts) != study:
+        sys.exit("window sets differ: order %d, judge %d, items %d" % (len(order), len(cuts), len(study)))
 
-def main(root, out):
-    res = os.path.join(root, "deepseek-pilot", "results")
-    traj, probs, segs = {}, {}, {}
-    with open(os.path.join(res, "trajectories.jsonl"), encoding="utf-8") as f:
-        for line in f:
-            r = json.loads(line); traj[r["trace_id"]] = r
-    with open(os.path.join(res, "problems.jsonl"), encoding="utf-8") as f:
-        for line in f:
-            r = json.loads(line); probs[r["problem_id"]] = r
-    with open(os.path.join(res, "segments.jsonl"), encoding="utf-8") as f:
-        for line in f:
-            r = json.loads(line); segs.setdefault(r["trace_id"], []).append(r)
-    items = []
-    for n, tid in enumerate(ORDER, 1):
-        t = traj[tid]
-        full = t["completion_text"]
-        k = full.find(THINK_END)
-        if k < 0:
-            sys.exit("no </think> in " + tid)
-        text = full[: k + len(THINK_END)]
-        ss = sorted(segs[tid], key=lambda s: s["segment_id"])
-        bounds = []
-        prev_end = 0
-        for s in ss:
-            a, b = int(s["char_start"]), int(s["char_end"])
-            if a >= len(text):
-                break
-            assert a == prev_end, (tid, s["segment_id"], "segments must be contiguous")
-            assert full[a:b] == s["text"], (tid, s["segment_id"], "segment text mismatch")
-            b = min(b, len(text))
-            bounds.append([s["segment_id"], u16(text, a), u16(text, b)])
-            prev_end = b
-        assert prev_end == len(text), (tid, "segments must cover the shown text")
-        seg_sig = hashlib.sha256(json.dumps(bounds).encode()).hexdigest()
-        items.append({
-            "id": tid,
-            "label": "Trace %d" % n,
-            "problem_id": t["problem_id"],
-            "question": probs[t["problem_id"]]["question"],
-            "text": text,
-            "sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
-            "seg_sha256": seg_sig,
-            "words": len(text.split()),
-            # [segment_id, start, end] - boundaries only; no action labels.
-            "segs": bounds,
+    out, n_seg = [], 0
+    for n, iid in enumerate(order, 1):
+        it = items[iid]
+        w, st = it["window_text"], it["unit_starts"]
+        if any(ord(c) > 0xFFFF for c in w):
+            sys.exit(iid + ": characters outside the BMP; offsets would need UTF-16 conversion")
+        us = sorted(set(cuts[iid]))
+        if us and (us[0] <= 0 or us[-1] >= len(st)):
+            sys.exit(iid + ": CUT unit index out of range")
+        starts = [0] + [st[u] for u in us]
+        bounds = [[k, s, e] for k, (s, e) in enumerate(zip(starts, starts[1:] + [len(w)]))]
+        assert all(s < e for _, s, e in bounds) and bounds[-1][2] == len(w)
+        n_seg += len(bounds)
+        out.append({
+            "id": iid,
+            "label": "Window %d" % n,
+            "question": it["problem"],
+            "context": it.get("context_before", ""),
+            "text": w,
+            "sha256": hashlib.sha256(w.encode("utf-8")).hexdigest(),
+            "seg_sha256": hashlib.sha256(json.dumps(bounds).encode()).hexdigest(),
+            "words": len(w.split()),
+            "read_words": len(it["problem"].split()) + len(it.get("context_before", "").split()),
+            "segs": bounds,  # [segment index, start, end] - boundaries only, no labels
         })
-    with open(out, "w", encoding="utf-8") as f:
+    with open(a.out, "w", encoding="utf-8") as f:
         f.write("// Generated by tools/build_segments.py - do not edit by hand.\n")
-        f.write("// Segment boundaries only: the LLM-judge action labels are not included.\n")
+        f.write("// Task A study windows segmented by %s (boundaries only; no model, outcome or labels).\n" % a.judge)
+        f.write("window.TASKB_SOURCE = %s;\n" % json.dumps({"judge": a.judge, "order_slot": a.slot, "windows": len(out), "segments": n_seg}))
         f.write("window.TRACES = ")
-        json.dump(items, f, ensure_ascii=False, separators=(",", ":"))
+        json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
         f.write(";\n")
-    for it in items:
-        print(it["label"], it["id"], len(it["segs"]), "segments", it["words"], "words")
+    print("%d windows, %d segments (judge %s, order %s)" % (len(out), n_seg, a.judge, a.slot))
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2])
+    main()
