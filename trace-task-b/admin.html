@@ -34,6 +34,16 @@
   .kpi b { display: block; font-size: 22px; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
   .kpi span { font-size: 12.5px; color: var(--muted); }
   tr.tot td { font-weight: 600; color: var(--ink); background: #f7f8f4; }
+  .agr-box { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: var(--paper); margin: 10px 0 14px; display: grid; gap: 8px; }
+  .agr-row { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; font-size: 14px; }
+  .agr-row label { display: inline-flex; gap: 6px; align-items: center; }
+  h3.agr { font-size: 16px; margin: 22px 0 4px; }
+  .verdict { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .04em; padding: 3px 9px; border-radius: 99px; background: var(--line); color: var(--ink); }
+  .verdict.ok { background: #dcefe3; color: #1d6b3d; } .verdict.mid { background: #fbecc9; color: #7a5300; } .verdict.no { background: #f7d9d6; color: #8a2a20; } .verdict.na { background: #ececef; color: #555; }
+  .grid-tbl td.yes { color: #1d6b3d; font-weight: 600; } .grid-tbl td.nope { color: #8a2a20; font-weight: 600; }
+  .grid-tbl.compact th, .grid-tbl.compact td { padding: 6px 10px; }
+  .grid-tbl th.rowh { text-transform: none; letter-spacing: 0; font-size: 13px; color: var(--ink-2); font-weight: 600; }
+  tr.best td { background: #eef7f0; }
 </style>
 </head>
 <body>
@@ -57,6 +67,18 @@
     <div class="kpis" id="progKpis"></div>
     <div class="tbl-wrap"><table class="grid-tbl" id="progTbl"></table></div>
     <div class="note warn" id="otherNote" hidden></div>
+
+    <h2>Agreement</h2>
+    <p class="muted small">Recomputed on every <b>Load progress</b> / refresh from the windows <b>both</b> annotators have submitted (drafts are not used), so the numbers grow window by window. Unit: one segment. 95% intervals: percentile bootstrap over windows (2,000 resamples, seed 20261115), because segments of one window are not independent. Primary statistic: Krippendorff's α (nominal); a segment flagged without a label is missing for that annotator.</p>
+    <div class="agr-box">
+      <div class="agr-row"><b>Judges</b> <span class="muted small">Load the judge files written by <code>taskB_judge_labeling.ipynb</code> (<code>TaskB/judges/*.json</code>) and, for the per-model claim J2 and the strata, <code>TaskA/private/key.csv</code>. They are read and kept only in this browser, never uploaded or published.</span></div>
+      <div class="agr-row"><input type="file" id="refFiles" multiple accept=".json,.csv,text/csv,application/json"> <button type="button" class="link small" id="refForget">Forget loaded files</button></div>
+      <div class="small" id="refInfo"></div>
+      <div class="agr-row" id="agrJudges"></div>
+      <div class="agr-row"><button type="button" class="btn sm" id="agrRun">Recompute now</button> <button type="button" class="link small" id="agrDl" disabled>Download all metrics (JSON)</button></div>
+    </div>
+    <div class="note" id="agrStatus" hidden></div>
+    <div id="agrOut"></div>
 
     <h2>Annotators</h2>
     <p class="muted small"><b>Only these email addresses can sign in.</b> The list is <code>ANNOTATORS</code> at the top of <code>backend/Code.gs</code>; to change it, edit the list and deploy a new version. <b>Block</b> keeps one of them out without deleting their data; <b>Allow</b> undoes it.</p>
@@ -86,6 +108,7 @@
 </main>
 <script src="config.js"></script>
 <script src="traces.js"></script>
+<script src="metrics.js"></script>
 <script>
 (function () {
   'use strict';
@@ -240,6 +263,7 @@
       last = r; $('exportBtn').disabled = false;
       $('loadedAt').textContent = 'Updated ' + new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
       renderProgress(r); renderAnnotators(r); renderEstimate();
+      runAgreement();
     } catch (err) {
       const t = err.code === 'auth' ? 'Wrong admin key.' : 'Could not reach the backend: ' + esc(err.message);
       msg('err', t); $('progEmpty').hidden = false; $('progEmpty').className = 'note err'; $('progEmpty').innerHTML = t + ' Progress cannot be shown until the admin key is accepted.';
@@ -272,6 +296,223 @@
       document.body.appendChild(a); a.click(); a.remove();
     } catch (err) { msg('err', esc(err.message)); }
   });
+  // ================================================================ agreement (live)
+  const MX = window.TaskBMetrics, LABS = MX.LABELS;
+  const REF_KEY = 'ttb:refs:v2';
+  let REF = null, AGR = null, agrBusy = false, agrAgain = false, lastSig = '';
+  const SHA1 = {};
+  (async function () {
+    try {
+      for (const t of TRACES) {
+        const h = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(t.text));
+        SHA1[t.id] = Array.from(new Uint8Array(h)).map(b => b.toString(16).padStart(2, '0')).join('');
+      }
+    } catch (e) {}
+  })();
+  function loadRefs() { try { REF = JSON.parse(localStorage.getItem(REF_KEY) || 'null'); } catch (e) { REF = null; } renderRefInfo(); }
+  function saveRefs() { try { if (REF) localStorage.setItem(REF_KEY, JSON.stringify(REF)); else localStorage.removeItem(REF_KEY); } catch (e) {} renderRefInfo(); }
+  function renderRefInfo() {
+    const j = REF ? Object.keys(REF.judges || {}) : [], nk = REF && REF.meta ? Object.keys(REF.meta).length : 0;
+    $('refInfo').innerHTML = (j.length || nk) ? 'Loaded: ' + (nk ? '<b>key.csv</b> (' + nk + ' windows)' : '<span class="muted">no key.csv (J2 and strata need it)</span>') +
+      (j.length ? ', judges: ' + j.map(n => '<b>' + esc(n) + '</b> (' + Object.keys(REF.judges[n].labels).length + '/' + TRACES.length + ' windows' + (REF.judges[n].info && REF.judges[n].info.cost_usd != null ? ', $' + Number(REF.judges[n].info.cost_usd).toFixed(2) : '') + ')').join(', ') : ', no judge file yet')
+      : '<span class="muted">No judge or key file loaded: inter-annotator agreement only.</span>';
+    const prev = {}; document.querySelectorAll('[data-agrj]').forEach(c => { prev[c.dataset.agrj] = c.checked; });
+    $('agrJudges').innerHTML = j.length ? '<b class="small">Judges to compare:</b> ' + j.map(n => '<label class="small"><input type="checkbox" data-agrj="' + esc(n) + '"' + (prev[n] === false ? '' : ' checked') + '> ' + esc(n) + '</label>').join('') : '';
+  }
+  function parseCsv(text) {
+    const rows = []; let row = [], cell = '', q = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (q) { if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += c; }
+      else if (c === '"') q = true; else if (c === ',') { row.push(cell); cell = ''; }
+      else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(cell); rows.push(row); row = []; cell = ''; }
+      else cell += c;
+    }
+    if (cell || row.length) { row.push(cell); rows.push(row); }
+    const h = rows.shift() || [];
+    return rows.filter(r => r.length > 1).map(r => { const o = {}; h.forEach((k, i) => { o[k.trim()] = (r[i] || '').trim(); }); return o; });
+  }
+  $('refFiles').addEventListener('change', async e => {
+    const files = Array.from(e.target.files || []); if (!files.length) return;
+    const texts = await Promise.all(files.map(f => f.text().then(t => ({ name: f.name, text: t }))));
+    const next = REF ? JSON.parse(JSON.stringify(REF)) : { meta: {}, judges: {} };
+    const problems = [], notes = [];
+    texts.filter(f => /\.csv$/i.test(f.name)).forEach(f => {
+      const rows = parseCsv(f.text);
+      if (!rows.length || !('item_id' in rows[0]) || !('model_code' in rows[0])) { problems.push(f.name + ' is not the Task A key (key.csv)'); return; }
+      const meta = {};
+      rows.filter(r => String(r.practice).toLowerCase() !== 'true').forEach(r => {
+        if (!TBY[r.item_id]) return;
+        if (r.window_sha1 && SHA1[r.item_id] && r.window_sha1 !== SHA1[r.item_id]) { problems.push(r.item_id + ': window text differs from the key'); return; }
+        meta[r.item_id] = { model_code: r.model_code, domain: r.domain, correct: String(r.correct).toLowerCase() === 'true' ? 'True' : 'False', position: r.position };
+      });
+      if (!Object.keys(meta).length) problems.push(f.name + ': none of its windows are in traces.js'); else next.meta = meta;
+    });
+    texts.filter(f => /\.json$/i.test(f.name)).forEach(f => {
+      let d; try { d = JSON.parse(f.text); } catch (x) { problems.push(f.name + ': not valid JSON'); return; }
+      const lab = d && d.labels && typeof d.labels === 'object' ? d.labels : d;
+      const name = (d && d.judge) || f.name.replace(/\.json$/i, '');
+      const out = {}; let bad = 0;
+      Object.keys(lab || {}).forEach(id => {
+        const t = TBY[id]; if (!t || !Array.isArray(lab[id])) return;
+        if (lab[id].length !== t.segs.length || (d.seg_sha256 && d.seg_sha256[id] && d.seg_sha256[id] !== t.seg_sha256)) { bad++; return; }
+        out[id] = lab[id].map(x => (LABS.indexOf(x) >= 0 ? x : null));
+      });
+      if (!Object.keys(out).length) { problems.push(f.name + ': no window of traces.js with matching segments'); return; }
+      if (bad) notes.push(name + ': ' + bad + ' window(s) skipped (segment count or segmentation hash differs from traces.js)');
+      next.judges[name] = { labels: out, info: { model: d.model || '', prompt_version: d.prompt_version || '', protocol: d.protocol || '', cost_usd: d.cost_usd, created: d.created || '' } };
+    });
+    e.target.value = '';
+    if (problems.length) { msg('err', 'Not loaded: ' + problems.slice(0, 8).map(esc).join('; ') + (problems.length > 8 ? ' …' : '')); return; }
+    next.loaded_at = new Date().toISOString(); REF = next; saveRefs();
+    msg(notes.length ? 'warn' : '', 'Files loaded (kept in this browser only).' + (notes.length ? ' ' + notes.map(esc).join('; ') : ''));
+    lastSig = ''; runAgreement();
+  });
+  $('refForget').addEventListener('click', () => { REF = null; saveRefs(); lastSig = ''; runAgreement(); });
+  $('agrRun').addEventListener('click', () => { lastSig = ''; runAgreement(); });
+  document.addEventListener('change', e => { if (e.target.closest('[data-agrj]')) { lastSig = ''; runAgreement(); } });
+  $('agrDl').addEventListener('click', () => {
+    if (!AGR) return;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(AGR, null, 1)], { type: 'application/json' }));
+    a.download = 'taskB_agreement_' + new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-') + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+
+  function agrStatus(kind, html) { const m = $('agrStatus'); m.className = 'note' + (kind ? ' ' + kind : ''); m.innerHTML = html; m.hidden = false; }
+  async function runAgreement() {
+    if (!last) return;
+    if (agrBusy) { agrAgain = true; return; }
+    agrBusy = true;
+    try {
+      const ex = await api('admin_export');
+      const names = allowedList(last).filter(id => !roster(last).some(x => x.id === id && !x.can));
+      const H = {}; names.forEach(n => { H[n] = {}; });
+      const ver = [];
+      ex.annotations.forEach(a => {
+        const id = String(a.annotator_id).toLowerCase(), t = TBY[a.trace_id];
+        if (!H[id] || !t || a.status !== 'submitted' || a.seg_sha256 !== t.seg_sha256 || (a.labels || []).length !== t.segs.length) return;
+        H[id][a.trace_id] = a.labels.map(x => (LABS.indexOf(x) >= 0 ? x : null)); ver.push(id + a.trace_id + a.version);
+      });
+      const jsel = new Set(Array.from(document.querySelectorAll('[data-agrj]')).filter(c => c.checked).map(c => c.dataset.agrj));
+      const J = {}; if (REF) Object.keys(REF.judges || {}).filter(n => jsel.has(n)).forEach(n => { J[n] = REF.judges[n].labels; });
+      const sig = ver.sort().join() + '|' + Object.keys(J).sort().join() + '|' + (REF ? REF.loaded_at : '');
+      if (sig === lastSig) return;
+      lastSig = sig;
+      const ann = names.filter(n => Object.keys(H[n]).length);
+      const ids = TRACES.map(t => t.id).filter(id => names.length >= 2 && names.slice(0, 2).every(n => H[n][id]));
+      if (names.length < 2) { $('agrOut').innerHTML = ''; agrStatus('warn', 'Agreement needs two annotators.'); return; }
+      if (!ids.length) {
+        $('agrOut').innerHTML = ''; $('agrDl').disabled = true;
+        agrStatus('warn', 'No window has been submitted by <b>both</b> annotators yet (' + names.map(n => esc(n) + ': ' + Object.keys(H[n]).length).join(', ') + ' submitted). Agreement appears as soon as one window is submitted by both.');
+        return;
+      }
+      const HH = { [names[0]]: H[names[0]], [names[1]]: H[names[1]] };
+      const BI = MX.bootIdx(ids.length, MX.N_BOOT);
+      const hr = MX.humanReliability(HH, names.slice(0, 2), ids, BI);
+      const meta = REF && REF.meta && Object.keys(REF.meta).length ? REF.meta : null;
+      const idsJ = ids.filter(i => Object.keys(J).every(j => J[j][i]));
+      let jv = null, hrJ = hr;
+      if (Object.keys(J).length && idsJ.length) {
+        const BIJ = idsJ.length === ids.length ? BI : MX.bootIdx(idsJ.length, MX.N_BOOT);
+        hrJ = idsJ.length === ids.length ? hr : MX.humanReliability(HH, names.slice(0, 2), idsJ, BIJ);
+        jv = MX.judgesVsHumans(HH, J, idsJ, BIJ, hrJ, meta);
+      }
+      const nseg = ids.reduce((t, i) => t + TBY[i].segs.length, 0);
+      AGR = { computed_at: new Date().toISOString(), segmentation: SRC, prereg: MX.PREREG, n_boot: MX.N_BOOT, seed: MX.SEED,
+        annotators: names.slice(0, 2), windows: ids.length, window_ids: ids, segments: nseg,
+        human: { verdict: hr.verdict, lower_one_sided_95: hr.lower, table: hr.table, per_label: hr.hh.per_label, confusion: hr.C, n_pairs: hr.hh.n },
+        human_llm: jv ? { windows: idsJ.length, annotator_alpha_on_these_windows: hrJ.hh.alpha, table: jv.rows,
+          detail: Object.fromEntries(Object.keys(jv.detail).map(k => [k, { per_annotator: jv.detail[k].perAnn, consensus: jv.detail[k].consensus, consensus_confusion: jv.detail[k].consensusC, alt_test: jv.detail[k].alt, by_model: jv.detail[k].byModel }])) } : null,
+        strata: meta ? [].concat(MX.stratumTable(HH[names[0]], HH[names[1]], ids, meta, 'annotators'),
+          ...Object.keys(J).map(j => MX.stratumTable(HH[names[0]], J[j], idsJ, meta, j + ' vs ' + names[0]))) : null,
+        model_rates: meta && Object.keys(J).length ? MX.modelRates(HH, J, idsJ, meta) : null,
+        judges_info: REF ? Object.fromEntries(Object.keys(J).map(j => [j, REF.judges[j].info])) : {} };
+      renderAgreement(AGR);
+      $('agrDl').disabled = false;
+      agrStatus('', 'Computed on <b>' + ids.length + ' of ' + TRACES.length + '</b> windows (' + nseg.toLocaleString() + ' segments) submitted by both annotators' + (Object.keys(J).length ? '; ' + Object.keys(J).length + ' judge(s) compared on ' + idsJ.length + ' window(s)' : '') + '. ' + new Date().toLocaleTimeString() + '.');
+    } catch (err) {
+      agrStatus('err', 'Agreement could not be computed: ' + esc(err.message || String(err)));
+    } finally {
+      agrBusy = false;
+      if (agrAgain) { agrAgain = false; runAgreement(); }
+    }
+  }
+
+  const f3 = x => (x === x && x != null ? Number(x).toFixed(3) : '—');
+  const pct = x => (x === x && x != null ? (100 * x).toFixed(1) + '%' : '—');
+  const ciS = c => (c && c[0] === c[0] ? '[' + f3(c[0]) + ', ' + f3(c[1]) + ']' : '—');
+  const yn = v => (v === true ? '<td class="yes">yes</td>' : v === false ? '<td class="nope">no</td>' : '<td class="muted">—</td>');
+  const VCLS = { RELIABLE: 'ok', ACCEPTABLE: 'mid', 'NOT RELIABLE': 'no' };
+  function confTable(C, rowName, colName) {
+    return '<div class="tbl-wrap"><table class="grid-tbl compact"><thead><tr><th>' + esc(rowName) + ' ↓ · ' + esc(colName) + ' →</th>' + LABS.map(l => '<th>' + l + '</th>').join('') + '<th>Total</th></tr></thead><tbody>' +
+      LABS.map((l, i) => '<tr><th class="rowh">' + l + '</th>' + C[i].map((v, j) => '<td class="nm"' + (i === j ? ' style="font-weight:700"' : '') + '>' + v + '</td>').join('') + '<td class="nm">' + C[i].reduce((a, b) => a + b, 0) + '</td></tr>').join('') + '</tbody></table></div>';
+  }
+  function renderAgreement(A) {
+    const P = A.prereg, hu = A.human;
+    let h = '<h3 class="agr">Inter-annotator agreement (' + esc(A.annotators.join(' – ')) + ')</h3>' +
+      '<p class="small">Claim H: <span class="verdict ' + (VCLS[hu.verdict] || 'na') + '">' + esc(hu.verdict) + '</span> <span class="muted">(α ≥ ' + P.human_reliable + ' and one-sided 95% lower bound ≥ ' + P.human_acceptable_lower + '; lower bound ' + f3(hu.lower_one_sided_95) + '; ' + hu.n_pairs.toLocaleString() + ' segments labeled by both)</span></p>' +
+      '<div class="tbl-wrap"><table class="grid-tbl compact"><thead><tr><th>Metric</th><th>Value</th><th>95% CI (windows)</th></tr></thead><tbody>' +
+      hu.table.map(r => '<tr><td>' + esc(r.metric) + '</td><td class="nm"><b>' + f3(r.value) + '</b></td><td class="nm">' + ciS(r.ci) + '</td></tr>').join('') + '</tbody></table></div>' +
+      '<p class="muted small">Per label: positive specific agreement (2·both / (n₁ + n₂)) with its 95% CI, and one-vs-rest κ. With rare labels (REVISE, REDIRECT, NONACTION) read the counts: a few segments move these numbers a lot.</p>' +
+      '<div class="tbl-wrap"><table class="grid-tbl compact"><thead><tr><th>Label</th><th>' + esc(A.annotators[0]) + '</th><th>' + esc(A.annotators[1]) + '</th><th>Both</th><th>Specific agreement</th><th>95% CI</th><th>κ (one vs rest)</th></tr></thead><tbody>' +
+      LABS.map(l => { const r = hu.per_label[l]; return '<tr><td>' + l + '</td><td class="nm">' + r.n_a + '</td><td class="nm">' + r.n_b + '</td><td class="nm">' + r.both + '</td><td class="nm"><b>' + f3(r.psa) + '</b></td><td class="nm">' + ciS(r.psa_ci) + '</td><td class="nm">' + f3(r.kappa) + '</td></tr>'; }).join('') + '</tbody></table></div>' +
+      '<details><summary class="small" style="cursor:pointer;color:var(--green)">Confusion matrix between the annotators</summary>' + confTable(hu.confusion, A.annotators[0], A.annotators[1]) + '</details>';
+    const L = A.human_llm;
+    if (L) {
+      const T = L.table;
+      const best = T.filter(r => r.VALIDATED)[0] || null;
+      h += '<h3 class="agr">Human–LLM agreement: which judge?</h3>' +
+        (L.windows < A.windows ? '<div class="note warn small">Computed on <b>' + L.windows + ' of ' + A.windows + '</b> windows: the selected judge files do not all cover the others.</div>' : '') +
+        '<p class="small">' + (best ? 'Best validated judge: <span class="verdict ok">' + esc(best.judge) + '</span> (highest α among judges that pass H, J1 and J2).' : 'No judge passes every claim yet' + (T.length ? '; highest α: <b>' + esc(T[0].judge) + '</b>' : '') + '. Report the results as they are; do not relax thresholds after seeing them.') + '</p>' +
+        '<p class="muted small">Each judge against each annotator (mean of the two). Δ = judge α − annotator α (' + f3(L.annotator_alpha_on_these_windows) + ' on these windows); J1 = non-inferior (one-sided 95% lower bound of Δ above −' + P.noninferiority_delta + ', paired bootstrap over windows); J2 = no creator model with an α gap below ' + P.model_gap_floor + ' (needs key.csv). “Agreed labels” = segments where both annotators chose the same label. The Alternative Annotator Test (ε = ' + P.alt_epsilon + ') is supporting evidence: with two annotators it has little power.</p>';
+      const row = (lbl, f) => '<tr><th class="rowh">' + lbl + '</th>' + T.map(r => f(r)).join('') + '</tr>';
+      const td = v => '<td class="nm">' + v + '</td>';
+      h += '<div class="tbl-wrap"><table class="grid-tbl compact"><thead><tr><th></th>' + T.map(r => '<th>' + esc(r.judge) + '</th>').join('') + '</tr></thead><tbody>' +
+        row('α vs annotators (mean)', r => td('<b>' + f3(r.alpha) + '</b>')) + row('95% CI', r => td(ciS(r.alpha_ci))) +
+        row('Δ vs annotator α', r => td(f3(r.delta_vs_human))) + row('Δ one-sided 95% lower bound', r => td(f3(r.delta_lower95))) +
+        row('Ceiling ratio (judge α / annotator α)', r => td(f3(r.ceiling_ratio))) +
+        row('κ vs annotators (mean)', r => td(f3(r.kappa))) + row('AC1 vs annotators (mean)', r => td(f3(r.ac1))) + row('Raw agreement (mean)', r => td(pct(r.po))) +
+        row('Macro-F1 vs agreed labels', r => td('<b>' + f3(r.consensus_macro_f1) + '</b> ' + ciS(r.consensus_macro_f1_ci))) +
+        row('Accuracy vs agreed labels', r => td(pct(r.consensus_accuracy) + ' <span class="muted">(n ' + r.consensus_n + ')</span>')) +
+        LABS.map(l => row('F1 ' + l + ' (agreed labels)', r => td(f3(r.consensus_f1[l])))).join('') +
+        row('Alt-test ω (winning rate)', r => td(f3(r.alt_omega))) + row('Worst model (α gap)', r => td(r.worst_model ? esc(r.worst_model) + ' (' + f3(r.worst_model_gap) + ')' : '—')) +
+        row('J1 non-inferior', r => yn(r.J1_noninferior)) + row('J2 no model failure', r => yn(r.J2_no_model_failure)) + row('<b>VALIDATED</b> (H + J1 + J2)', r => yn(r.VALIDATED)) +
+        row('Cost of the run', r => td((A.judges_info[r.judge] || {}).cost_usd != null ? '$' + Number(A.judges_info[r.judge].cost_usd).toFixed(2) : '—')) +
+        '</tbody></table></div>';
+      h += '<details><summary class="small" style="cursor:pointer;color:var(--green)">Label distribution: judges vs annotators</summary><div class="tbl-wrap"><table class="grid-tbl compact"><thead><tr><th>Coder</th>' + LABS.map(l => '<th>' + l + '</th>').join('') + '</tr></thead><tbody>' +
+        A.annotators.map((n, k) => '<tr><td>' + esc(n) + '</td>' + LABS.map(l => '<td class="nm">' + (k === 0 ? A.human.per_label[l].n_a : A.human.per_label[l].n_b) + '</td>').join('') + '</tr>').join('') +
+        T.map(r => '<tr><td>' + esc(r.judge) + '</td>' + LABS.map(l => '<td class="nm">' + r.distribution[l] + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>' +
+        '<p class="muted small">Annotator counts are over segments both annotators labeled; judge counts over all segments of the compared windows.</p></details>';
+      h += '<details><summary class="small" style="cursor:pointer;color:var(--green)">Confusion matrix of each judge against the agreed labels</summary>' + T.map(r => '<p class="small"><b>' + esc(r.judge) + '</b></p>' + confTable(L.detail[r.judge].consensus_confusion, 'agreed label', r.judge)).join('') + '</details>';
+      h += '<details><summary class="small" style="cursor:pointer;color:var(--green)">Each judge against each annotator, and the Alternative Annotator Test</summary><div class="tbl-wrap"><table class="grid-tbl compact"><thead><tr><th>Judge</th><th>Annotator</th><th>α</th><th>κ</th><th>AC1</th><th>Agreement</th><th>Macro-F1</th></tr></thead><tbody>' +
+        T.map(r => A.annotators.map(a => { const x = L.detail[r.judge].per_annotator[a]; return '<tr><td>' + esc(r.judge) + '</td><td>' + esc(a) + '</td><td class="nm">' + f3(x.alpha) + '</td><td class="nm">' + f3(x.kappa) + '</td><td class="nm">' + f3(x.ac1) + '</td><td class="nm">' + pct(x.po) + '</td><td class="nm">' + f3(x.macro_f1) + '</td></tr>'; }).join('')).join('') + '</tbody></table></div>' +
+        '<div class="tbl-wrap"><table class="grid-tbl compact"><thead><tr><th>Judge</th><th>Annotator left out</th><th>Segments</th><th>ρ judge</th><th>ρ annotator</th><th>p</th><th>p (BY)</th><th>Judge wins</th></tr></thead><tbody>' +
+        T.map(r => L.detail[r.judge].alt_test.rows.map(x => '<tr><td>' + esc(r.judge) + '</td><td>' + esc(x.excluded) + '</td><td class="nm">' + x.n + '</td><td class="nm">' + f3(x.rho_f) + '</td><td class="nm">' + f3(x.rho_h) + '</td><td class="nm">' + f3(x.p) + '</td><td class="nm">' + f3(x.p_BY) + '</td>' + yn(x.judge_wins) + '</tr>').join('')).join('') + '</tbody></table></div></details>';
+      const withModel = T.filter(r => L.detail[r.judge].by_model);
+      if (withModel.length) {
+        const models = Object.keys(L.detail[withModel[0].judge].by_model);
+        h += '<details><summary class="small" style="cursor:pointer;color:var(--green)">α gap by creator model (judge–annotator minus annotator–annotator)</summary><div class="tbl-wrap"><table class="grid-tbl compact"><thead><tr><th>Judge</th>' + models.map(m => '<th>' + esc(m) + '</th>').join('') + '</tr></thead><tbody>' +
+          withModel.map(r => '<tr><td>' + esc(r.judge) + '</td>' + models.map(m => { const g = L.detail[r.judge].by_model[m]; return '<td class="nm"' + (g.gap < P.model_gap_floor ? ' style="color:#8a2a20;font-weight:600"' : '') + '>' + f3(g.gap) + ' <span class="muted">(' + g.windows + ')</span></td>'; }).join('') + '</tr>').join('') + '</tbody></table></div></details>';
+      }
+    } else {
+      h += '<h3 class="agr">Human–LLM agreement</h3><p class="muted small">Load judge files above to compare judges with the annotators.</p>';
+    }
+    if (A.model_rates) {
+      const MR = A.model_rates, js = Object.keys(MR.rho);
+      h += '<h3 class="agr">Label shares by creator model</h3><p class="muted small">Share of each label per model, annotators (mean) and each judge; Spearman ρ of the model ranking, judge vs annotators. A ρ near 1 means the judge leaves the paper\'s model comparison unchanged.</p>' +
+        '<div class="tbl-wrap"><table class="grid-tbl compact"><thead><tr><th>Model</th>' + LABS.map(l => '<th>' + l + ' (annotators' + js.map(j => ' / ' + esc(j)).join('') + ')</th>').join('') + '</tr></thead><tbody>' +
+        MR.rates.map(r => '<tr><td>' + esc(r.model_code) + '</td>' + LABS.map(l => '<td class="nm">' + pct(r.human[l]) + js.map(j => ' / ' + pct(r.judges[j][l])).join('') + '</td>').join('') + '</tr>').join('') +
+        js.map(j => '<tr class="tot"><td>ρ ' + esc(j) + '</td>' + LABS.map(l => '<td class="nm">' + f3(MR.rho[j][l]) + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
+    }
+    if (A.strata) {
+      h += '<h3 class="agr">Strata (α, descriptive)</h3><p class="muted small">Per creator model, domain, outcome and window position; 95% bootstrap CIs over the windows of each stratum, which holds only a few windows.</p><div class="tbl-wrap"><table class="grid-tbl compact"><thead><tr><th>Pair</th><th>Stratum</th><th>Level</th><th>Windows</th><th>α</th><th>95% CI</th></tr></thead><tbody>' +
+        A.strata.map(r => '<tr><td>' + esc(r.pair) + '</td><td>' + esc(r.stratum) + '</td><td>' + esc(r.level) + '</td><td class="nm">' + r.windows + '</td><td class="nm">' + f3(r.alpha) + '</td><td class="nm">' + ciS([r.lo, r.hi]) + '</td></tr>').join('') + '</tbody></table></div>';
+    }
+    $('agrOut').innerHTML = h;
+  }
+  loadRefs();
+
   $('refreshBtn').addEventListener('click', load);
   let refT = 0;
   $('autoRef').addEventListener('change', () => { clearInterval(refT); if ($('autoRef').checked) refT = setInterval(() => { if (document.visibilityState === 'visible') load(); }, 60000); });
