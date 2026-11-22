@@ -14,7 +14,7 @@ non-inferior). Every segment gets exactly one action: CONSTRUCT, INSPECT, REVISE
 | `backend/Code.gs` | Google Apps Script backend (Google Sheet: Annotators, Annotations, Log) |
 | `tools/build_segments.py` | Regenerates `traces.js` |
 | `metrics.js` | Agreement statistics for the researcher page (α, κ, π, AC1, per-label agreement, window bootstrap, claims H / J1 / J2, alt-test, strata); runs in the browser and in Node |
-| `notebooks/taskB_judge_labeling.ipynb` | Colab notebook: label the same segments with candidate LLM judges, record the cost, write `TaskB/judges/<judge>.json` |
+| `notebooks/taskB_judge_study.ipynb` | Colab notebook: label the same segments with candidate judges through the package itself (`anatomy relabel`), record the cost, write `TaskB/judges/<judge>.json` |
 | `analysis/task_b_agreement.py` | Offline agreement report (human–human, optionally one judge) |
 
 ## The data
@@ -117,17 +117,26 @@ submitted, so it grows window by window. Unit: one segment; a segment flagged wi
 `metrics.js` was checked against `krippendorff` and scikit-learn (α with missing values for 2 and 3 coders, κ,
 macro-F1) to floating-point precision.
 
-## The judge notebook
+## The judge notebook (labels exactly as the package)
 
-`notebooks/taskB_judge_labeling.ipynb` (Colab) gives the same 947 segments to one candidate judge at a time:
-one request per segment with the problem, the **earlier** text only (grey context + earlier segments, nearest first,
-about 400 tokens) and the segment under review; the system prompt is `LABELING_PROMPT` read from
-`reasoning-anatomy-v1.8.9.zip` on Drive (the main pipeline's prompt; an embedded v1.6.1 copy is the fallback, and the
-version used is recorded in the output). The judge answers the package's four tests; the first *yes* decides the
-action, as in the package. Responses are saved as they arrive (re-running resumes, nothing is paid twice), the cost
-comes from the providers' token counts, and `TaskB/judges/<judge>.json` is written. Judges: Gemini 3.8 Flash,
-3.5 Flash-Lite (± thinking), 3.1 / 2.5 Flash-Lite, Gemini 4 Hydrogen, Claude Haiku 5.5 (± thinking), and a `mock`
-judge that tests the pipeline without API calls.
+`notebooks/taskB_judge_study.ipynb` (Colab; open it from GitHub and save a copy in `TaskB/notebooks/` on Drive) never
+prompts a model itself. For each candidate judge and each creator model it runs, with reasoning-anatomy v1.8.9:
+
+1. `anatomy check-judge` (one cheap test; a wrong model ID, setting or key stops here and creates nothing);
+2. `anatomy relabel --source-run TaskA/judge_study/g3.8-flash/<MODEL>`: the package's own command to label the
+   segments of a finished run with another judge. Segmentation is replayed from the source run's saved responses (no
+   segmentation call; `segments_identical_to_source` must be true) and the package's `05_semantics` stage labels every
+   segment: same prompt, request rendering, earlier-context selection (token budget over the full trace),
+   referenced-setup context, deterministic COMMIT and answer-section rules, schema validation, retries and receipts as
+   the real pipeline;
+3. `anatomy export-annotations`, then a bookkeeping step that maps the package's trace segments onto the website's 947
+   segments (checked on the Gemini 3.8 Flash runs before anything is paid: every website segment must be covered).
+   A website segment takes the label of the package segment(s) inside it; segments the package marks COMMIT (the
+   final answer) or leaves unlabeled are not compared, for every judge alike.
+
+Inputs and outputs are on Drive (`Reasoning Behavior/TaskB/`, see its README): `platform/traces.js` (copied from the
+site on the first run), `judge_study/` (package runs, `costs.csv` from the package's receipts), `judges/<judge>.json`.
+The package labels every segment of the 36 traces (as the real pipeline would); only the window segments are compared.
 
 ## Agreement
 
