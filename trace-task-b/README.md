@@ -120,7 +120,17 @@ macro-F1) to floating-point precision.
 ## The judge notebook (labels exactly as the package)
 
 `notebooks/taskB_judge_study.ipynb` (Colab; a copy is in `TaskB/notebooks/` on Drive) never segments or prompts a
-model itself; it only runs **reasoning-anatomy v1.8.11** commands (`Reasoning Behavior/reasoning-anatomy-v1.8.11.zip`).
+model itself; it only runs **reasoning-anatomy v1.8.12** commands (`Reasoning Behavior/reasoning-anatomy-v1.8.12.zip`).
+
+**Resumable.** While a model is labeled, its package run (on the Colab disk) is checkpointed to Drive every
+`CHECKPOINT_MINUTES` (3) as `labels/<judge>/<MODEL>/checkpoint.tar.gz`; the package process is paused for the second
+it takes to copy its folder, so the copy is consistent. After a disconnect, run all cells again and the judge cell:
+finished models are skipped, a running one is restored from its checkpoint and the package continues (tested: a
+hard kill mid-stage, the disk wiped, then resumed with only the remaining requests and byte-identical prompts).
+
+**Why v1.8.12.** Labeling ran one request at a time: each wave admits one live request per problem but was filled with
+segments of a single problem. v1.8.12 fills a wave with one segment per problem (about 6x faster); prompts and labels
+are unchanged (verified on a finished run: the same 675 requests with byte-identical prompts).
 
 **Why v1.8.11.** The labeling stage capped retries only for some rejection kinds: a judge that kept answering with a
 wrong segment ID was asked the identical prompt again without limit (Gemini 2.5 Flash-Lite: 930 calls for one
