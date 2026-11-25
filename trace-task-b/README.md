@@ -162,6 +162,22 @@ Per creator model:
 Inputs and outputs are on Drive (`Reasoning Behavior/TaskB/`): `platform/traces.js`, `judge_study/source_exports/`,
 `judge_study/labels/<judge>/<MODEL>/` (package runs), `judge_study/costs.csv`, `judges/<judge>.json`.
 
+## Judge review PDF (researcher only)
+
+`analysis/judge_review_report.py` writes a Task A-style review of the judges' decisions: judges (settings, coverage, label
+shares, requests, tokens, cost), agreement between judges (raw agreement, Cohen's κ, Krippendorff's α with window
+bootstrap CIs, all-judge α / Fleiss κ, confusion matrices), agreement by stratum and label shares per creator model, then
+one page per window with every segment and each judge's label (unanimous / majority / all-different marked).
+
+```bash
+python3 trace-task-b/analysis/judge_review_report.py trace-task-b/traces.js key.csv costs.csv review.html \
+    judges/claude-haiku-5.5-think.json judges/g3.5-flash-lite.json judges/g3.8-flash.json
+node trace-task-b/analysis/judge_review_pdf.js "$PWD/review.html" taskB_judge_review.pdf   # Playwright + Chromium
+```
+
+It shows the model, the outcome and the judges' labels: keep it away from annotators, and do not read the window
+pages before your own annotation is submitted.
+
 ## Agreement
 
 ```bash
