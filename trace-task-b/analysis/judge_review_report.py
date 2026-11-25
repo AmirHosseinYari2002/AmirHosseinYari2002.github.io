@@ -153,7 +153,7 @@ def f2(x): return "—" if x != x else f"{x:.2f}"
 
 today = datetime.date.today().isoformat()
 H = [f"<!doctype html><html><head><meta charset='utf-8'><title>Task B judge review</title><style>{CSS}</style></head><body>"]
-H.append(f"<h1>Task B: action labels by judge, window by window</h1>")
+H.append("<h1>Task B: action labels by judge, window by window</h1>")
 H.append(f"<p>{len(W)} study windows, {sum(len(w['segs']) for w in W)} segments (segmentation: {esc(INFO['judge'])}, platform order slot {esc(INFO['order_slot'])}). "
          f"Judges: {', '.join(esc(NAMES[n]) for n in ORDER)}. Every judge labelled the same segments through reasoning-anatomy "
          f"v{esc(J[ORDER[0]]['package_version'])} (<code>anatomy relabel</code>, segmentation replayed). Generated {today}. "
