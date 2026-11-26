@@ -119,24 +119,64 @@ macro-F1) to floating-point precision.
 
 ## The judge notebook (labels exactly as the package)
 
-`notebooks/taskB_judge_study.ipynb` (Colab; open it from GitHub and save a copy in `TaskB/notebooks/` on Drive) never
-prompts a model itself. For each candidate judge and each creator model it runs, with reasoning-anatomy v1.8.9:
+`notebooks/taskB_judge_study.ipynb` (Colab; a copy is in `TaskB/notebooks/` on Drive) never segments or prompts a
+model itself; it only runs **reasoning-anatomy v1.8.12** commands (`Reasoning Behavior/reasoning-anatomy-v1.8.12.zip`).
 
-1. `anatomy check-judge` (one cheap test; a wrong model ID, setting or key stops here and creates nothing);
-2. `anatomy relabel --source-run TaskA/judge_study/g3.8-flash/<MODEL>`: the package's own command to label the
-   segments of a finished run with another judge. Segmentation is replayed from the source run's saved responses (no
-   segmentation call; `segments_identical_to_source` must be true) and the package's `05_semantics` stage labels every
-   segment: same prompt, request rendering, earlier-context selection (token budget over the full trace),
-   referenced-setup context, deterministic COMMIT and answer-section rules, schema validation, retries and receipts as
-   the real pipeline;
-3. `anatomy export-annotations`, then a bookkeeping step that maps the package's trace segments onto the website's 947
-   segments (checked on the Gemini 3.8 Flash runs before anything is paid: every website segment must be covered).
-   A website segment takes the label of the package segment(s) inside it; segments the package marks COMMIT (the
-   final answer) or leaves unlabeled are not compared, for every judge alike.
+**Resumable.** While a model is labeled, its package run (on the Colab disk) is checkpointed to Drive every
+`CHECKPOINT_MINUTES` (3) as `labels/<judge>/<MODEL>/checkpoint.tar.gz`; the package process is paused for the second
+it takes to copy its folder, so the copy is consistent. After a disconnect, run all cells again and the judge cell:
+finished models are skipped, a running one is restored from its checkpoint and the package continues (tested: a
+hard kill mid-stage, the disk wiped, then resumed with only the remaining requests and byte-identical prompts).
 
-Inputs and outputs are on Drive (`Reasoning Behavior/TaskB/`, see its README): `platform/traces.js` (copied from the
-site on the first run), `judge_study/` (package runs, `costs.csv` from the package's receipts), `judges/<judge>.json`.
-The package labels every segment of the 36 traces (as the real pipeline would); only the window segments are compared.
+**Why v1.8.12.** Labeling ran one request at a time: each wave admits one live request per problem but was filled with
+segments of a single problem. v1.8.12 fills a wave with one segment per problem (about 6x faster); prompts and labels
+are unchanged (verified on a finished run: the same 675 requests with byte-identical prompts).
+
+**Why v1.8.11.** The labeling stage capped retries only for some rejection kinds: a judge that kept answering with a
+wrong segment ID was asked the identical prompt again without limit (Gemini 2.5 Flash-Lite: 930 calls for one
+segment). v1.8.11 enforces the documented cap of 3 (then `TECHNICAL_MISSING`), for `anatomy run` and `relabel`.
+Runs are written to the Colab disk while they run and archived to Drive (`labels/<judge>/<MODEL>/run.tar.gz`,
+`export.json`); Gemini judges run at `GEMINI_RPM` (300) requests per minute (pace only).
+
+**Why v1.8.10.** v1.8.9 did not replay two kinds of saved segmentation answers in derived runs (the native-ID
+selections `native_selection_missing_candidate` / `native_selection_low_cut_density` and their split checks), so
+`relabel` stopped (exit 6: *a segmentation request is not among the source run's saved responses*) and `resegment`
+asked them again (Gemini answers vary, so segments could change). v1.8.10 replays every saved answer, and adds
+`relabel --allow-unresolved-segments`: all six Task A Gemini 3.8 Flash runs have a few unresolved boundaries
+(`quality.json`: 34–6,123 tokens per model), which v1.8.9 refused to label at all (exit 3); with the option the
+segments stay exactly the source run's and the ones inside an unresolved boundary are recorded `TECHNICAL_MISSING`.
+`anatomy run` and every recorded result are unchanged (study policy 1.8.8). Tests: `tests/test_derived_replay.py`.
+
+Per creator model:
+
+1. **Checks before anything is paid (section 4):** a replay audit of each Task A run with the package's own rules
+   (every saved segmentation answer must be replayable); the Task A runs must cover all 947 website segments; the
+   website segments inside an unresolved boundary are listed and excluded for every judge (`judge_study/excluded.json`).
+2. **Judges (section 6):** `anatomy check-judge`, then `anatomy relabel --source-run TaskA/judge_study/g3.8-flash/<MODEL>
+   [--allow-unresolved-segments]` (segmentation replayed, never re-run; `segments_identical_to_source` must be true;
+   the package's own `05_semantics`: same prompt, request rendering, earlier-context selection, referenced-setup
+   context, COMMIT and answer-section rules, validation, retries and receipts), `anatomy export-annotations`, and the
+   mapping onto the website's segments. A website segment takes the label of the package segment(s) inside it;
+   COMMIT (the final answer), unlabeled and excluded segments are not compared.
+
+Inputs and outputs are on Drive (`Reasoning Behavior/TaskB/`): `platform/traces.js`, `judge_study/source_exports/`,
+`judge_study/labels/<judge>/<MODEL>/` (package runs), `judge_study/costs.csv`, `judges/<judge>.json`.
+
+## Judge review PDF (researcher only)
+
+`analysis/judge_review_report.py` writes a Task A-style review of the judges' decisions: judges (settings, coverage, label
+shares, requests, tokens, cost), agreement between judges (raw agreement, Cohen's κ, Krippendorff's α with window
+bootstrap CIs, all-judge α / Fleiss κ, confusion matrices), agreement by stratum and label shares per creator model, then
+one page per window with every segment and each judge's label (unanimous / majority / all-different marked).
+
+```bash
+python3 trace-task-b/analysis/judge_review_report.py trace-task-b/traces.js key.csv costs.csv review.html \
+    judges/claude-haiku-5.5-think.json judges/g3.5-flash-lite.json judges/g3.8-flash.json
+node trace-task-b/analysis/judge_review_pdf.js "$PWD/review.html" taskB_judge_review.pdf   # Playwright + Chromium
+```
+
+It shows the model, the outcome and the judges' labels: keep it away from annotators, and do not read the window
+pages before your own annotation is submitted.
 
 ## Agreement
 
